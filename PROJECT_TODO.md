@@ -15,7 +15,7 @@ Tracking fields:
 
 | ID | Ask | Meaning | Suggested work (updates / solution / work) | Status | Where |
 |---:|---|---|---|---|---|
-| 10 | Keep a running decisions log | Prevent churn and accidental reversions | Append dated decisions/changes here when a wording choice is locked | todo | this file |
+| 10 | Keep a running decisions log | Prevent churn and accidental reversions | Append dated decisions/changes here when a wording choice is locked | in_progress | this file |
 | 3 | Use formal voice; remove 1st person | Improve professionalism; reduce “class project” vibe | Remove “I/my/our/we”; rewrite as “this work/the project” | done | `Semester5/DSCI601/DSCI601-Project_Proposal/main.tex` |
 | 9 | Clean up proposal wording/labels | Reduce jargon and tighten phrasing | Apply the agreed wording changes (CMAB/iCMAB phrasing $\rightarrow$ context-aware MABs, remove “required” and “(not optional)”, “template” $\rightarrow$ “framework”, “For the DSCI 601/602 …” $\rightarrow$ “For this project …”, “two required testbeds” $\rightarrow$ “two testbeds”, timeline $\rightarrow$ Phase 1/Phase 2) | done | `Semester5/DSCI601/DSCI601-Project_Proposal/main.tex` |
 | 2 | Define what “diagnostics” means per domain | Avoid ambiguity (clinical vs system/runtime vs “decision workflow”) | Add 1–2 explicit sentences: define “diagnostic-like” as sequential test/model selection; explicitly *not* system debugging | todo | `Semester5/DSCI601/DSCI601-Project_Proposal/main.tex` |
@@ -30,6 +30,7 @@ Tracking fields:
 ## Decisions Log
 
 - 2026-02-22: Created this tracker from the 02-20 notes.
+- 2026-02-22: Locked workflow: propose changes first; apply edits only after explicit approval.
 - 2026-02-22: Reset statuses to `todo` to review and apply updates one-by-one (Option A workflow).
 - 2026-02-22: Reordered tasks from easiest $\rightarrow$ hardest to support incremental edits with checkpoints.
 - 2026-02-22: Moved Task 3 (remove first person) to the top; narrowed Task 9 to timeline label clarity (DSCI 601/602 $\rightarrow$ Phase/Term labels).
@@ -39,4 +40,12 @@ Tracking fields:
 - 2026-02-22: Applied Task 3 (approved): removed first-person voice in `main.tex` with minimal wording changes (our/we/my $\rightarrow$ neutral third-person phrasing).
 - 2026-02-22: Migrated Option 6 assets into `Semester5/DSCI601/DSCI601-Project_Proposal` (git repo): merged `main.tex`, added `.gitignore`, and moved meeting notes + `PROJECT_TODO.md`.
 - 2026-02-22: Applied Task 4: removed the “This is an individual project.” admin/meta sentence from the Approach paragraph.
-- 2026-02-22: Applied Task 9: wording/labels cleanup (MABs phrasing, removed “required” + “(not optional)”, template $\rightarrow$ framework, “For this project …”, Phase 1/Phase 2 timeline).
+- 2026-02-22: Applied Task 9 (approved change list):
+  - Replace “fairness-aware CMAB/iCMAB” with “fairness and context aware MABs” in the evaluation/approach phrasing.
+  - Replace “evaluating CMAB/iCMAB” with “evaluating context aware MABs”.
+  - Remove “(not optional)”.
+  - Replace “reproducible template” with “reproducible framework”.
+  - Replace “For the DSCI 601/602 …” with “For this project …”.
+  - Replace “(two required testbeds + …)” with “(two testbeds + …)”.
+  - Replace “Timeline: DSCI 601/DSCI 602 …” with “Phase 1 includes …; Phase 2 includes …”.
+  - Remove all remaining uses of the word “required”.
