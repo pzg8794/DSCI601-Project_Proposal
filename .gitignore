@@ -1,0 +1,29 @@
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.xdv
+*.nav
+*.snm
+*.vrb
+*.dvi
+*.ps
+_minted*
+*.pyg
+
+# PDFs: keep only the rendered submission PDF
+*.pdf
+!main.pdf
+
+# OS/editor junk
+.DS_Store
