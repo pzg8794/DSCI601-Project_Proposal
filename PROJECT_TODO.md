@@ -49,3 +49,4 @@ Tracking fields:
   - Replace “(two required testbeds + …)” with “(two testbeds + …)”.
   - Replace “Timeline: DSCI 601/DSCI 602 …” with “Phase 1 includes …; Phase 2 includes …”.
   - Remove all remaining uses of the word “required”.
+- 2026-02-22: Updated acronym order at first mention: (CMAB / iCMAB) $\rightarrow$ (iC/CMAB).
