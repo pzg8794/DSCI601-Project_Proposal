@@ -1,0 +1,101 @@
+\documentclass[12pt]{article}
+
+\input{proposal-defs-alt}
+\usepackage[margin=0.6in]{geometry}
+\usepackage{url}
+\usepackage{latexsym}
+\usepackage{eepic,color,bm,array,amsmath}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}
+
+\setlist[itemize]{leftmargin=1.25em, itemsep=0.05em, topsep=0.1em}
+\setlength{\parskip}{0.15em}
+\setlength{\parindent}{0pt}
+
+\newcommand{\eg}{{\it e.g.}}
+\newcommand{\ie}{{\it i.e.}}
+
+\begin{document}
+
+\pagestyle{empty}
+
+\noindent
+\begin{center}
+{\large\bf Fair Contextual Bandits for Equitable Diagnostic Decision-Making Under Missing Context}
+\end{center}
+
+\begin{center}
+\begin{minipage}{0.48\linewidth}
+\begin{center}
+{\bf Piter Z. Garcia Bautista}\\
+\begin{small}
+MS Data Science / Bioinformatics\\
+Rochester Institute of Technology\\
+{\it pizg8794@g.rit.edu}
+\end{small}
+\end{center}
+\end{minipage}
+\begin{minipage}{0.48\linewidth}
+\begin{center}
+{\bf Dr. Daniel Krutz, Travis Desell}\\
+\begin{small}
+Department of Software Engineering, Data Science\\
+DSCI 601 Project Advisors\\
+{\it dxkvse@g.rit.edu, tjdvse@g.rit.edu}
+\end{small}
+\end{center}
+\end{minipage}
+\end{center}
+
+\noindent
+This project will develop a practical, reproducible framework for {\bf contextual multi-armed bandits} (CMAB / iCMAB)
+to make sequential decisions under uncertainty and limited resources while treating {\bf algorithmic fairness} as a first-class objective.
+The deliverables are: i) a simulation-first diagnostic-like sequential decision environment with controllable context missingness/uneven measurement and distribution shift,
+ii) a fairness-aware CMAB/iCMAB evaluation stack (baselines + contextual policies) with time-evolving group disparity reporting and at least one mitigation mechanism,
+and iii) a required transfer study demonstrating the same policy stack in our quantum-network routing + qubit allocation simulator.
+
+
+\paragraph{Background:} \hspace{-5mm}
+Many diagnostic workflows involve sequential choices about tests, models, and retesting under uncertainty, budgets, and distribution shift. These settings can amplify inequities when some groups systematically have lower-quality context or different error profiles. We frame this as a contextual bandit problem: at each step, choose an action (an ``arm'') given observed context to maximize utility while controlling fairness gaps. Multi-armed bandits formalize online decision-making with exploration--exploitation tradeoffs, and contextual bandits condition decisions on side information (context) that can improve sample-efficiency and stability. In diagnostics, context may include patient features, test and sample-quality indicators, and operational constraints, but access to context can be incomplete or systematically noisier for some populations. This creates both performance risk and fairness risk: aggregate optimization can hide subgroup error spikes (e.g., false-negative gaps) unless the system is explicitly monitored and constrained.
+
+This proposal draws on contextual bandit methods for sequential decision-making with side information \cite{li2010contextual,abbasi2011linear} and on algorithmic fairness work that defines and measures group-based error disparities \cite{hardt2016equality}. Practically, it builds on our existing quantum-network routing + qubit allocation simulator and on my ISTE780 work operationalizing fairness audits and mitigation for diagnostic-relevant pipelines. The novelty is the {\bf integration}: evaluating CMAB/iCMAB policy choices in a diagnostic-like sequential environment while reporting and mitigating fairness disparities {\bf over time} rather than only post-hoc.
+Unlike prior work that often reports utility-only bandit performance or post-hoc fairness for static predictors, this project makes the time-evolving utility--fairness tradeoff explicit and tests transfer across both required testbeds.
+
+
+\paragraph{Scientific Merit:} \hspace{-5mm}
+The core scientific question is: {\it when does informative context (and how it is modeled) materially reduce disparity and error in sequential decision-making under shift?} This is challenging in modern contextual-bandit settings because (1) feedback is partial and delayed (bandit feedback), (2) distributions shift, and (3) fairness constraints can conflict with pure utility optimization. The key innovative component is that we treat a {\bf quantum-network routing and qubit-allocation environment} as a first-class testbed (not optional): we evaluate the same fairness-aware contextual bandit stack in (i) a diagnostic-like simulation and (ii) our existing quantum routing + qubit allocation simulator to test robustness and transfer across radically different domains.
+
+
+\paragraph{Broader Impacts:} \hspace{-5mm}
+If successful, this work provides a concrete, reproducible template for fairness-aware sequential decision systems in diagnostics and other public-health settings (including COVID-style test allocation) where both resources and context quality are limited. It also advances trustworthy learning-based control in quantum networking by adding explicit disparity monitoring and constraints to online routing/allocation policies, producing reportable utility--fairness tradeoffs under shift. For our DSCI 601/602 research context, the result is a reusable evaluation harness (two required testbeds + shared policy API) that supports advisor-driven experimentation and future publication-quality benchmarking of fairness-aware bandit policies.
+
+
+\paragraph{Approach:} \hspace{-5mm}
+This is an individual project. My goal is to implement and evaluate fairness-aware CMAB/iCMAB policies across two required testbeds (diagnostic-like sequential decision simulation + quantum-network routing/qubit allocation simulator), and to report utility--fairness tradeoffs under shift. The work is structured to be feasible without sensitive clinical data access (simulation-first), while remaining extensible to approved open datasets. My tasks are:
+\begin{itemize}
+\item {\bf Build diagnostic testbed:} implement a sequential decision simulation (test/model choice, retesting, pipeline choice) with distribution shift and controllable context missingness/uneven measurement.
+\item {\bf Build quantum testbed (required):} integrate policies into the quantum routing + qubit allocation simulator; define flow/node groups and track service equity across groups.
+\item {\bf Implement bandit policies:} non-contextual baselines (epsilon-greedy, UCB, Thompson), a contextual baseline (LinUCB-style), and one informed contextual (iCMAB-style) policy under a shared interface.
+\item {\bf Define reward + metrics:} utility with explicit cost/latency and safety weighting; report regret/utility plus time-evolving fairness metrics (FNR/FPR gaps for diagnostics; service/latency parity for quantum) and at least one additional criterion.
+\item {\bf Add fairness mitigation:} implement one fairness-aware mechanism (constraint/penalty or calibration) and quantify utility--fairness tradeoffs across both testbeds.
+\item {\bf Package for reproducibility:} Python 3.11+ modular scripts and/or notebooks with fixed seeds + configurations, plus a minimal test suite (sanity checks for simulations and metric computation).
+\end{itemize}
+Timeline: {\bf DSCI 601} = environment + baselines + initial fairness audit/mitigation; {\bf DSCI 602} = robustness under shift + ablations + packaging for code review and final report/demo.
+
+
+\paragraph{References:} \hspace{-5mm}
+\begin{thebibliography}{10}
+\bibitem{ga_work_bandits}
+P. Z. Garcia Bautista. {\it Qubit Allocation in a Quantum Network using Stochastic Bandits}. Internal manuscript (course/research draft), 2026.
+\bibitem{iste780_equitas}
+P. Z. Garcia Bautista. {\it Equitable Bioinformatics: Enhancing Diagnostic Decision-Making through RNA and Biomarker Data}. ISTE780 Phase 4 project report (unpublished), 2025.
+\bibitem{li2010contextual}
+L. Li, W. Chu, J. Langford, and R. Schapire. A contextual-bandit approach to personalized news article recommendation. In {\it WWW}, 2010.
+\bibitem{abbasi2011linear}
+Y. Abbasi-Yadkori, D. P{\'a}l, and C. Szepesv{\'a}ri. Improved algorithms for linear stochastic bandits. In {\it NeurIPS}, 2011.
+\bibitem{hardt2016equality}
+M. Hardt, E. Price, and N. Srebro. Equality of opportunity in supervised learning. In {\it NeurIPS}, 2016.
+\end{thebibliography}
+
+\end{document}
