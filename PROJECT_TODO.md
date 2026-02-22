@@ -50,3 +50,4 @@ Tracking fields:
   - Replace “Timeline: DSCI 601/DSCI 602 …” with “Phase 1 includes …; Phase 2 includes …”.
   - Remove all remaining uses of the word “required”.
 - 2026-02-22: Updated acronym order at first mention: (CMAB / iCMAB) $\rightarrow$ (iC/CMAB).
+- 2026-02-22: Updated prior-work wording: replaced “ISTE780” mentions with {\it Equitable Bioinformatics} and updated the reference entry to an “unpublished paper” style.
