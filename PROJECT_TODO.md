@@ -1,0 +1,40 @@
+# Option 6 (DSCI601) — Project To‑Do Tracker
+
+Source notes reviewed:
+- `Semester5/DSCI601/DSCI601-Project_Proposal/notes/02-20 Refining a Research Proposal by Separating Core Methodology from Domain-Specific Applications-Summary.md`
+- `Semester5/DSCI601/DSCI601-Project_Proposal/notes/02-20 Refining a Research Proposal by Separating Core Methodology from Domain-Specific Applications-Meeting Summary.md`
+- `Semester5/DSCI601/DSCI601-Project_Proposal/notes/02-20 Refining a Research Proposal by Separating Core Methodology from Domain-Specific Applications-Meeting Minutes.md`
+
+Tracking fields:
+- **Ask**: what the meeting requested
+- **Meaning**: why it matters / what “done” looks like
+- **Suggested work**: concrete edits/experiments to perform
+- **Status**: `todo` | `in_progress` | `done`
+
+## To‑Dos
+
+| ID | Ask | Meaning | Suggested work (updates / solution / work) | Status | Where |
+|---:|---|---|---|---|---|
+| 10 | Keep a running decisions log | Prevent churn and accidental reversions | Append dated decisions/changes here when a wording choice is locked | todo | this file |
+| 3 | Use formal voice; remove 1st person | Improve professionalism; reduce “class project” vibe | Remove “I/my/our/we”; rewrite as “this work/the project” | done | `Semester5/DSCI601/DSCI601-Project_Proposal/main.tex` |
+| 9 | Clarify ISTE780 wording + similar labels (and timeline phrasing) | Make key references/labels readable and intentional | (a) Keep ISTE780 as the primary prior-work reference but rewrite mentions so they read as a proper prior report/manuscript reference; (b) review any other course-like labels in references (e.g., “course/research draft”) and rewrite as neutral; (c) finalize timeline phrasing (“DSCI 601 / DSCI 602”, or alternative) | todo | `Semester5/DSCI601/DSCI601-Project_Proposal/main.tex` |
+| 2 | Define what “diagnostics” means per domain | Avoid ambiguity (clinical vs system/runtime vs “decision workflow”) | Add 1–2 explicit sentences: define “diagnostic-like” as sequential test/model selection; explicitly *not* system debugging | todo | `Semester5/DSCI601/DSCI601-Project_Proposal/main.tex` |
+| 4 | Remove obvious admin/meta statements | Reduce fluff; keep the proposal content-focused | Remove statements that are obvious or add no technical value (e.g., “This is an individual project”, “class project” wording, or other administrative/meta phrasing). Leave timeline label decisions to Task 9. | todo | `Semester5/DSCI601/DSCI601-Project_Proposal/main.tex` |
+| 8 | Justify fairness need in quantum setting | Anticipate advisor pushback (“why fairness in quantum?”) | Add 2–3 sentences: fairness as service equity across user/flow groups under limited qubits; tie to allocation policies | todo | `Semester5/DSCI601/DSCI601-Project_Proposal/main.tex` |
+| 5 | Establish fairness metric(s) per testbed | Fairness has to be measurable before “mitigation” claims are credible | Diagnostic: pick 1–2 (e.g., equal opportunity via FNR gap, equalized odds via FNR/FPR gaps). Quantum: define “service equity” precisely (e.g., disparity in mean success probability/latency across flow groups) | todo | `Semester5/DSCI601/DSCI601-Project_Proposal/main.tex` + experiment notes |
+| 7 | Propose methods X/Y/Z (context → fairness) | Avoid sounding like “we’ll magically make it fair” | Enumerate 2–3 concrete methods: (a) context enrichment/features, (b) fairness penalty/constraint, (c) calibration/thresholding policy | todo | `Semester5/DSCI601/DSCI601-Project_Proposal/main.tex` |
+| 1 | Emphasize the generic product/framework (domain-agnostic) | Make the contribution clear even if domains change | Rewrite the opening and recurring phrasing so the work is framed as a generic, reusable framework for fairness-aware sequential decision-making under missing/uneven context; iCMABs are an included model family, not the entire product | todo | `Semester5/DSCI601/DSCI601-Project_Proposal/main.tex` |
+| 6 | Show baseline unfairness, then improvements | Strong story: “problem → evidence → fix” | Run baseline policies and report disparities under missing context/shift; then show improvements with contextual + mitigation | todo | experiments + results log |
+| 11 | Separate and scope the two domains throughout the proposal | Remove confusion from mixing domain terms; make sections parallel and explicit | Restructure Goal/Background/Scientific Merit/Broader Impacts/Approach so each domain has clearly labeled, parallel statements (clinical/diagnostic-like vs quantum routing/qubit allocation), with consistent terminology and minimal cross-domain leakage | todo | `Semester5/DSCI601/DSCI601-Project_Proposal/main.tex` |
+
+## Decisions Log
+
+- 2026-02-22: Created this tracker from the 02-20 notes.
+- 2026-02-22: Reset statuses to `todo` to review and apply updates one-by-one (Option A workflow).
+- 2026-02-22: Reordered tasks from easiest $\rightarrow$ hardest to support incremental edits with checkpoints.
+- 2026-02-22: Moved Task 3 (remove first person) to the top; narrowed Task 9 to timeline label clarity (DSCI 601/602 $\rightarrow$ Phase/Term labels).
+- 2026-02-22: Reverted unauthorized `main.tex` edits; Task 3 set back to `todo` until explicitly approved.
+- 2026-02-22: Cleaned task scopes: Task 1 = generic product only; Task 9 = ISTE780 + timeline labels (optionally iCMAB naming); domain separation moved to Task 11 (hardest).
+- 2026-02-22: Refined Task 4 to “remove obvious admin/meta statements” (distinct from Task 3 voice changes).
+- 2026-02-22: Applied Task 3 (approved): removed first-person voice in `main.tex` with minimal wording changes (our/we/my $\rightarrow$ neutral third-person phrasing).
+- 2026-02-22: Migrated Option 6 assets into `Semester5/DSCI601/DSCI601-Project_Proposal` (git repo): merged `main.tex`, added `.gitignore`, and moved meeting notes + `PROJECT_TODO.md`.
