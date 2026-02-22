@@ -58,3 +58,4 @@ Tracking fields:
 - 2026-02-22: Background (wording cleanup): removed the parenthetical “(context)” from “side information (context)” for cleaner reading.
 - 2026-02-22: Background (domain framing): changed “Multi-armed bandits …” to start with “In both domains, …” to make it clear the bandit framing applies to both the clinical and quantum domains before expanding the clinical diagnostic context.
 - 2026-02-22: Background (transition): changed “In diagnostics, …” to “However, in clinical diagnostics, …” to smooth the transition from the cross-domain bandit framing to the clinical-specific context example.
+- 2026-02-22: Background (risk sentence): rewrote “This creates both performance risk and fairness risk …” to “These limitations create performance and fairness risks …” to avoid the rigid “both … and …” phrasing and to tie the risk explicitly to aggregate optimization hiding subgroup error spikes.
