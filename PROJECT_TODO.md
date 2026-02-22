@@ -41,7 +41,7 @@ Tracking fields:
 - 2026-02-22: Migrated Option 6 assets into `Semester5/DSCI601/DSCI601-Project_Proposal` (git repo): merged `main.tex`, added `.gitignore`, and moved meeting notes + `PROJECT_TODO.md`.
 - 2026-02-22: Applied Task 4: removed the “This is an individual project.” admin/meta sentence from the Approach paragraph.
 - 2026-02-22: Applied Task 9 (approved change list):
-  - Replace “fairness-aware CMAB/iCMAB” with “fairness and context aware MABs” in the evaluation/approach phrasing.
+  - Replace “fairness-aware CMAB/iCMAB” with “fairness aware and contextual MABs” in the evaluation/approach phrasing.
   - Replace “evaluating CMAB/iCMAB” with “evaluating context aware MABs”.
   - Remove “(not optional)”.
   - Replace “reproducible template” with “reproducible framework”.
@@ -49,5 +49,5 @@ Tracking fields:
   - Replace “(two required testbeds + …)” with “(two testbeds + …)”.
   - Replace “Timeline: DSCI 601/DSCI 602 …” with “Phase 1 includes …; Phase 2 includes …”.
   - Remove all remaining uses of the word “required”.
-- 2026-02-22: Updated acronym order at first mention: (CMAB / iCMAB) $\rightarrow$ (iC/CMAB).
+- 2026-02-22: Updated acronym order at first mention: (CMAB / iCMAB) $\rightarrow$ (iC-/C-).
 - 2026-02-22: Updated prior-work wording: replaced “ISTE780” mentions with {\it Equitable Bioinformatics} and updated the reference entry to an “unpublished paper” style.

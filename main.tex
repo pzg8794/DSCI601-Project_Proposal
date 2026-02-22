@@ -52,7 +52,7 @@ DSCI 601 Project Advisors\\
 This project will develop a practical, reproducible framework for {\bf contextual multi-armed bandits} (iC-/C-)
 to make sequential decisions under uncertainty and limited resources while treating {\bf algorithmic fairness} as a first-class objective.
 The deliverables are: i) a simulation-first diagnostic-like sequential decision environment with controllable context missingness/uneven measurement and distribution shift,
-ii) a fairness and context aware MABs evaluation stack (baselines + contextual policies) with time-evolving group disparity reporting and at least one mitigation mechanism,
+ii) a fairness aware and contextual MABs evaluation stack (baselines + contextual policies) with time-evolving group disparity reporting and at least one mitigation mechanism,
 and iii) a transfer study demonstrating the same policy stack in a quantum-network routing + qubit allocation simulator.
 
 
@@ -72,7 +72,7 @@ If successful, this work provides a concrete, reproducible framework for fairnes
 
 
 \paragraph{Approach:} \hspace{-5mm}
-The goal is to implement and evaluate fairness and context aware MABs policies across two testbeds (diagnostic-like sequential decision simulation + quantum-network routing/qubit allocation simulator), and to report utility--fairness tradeoffs under shift. The work is structured to be feasible without sensitive clinical data access (simulation-first), while remaining extensible to approved open datasets. The tasks are:
+The goal is to implement and evaluate fairness aware and contextual MABs policies across two testbeds (diagnostic-like sequential decision simulation + quantum-network routing/qubit allocation simulator), and to report utility--fairness tradeoffs under shift. The work is structured to be feasible without sensitive clinical data access (simulation-first), while remaining extensible to approved open datasets. The tasks are:
 \begin{itemize}
 \item {\bf Build diagnostic testbed:} implement a sequential decision simulation (test/model choice, retesting, pipeline choice) with distribution shift and controllable context missingness/uneven measurement.
 \item {\bf Build quantum testbed:} integrate policies into the quantum routing + qubit allocation simulator; define flow/node groups and track service equity across groups.
