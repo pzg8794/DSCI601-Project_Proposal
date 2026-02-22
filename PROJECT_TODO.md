@@ -57,3 +57,4 @@ Tracking fields:
 - 2026-02-22: Background (two-domain opening): rewrote the first sentence to explicitly cover both domains — “Many real-world workflows in both clinical diagnostics and quantum networking require sequential choices under uncertainty, resource constraints, and distribution shift.”
 - 2026-02-22: Background (wording cleanup): removed the parenthetical “(context)” from “side information (context)” for cleaner reading.
 - 2026-02-22: Background (domain framing): changed “Multi-armed bandits …” to start with “In both domains, …” to make it clear the bandit framing applies to both the clinical and quantum domains before expanding the clinical diagnostic context.
+- 2026-02-22: Background (transition): changed “In diagnostics, …” to “However, in clinical diagnostics, …” to smooth the transition from the cross-domain bandit framing to the clinical-specific context example.
