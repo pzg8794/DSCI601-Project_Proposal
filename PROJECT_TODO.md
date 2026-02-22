@@ -61,3 +61,4 @@ Tracking fields:
 - 2026-02-22: Background (risk sentence): rewrote “This creates both performance risk and fairness risk …” to “These limitations create performance and fairness risks …” to avoid the rigid “both … and …” phrasing and to tie the risk explicitly to aggregate optimization hiding subgroup error spikes.
 - 2026-02-22: Background (two domain problems): added a quantum-network domain context sentence (link-quality/load/qubit signals; delayed/noisy/partial observation) before the clinical diagnostic context sentence to make the two domain problem statements explicit.
 - 2026-02-22: Background (integration sentence): updated the novelty sentence to state the framework is evaluated in both the diagnostic-like and quantum-network environments while tracking fairness disparities over time.
+- 2026-02-22: Background (prior-work wording): changed “and on prior work,” to “and previous work on …” to improve flow into the {\it Equitable Bioinformatics} reference.
