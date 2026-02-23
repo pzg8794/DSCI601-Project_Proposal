@@ -132,7 +132,7 @@ under probabilistic link success, limited entanglement/quantum-resource availabi
 time-varying congestion;
 context may include link-quality estimates and network load/queue signals, but these signals
 can be delayed, noisy, or partially observed. In this project, service equity is defined as parity in
-routing outcomes (e.g., success probability/latency parity across flow groups) under these
+routing outcomes, quantified by group disparities in success probability and latency across flow groups, under these
 constraints. Both domains share a common mathematical structure: stochastic, history-dependent
 dynamics with non-stationarity, partial context, and compounding decisions over time.
 In clinical diagnostics, context may include patient features, test and
@@ -250,7 +250,7 @@ will be added in the shared evaluation framework.
 	    \node[layer, fill=blue!18, draw=blue, below=0.4cm of configcontent] (evaluator) {\textbf{3. EVALUATOR}};
 	    \node[block, below=0.1cm of evaluator, font=\scriptsize] (evalcontent) {
 	      Orchestrates runs
-	      Logs run artifacts \& per-layer state
+	      Captures full layered run state
 	    };
 	    \node[block, below=0.1cm of evalcontent, font=\scriptsize, fill=envgreen!10, draw=envgreen] (env) {
 	      \textbf{Environment (noise/threat):}
@@ -308,7 +308,7 @@ will be added in the shared evaluation framework.
 \caption{\footnotesize Modular framework for quantum routing evaluation, following the evaluation
 stack described in \cite{garcia2026threat_aware_quantum_routing}. The evaluation stack separates allocator,
 configuration, evaluator, runner, model, and visualizer concerns to support systematic
-ablation under consistent capacity and threat semantics, with run artifacts and per-layer state captured for downstream utility and fairness analysis.}
+ablation under consistent capacity and threat semantics, with full logged run state captured for downstream utility and fairness analysis.}
 \label{fig:quantum_framework}
 \end{figure}
 
@@ -321,7 +321,7 @@ topology/scenarios/capacity semantics, an \emph{evaluator} orchestrates runs and
 routing policy (bandit learner + network), and a \emph{visualizer} aggregates results into
 plots and winner summaries. This modular structure is reused in the proposed work so that
 fairness/service-equity monitoring and mitigation can be computed and applied from the same
-run artifacts and per-layer state, under identical experimental controls.
+logged run state, under identical experimental controls.
 Having grounded the two experimental testbeds, the remainder of this section surveys the
 algorithmic and fairness literature needed to design and evaluate a shared fairness-aware CMAB
 framework across both domains.
