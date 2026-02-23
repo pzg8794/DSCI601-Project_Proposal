@@ -34,15 +34,21 @@ Diagnostic Decision-Making Under Missing Context}
 
 \section{Introduction}
 This project develops a practical, reproducible framework for fairness-aware contextual
-multi-armed bandits (CMAB/iCMAB) to make sequential decisions under uncertainty and limited
-resources while treating algorithmic fairness as a first-class objective. The work focuses
-on measuring and improving fairness across two domains---clinical diagnostic-like decision
-workflows and quantum-network routing---by evaluating the same policy stack in a
-simulation-first diagnostic environment and in a quantum-network routing simulator, with
-time-evolving disparity reporting and at least one mitigation mechanism.
-Here, ``diagnostic-like'' refers to sequential decision workflows such as test/model selection,
-triage escalation, or pipeline selection under partial feedback and non-stationarity; it does
+multi-armed bandits (CMAB/iCMAB) to support sequential decision-making under uncertainty,
+missing/partial context, and non-stationarity while treating algorithmic fairness as a
+first-class objective. The same framework is instantiated in two domains---clinical
+diagnostic-like decision workflows and quantum-network routing---by evaluating a shared
+policy stack in a simulation-first diagnostic environment and in a quantum-network routing
+simulator, with time-evolving disparity reporting and at least one mitigation mechanism.
+Here, ``diagnostic-like'' refers to sequential decision workflows such as diagnostic test
+selection, triage or follow-up escalation, and model/pipeline selection under partial
+feedback and non-stationarity; it also includes cases where key diagnostic components
+(tests, instruments, or patient information) are unavailable or delayed due to resource
+constraints or allocation policies, creating group-dependent missing context. It does
 \emph{not} refer to system debugging or fault diagnosis.
+Mitigation mechanisms considered include fairness-regularized policy updates
+(constraints/penalties), group-aware calibration or thresholding, and missingness-aware
+context augmentation (e.g., feature acquisition or imputation policies).
 Two prior works provide the concrete testbeds used in this work: a clinical
 diagnostic--motivated fairness audit and mitigation pipeline in equitable bioinformatics
 \cite{garcia2025equitable_bioinformatics} and a threat-aware quantum-network routing study
