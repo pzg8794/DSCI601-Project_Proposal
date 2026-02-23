@@ -31,13 +31,16 @@ on measuring and improving fairness across two domains---clinical diagnostic-lik
 workflows and quantum-network routing---by evaluating the same policy stack in a
 simulation-first diagnostic environment and in a quantum-network routing simulator, with
 time-evolving disparity reporting and at least one mitigation mechanism.
-Two anchor papers provide the concrete testbeds used in this work: a clinical
+Two prior works provide the concrete testbeds used in this work: a clinical
 diagnostic--motivated fairness audit and mitigation pipeline in equitable bioinformatics
 \cite{garcia2025equitable_bioinformatics} and a threat-aware quantum-network routing study
 using hybrid contextual bandits \cite{garcia2026threat_aware_quantum_routing}.
 From a real-world perspective, the quantum routing testbed can be interpreted as online
 resource allocation: deciding how to route competing flows when link success is uncertain and
 network conditions change over time, while ensuring equitable service outcomes across groups.
+Critically, the two-domain design also enables a cross-domain transfer study: after improving
+performance and fairness within each domain, the framework tests whether policies developed in
+one domain remain effective and equitable when applied to the other.
 
 This survey reviews prior work needed to support this framework, including bandit foundations,
 contextual/linear bandits and evaluation, learning under distribution shift and
@@ -110,7 +113,9 @@ time-varying congestion;
 context may include link-quality estimates and network load/queue signals, but these signals
 can be delayed, noisy, or partially observed. In this project, service equity is defined as parity in
 routing outcomes (e.g., success probability/latency parity across flow groups) under these
-constraints. In clinical diagnostics, context may include patient features, test and
+constraints. Both domains share a common mathematical structure: stochastic, history-dependent
+dynamics with non-stationarity, partial context, and compounding decisions over time.
+In clinical diagnostics, context may include patient features, test and
 sample-quality indicators, and operational constraints, but access to context can be
 incomplete or systematically noisier for some populations. These limitations create
 performance and fairness risks, especially when optimizing aggregate performance, which can
@@ -133,7 +138,7 @@ the proposed project.
 \toprule
 Category & Representative works \\
 \midrule
-Primary project testbeds (two anchor papers)
+Primary project testbeds (two prior works)
   & Equitable bioinformatics (clinical diagnostic motivation) \cite{garcia2025equitable_bioinformatics};
     threat-aware quantum routing bandit evaluation \cite{garcia2026threat_aware_quantum_routing} \\
 Bandit foundations (exploration--exploitation basics)
@@ -167,7 +172,7 @@ Quantum networking (routing under uncertainty + resource scarcity)
 \label{tab:overview}
 \end{table*}
 
-\subsection{Primary project testbeds (two anchor papers)}
+\subsection{Primary project testbeds (two prior works)}
 \label{sec:related_testbeds}
 
 \subsubsection{Equitable bioinformatics for diagnostic-relevant fairness auditing}
@@ -419,7 +424,8 @@ domain-realistic constraints.
 In particular, \cite{garcia2025equitable_bioinformatics,garcia2026threat_aware_quantum_routing}
 serve as the two primary experimental foundations for the project’s cross-domain transfer study.
 This transfer framing is relevant to high-uncertainty operational regimes (e.g., surges), where
-decision policies must adapt under non-stationarity rather than assuming stable, i.i.d. data.
+decision policies must adapt under non-stationarity and partial observability rather than assuming
+stable, i.i.d. data.
 
 \noindent\textbf{Overleaf (editable):}
 \url{https://www.overleaf.com/3621132125pfjhvkxzsbkp#0cab76}
