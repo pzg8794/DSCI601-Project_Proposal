@@ -27,3 +27,6 @@ _minted*
 
 # OS/editor junk
 .DS_Store
+
+# Allow alternate name for submission
+!proposal.pdf
