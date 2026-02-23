@@ -49,7 +49,8 @@ resource allocation: deciding how to route competing flows when link success is 
 network conditions change over time, while ensuring equitable service outcomes across groups.
 Critically, the two-domain design also enables a cross-domain transfer study: after improving
 performance and fairness within each domain, the framework tests whether policies developed in
-one domain remain effective and equitable when applied to the other.
+one domain remain effective and equitable when applied to the other, focusing on transfer of
+\emph{fairness mechanisms and policy-update strategies} rather than domain-specific features.
 
 This survey reviews prior work needed to support this framework, including bandit foundations,
 contextual/linear bandits and evaluation, learning under distribution shift and
@@ -213,7 +214,7 @@ will be added in the shared evaluation framework.
 \begin{figure}[t]
 \tiny
 \centering
-\resizebox{0.6\columnwidth}{!}{%
+\resizebox{0.9\columnwidth}{!}{%
     \begin{tikzpicture}[
       node distance=0.5cm,
       block/.style={rectangle, draw, fill=white, text width=5.0cm, text centered, rounded corners, minimum height=0.1cm, line width=0.5pt},
@@ -228,55 +229,54 @@ will be added in the shared evaluation framework.
     };
 
     \node[layer, fill=gray!18, draw=gray, below=0.4cm of alloccontent] (config) {\textbf{2. CONFIGURATION}};
-    \node[block, below=0.1cm of config, font=\scriptsize] (configcontent) {
-      Topology: 4 nodes, 4 paths
-      Scenarios: 5 threats
-      Algorithms: CPursuitNeuralUCB, iCPursuitNeuralUCB, GNeuralUCB, EXPNeuralUCB
-      Capacity: replay type ($T_b$ vs.\ $T$), scale $s\in\{1,1.5,2\}$\\
-      Seeds: 3--10 runs
-    };
+		    \node[block, below=0.1cm of config, font=\scriptsize] (configcontent) {
+		      Topology: 4 nodes, 4 paths
+		      Scenarios: 5 noise/threat regimes
+		      Algorithms: contextual, adversarial, and hybrid bandits
+		      Capacity: replay type ($T_b$ vs.\ $T$), scale $s\in\{1,1.5,2\}$\\
+		      Seeds: 3--10 runs
+		    };
 
-    \node[layer, fill=blue!18, draw=blue, below=0.4cm of configcontent] (evaluator) {\textbf{3. EVALUATOR}};
-    \node[block, below=0.1cm of evaluator, font=\scriptsize] (evalcontent) {
-      Orchestrates runs
-      Logs results
-    };
-    \node[block, below=0.1cm of evalcontent, font=\scriptsize, fill=envgreen!10, draw=envgreen] (env) {
-      \textbf{Environment Threat:}
-      $Y_t(r,\mathbf{x}) \sim \mathrm{Bernoulli}\!\big(h_r(\mathbf{x}) \cdot A_t(r)\big)$
-      None, Stochastic, Markov, Adaptive, OnlineAdaptive
-    };
+	    \node[layer, fill=blue!18, draw=blue, below=0.4cm of configcontent] (evaluator) {\textbf{3. EVALUATOR}};
+	    \node[block, below=0.1cm of evaluator, font=\scriptsize] (evalcontent) {
+	      Orchestrates runs
+	      Logs utility \& fairness metrics
+	    };
+	    \node[block, below=0.1cm of evalcontent, font=\scriptsize, fill=envgreen!10, draw=envgreen] (env) {
+	      \textbf{Environment (noise/threat):}
+	      $Y_t(r,\mathbf{x}) \sim \mathrm{Bernoulli}\!\big(h_r(\mathbf{x}) \cdot A_t(r)\big)$
+	      None, Stochastic, Markov, Adaptive, OnlineAdaptive
+	    };
 
-    \node[layer, fill=blue!10, draw=blue!60, below=0.4cm of env] (runner) {\textbf{4. RUNNER}};
-    \node[block, below=0.1cm of runner, font=\scriptsize] (runnercontent) {
-      Batch execution
-      Parallel runs
-      Per-scenario/per-seed Oracle tracking
-      Applies the allocator to distribute qubits across paths
-    };
+	    \node[layer, fill=blue!10, draw=blue!60, below=0.4cm of env] (runner) {\textbf{4. RUNNER}};
+	    \node[block, below=0.1cm of runner, font=\scriptsize] (runnercontent) {
+	      Batch execution
+	      Parallel runs
+	      Per-scenario/per-seed Oracle + disparity tracking
+	      Applies the allocator to distribute qubits across paths
+	    };
 
-    \node[layer, fill=blue!10, draw=blue!60, below=0.4cm of runnercontent] (model) {\textbf{5. MODEL}};
-    \node[block, below=0.1cm of model, font=\scriptsize, fill=networkblue!10, draw=networkblue] (net) {
-      \textbf{Quantum network:}
-      4 paths, 35-qubit capacity
-    };
-    \node[block, below=0.05cm of net, font=\scriptsize, fill=algorange!10, draw=algorange] (algo) {
-      \textbf{Algorithms:}
-      EXPNeuralUCB
-      GNeuralUCB
-      CPursuitNeuralUCB
-      iCPursuitNeuralUCB
-      Structure: EXP3 group + neural/pursuit-based arm selection
-    };
+	    \node[layer, fill=blue!10, draw=blue!60, below=0.4cm of runnercontent] (model) {\textbf{5. MODEL}};
+	    \node[block, below=0.1cm of model, font=\scriptsize, fill=networkblue!10, draw=networkblue] (net) {
+	      \textbf{Quantum routing domain:}
+	      4 paths, 35-qubit capacity
+	    };
+		    \node[block, below=0.05cm of net, font=\scriptsize, fill=algorange!10, draw=algorange] (algo) {
+		      \textbf{Algorithms:}
+		      Contextual (CMAB/iCMAB)
+		      Adversarial (EXP3-family)
+		      Hybrid pursuit--neural variants
+		      Structure: EXP3 group + neural/pursuit-based arm selection
+		    };
 
-    \node[layer, fill=orange!18, draw=orange, below=0.4cm of algo] (visualizer) {\textbf{6. VISUALIZER}};
-    \node[block, below=0.1cm of visualizer, font=\scriptsize] (viscontent) {
-      Efficiency curves
-      Summary tables
-      Scenario ranking
-      Heatmaps
-      Winner highlighting
-    };
+	    \node[layer, fill=orange!18, draw=orange, below=0.4cm of algo] (visualizer) {\textbf{6. VISUALIZER}};
+	    \node[block, below=0.1cm of visualizer, font=\scriptsize] (viscontent) {
+	      Utility \& fairness curves
+	      Utility \& fairness summaries
+	      Scenario ranking
+	      Heatmaps
+	      Winner highlighting
+	    };
 
     \draw[arrow] (alloccontent.south) -- (config.north);
     \draw[arrow] (configcontent.south) -- (evaluator.north);
@@ -295,8 +295,8 @@ will be added in the shared evaluation framework.
     \end{tikzpicture}
 }
 \vspace{-0.45cm}
-\caption{\tiny Modular framework for quantum routing evaluation, adapted from
-\cite{garcia2026threat_aware_quantum_routing}. The evaluation stack separates allocator,
+\caption{\tiny Modular framework for quantum routing evaluation, following the evaluation
+stack described in \cite{garcia2026threat_aware_quantum_routing}. The evaluation stack separates allocator,
 configuration, evaluator, runner, model, and visualizer concerns to support systematic
 ablation under consistent capacity and threat semantics.}
 \label{fig:quantum_framework}
@@ -311,6 +311,9 @@ topology/scenarios/capacity semantics, an \emph{evaluator} orchestrates runs and
 routing policy (bandit learner + network), and a \emph{visualizer} aggregates results into
 plots and winner summaries. This modular structure is reused in the proposed work to add
 fairness/service-equity monitoring and mitigation under the same experimental controls.
+Having grounded the two experimental testbeds, the remainder of this section surveys the
+algorithmic and fairness literature needed to design and evaluate a shared fairness-aware CMAB
+framework across both domains.
 
 
 \subsection{Bandit foundations and core algorithms}

@@ -77,3 +77,7 @@ Tracking fields:
 - 2026-02-22: Approach (two-domain scope): clarified the opening sentence so Approach explicitly frames the work as spanning two domains across two testbeds.
 - 2026-02-22: Approach (reproducibility wording): removed the parenthetical about using a single notebook from the reproducibility bullet.
 - 2026-02-23: Tracker cleanup: reworded this log entry to avoid repeating the removed parenthetical verbatim.
+- 2026-02-23: Survey (DSCI601 related-work): tightened the cross-domain transfer sentence to clarify that transfer is at the level of fairness mechanisms/policy-update strategies (not domain-specific features).
+- 2026-02-23: Survey figure caption: replaced “adapted from” with “following the evaluation stack described in …” to reflect that the cited source is prior work for this project.
+- 2026-02-23: Related Work flow: added a bridge sentence after the two testbed subsections to signal the transition into the broader algorithmic + fairness literature survey.
+- 2026-02-23: Survey figure layer text: updated wording to emphasize noise/threat regimes and utility+fairness logging/summaries; generalized algorithm labels to contextual/adversarial/hybrid families to avoid implying EXP3 is contextual.
