@@ -63,3 +63,4 @@ Tracking fields:
 - 2026-02-22: Background (integration sentence): updated the novelty sentence to state the framework is evaluated in both the diagnostic-like and quantum-network environments while tracking fairness disparities over time.
 - 2026-02-22: Background (prior-work wording): changed “and on prior work,” to “and previous work on …” to improve flow into the {\it Equitable Bioinformatics} reference.
 - 2026-02-22: Background (reduce repetition): changed the integration sentence to say the framework is evaluated “in both domains” instead of repeating the full environment names in the same section.
+- 2026-02-22: Structure (Background $\rightarrow$ Merit): moved the citations/prior-work + novelty/integration paragraph (and the “Unlike prior work …” sentence) from Background into Scientific Merit so Background stays problem-focused and Merit carries the contribution framing.
