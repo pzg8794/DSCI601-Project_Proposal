@@ -62,3 +62,4 @@ Tracking fields:
 - 2026-02-22: Background (two domain problems): added a quantum-network domain context sentence (link-quality/load/qubit signals; delayed/noisy/partial observation) before the clinical diagnostic context sentence to make the two domain problem statements explicit.
 - 2026-02-22: Background (integration sentence): updated the novelty sentence to state the framework is evaluated in both the diagnostic-like and quantum-network environments while tracking fairness disparities over time.
 - 2026-02-22: Background (prior-work wording): changed “and on prior work,” to “and previous work on …” to improve flow into the {\it Equitable Bioinformatics} reference.
+- 2026-02-22: Background (reduce repetition): changed the integration sentence to say the framework is evaluated “in both domains” instead of repeating the full environment names in the same section.
