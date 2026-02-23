@@ -45,8 +45,7 @@ Here, ``diagnostic-like'' refers to sequential decision workflows such as diagno
 selection, triage or follow-up escalation, and model/pipeline selection under partial
 feedback and non-stationarity; it also includes cases where key diagnostic components
 (tests, instruments, or patient information) are unavailable or delayed due to resource
-constraints or allocation policies, creating group-dependent missing context. It does
-\emph{not} refer to system debugging or fault diagnosis.
+constraints or allocation policies, creating group-dependent missing context.
 Mitigation mechanisms considered include fairness-regularized policy updates
 (constraints/penalties), group-aware calibration or thresholding, and missingness-aware
 context augmentation (e.g., feature acquisition or imputation policies).
@@ -128,7 +127,7 @@ and to apply
 mitigation during the policy update loop rather than only post-hoc.
 
 \subsection{Domain grounding: diagnostics and quantum routing}
-In the quantum-network routing domain, routing decisions act as online resource allocation
+In the quantum-network domain, routing decisions act as online resource allocation
 under probabilistic link success, limited entanglement/quantum-resource availability, and
 time-varying congestion;
 context may include link-quality estimates and network load/queue signals, but these signals
