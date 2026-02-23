@@ -8,7 +8,7 @@
 \usepackage{microtype}
 \usepackage[hidelinks]{hyperref}
 
-\title{Related Work Survey: Fair Contextual Bandits for Equitable
+\title{Fair Contextual Bandits for Equitable
 Diagnostic Decision-Making Under Missing Context}
 
 \author{
@@ -31,6 +31,10 @@ on measuring and improving fairness across two domains---clinical diagnostic-lik
 workflows and quantum-network routing---by evaluating the same policy stack in a
 simulation-first diagnostic environment and in a quantum-network routing simulator, with
 time-evolving disparity reporting and at least one mitigation mechanism.
+Two project foundation papers provide the concrete testbeds used in this work: a clinical
+diagnostic--motivated fairness audit and mitigation pipeline in equitable bioinformatics
+\cite{garcia2025equitable_bioinformatics} and a threat-aware quantum-network routing study
+using hybrid contextual bandits \cite{garcia2026threat_aware_quantum_routing}.
 
 This survey reviews prior work needed to support this framework, including bandit foundations,
 contextual/linear bandits and evaluation, learning under distribution shift and
@@ -107,6 +111,8 @@ hide subgroup error spikes (e.g., false-negative gaps) unless the system is expl
 monitored and constrained. Unlike many evaluations that report utility-only bandit performance
 or post-hoc fairness for static predictors, the proposed work makes the time-evolving
 utility--fairness tradeoff explicit and tests transfer across both domains.
+In this project, the two testbeds are grounded in prior work described in
+\cite{garcia2025equitable_bioinformatics,garcia2026threat_aware_quantum_routing}.
 
 
 \section{Related Work}
@@ -121,6 +127,9 @@ the proposed project.
 \toprule
 Category & Representative works \\
 \midrule
+Project foundations (two testbeds)
+  & Equitable bioinformatics (clinical diagnostic motivation) \cite{garcia2025equitable_bioinformatics};
+    threat-aware quantum routing bandit evaluation \cite{garcia2026threat_aware_quantum_routing} \\
 Bandit foundations (exploration--exploitation basics)
   & UCB analysis \cite{auer2002finite};
     Thompson sampling tutorial \cite{russo2018tutorial};
@@ -151,6 +160,34 @@ Quantum networking (routing under uncertainty + resource scarcity)
 \end{tabular}
 \label{tab:overview}
 \end{table*}
+
+\subsection{Project foundations: two testbed papers}
+
+\subsubsection{Equitable bioinformatics for diagnostic-relevant fairness auditing}
+Garcia Bautista~\cite{garcia2025equitable_bioinformatics} presents a fairness-audit and
+mitigation framework (EQUITAS) for diagnostic-relevant bioinformatics pipelines, using RNA
+secondary-structure prediction as a case study. The work fine-tunes an Enhanced Nussinov
+dynamic-programming model with Optuna-driven hyperparameter search and evaluates it alongside
+five baselines on a curated dataset of 20 RNA sequences spanning multiple RNA types and
+compositional bins, reporting both performance and fairness metrics across protected attributes
+such as sequence type, GC-content bins, and length bins. Post-processing calibration and
+fairness-aware dataset augmentation are used to correct disparate-impact violations, achieving
+80\% rule compliance across algorithms. A limitation for the proposed project is that this
+study is largely an offline, static evaluation rather than an online sequential decision problem
+with bandit feedback; it motivates clinical-domain fairness metrics and context-quality concerns
+but does not model exploration--exploitation or time-evolving disparities.
+
+\subsubsection{Threat-aware quantum routing via hybrid contextual bandits}
+Garcia Bautista~\cite{garcia2026threat_aware_quantum_routing} evaluates contextual, adversarial,
+and hybrid bandit algorithms for joint quantum entanglement routing and resource allocation
+under non-stationary and adversarial conditions. The study compares 13 algorithms across
+multiple threat scenarios and reports that pursuit--neural hybrid variants provide robust
+performance under strategic attacks; it further validates robustness trends via cross-testbed
+evaluation across external quantum-network simulators. This work grounds the quantum-network
+routing testbed used in the proposed project by providing domain-realistic uncertainty, resource
+constraints, and adversarial shifts. A limitation for the proposed project is that robustness is
+the primary focus; explicit outcome-based fairness/service-equity monitoring is not central and
+will be added in the shared evaluation framework.
 
 
 \subsection{Bandit foundations and core algorithms}
