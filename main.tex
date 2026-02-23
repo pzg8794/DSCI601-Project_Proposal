@@ -49,8 +49,9 @@ constraints or allocation policies, creating group-dependent missing context. It
 Mitigation mechanisms considered include fairness-regularized policy updates
 (constraints/penalties), group-aware calibration or thresholding, and missingness-aware
 context augmentation (e.g., feature acquisition or imputation policies).
+
 Two prior works provide the concrete testbeds used in this work: a clinical
-diagnostic--motivated fairness audit and mitigation pipeline in equitable bioinformatics
+diagnostic--motivated fairness audit and mitigation pipeline (EQUITAS) in equitable bioinformatics
 \cite{garcia2025equitable_bioinformatics} and a threat-aware quantum-network routing study
 using hybrid contextual bandits \cite{garcia2026threat_aware_quantum_routing}.
 From a real-world perspective, the quantum routing testbed can be interpreted as online
@@ -63,8 +64,8 @@ one domain remain effective and equitable when applied to the other, focusing on
 
 This survey reviews prior work needed to support this framework, including bandit foundations,
 contextual/linear bandits and evaluation, learning under distribution shift and
-missing/partial context (including group-dependent missingness/measurement noise), and
-fairness definitions and fairness in bandit-style learning. It also includes domain grounding
+missing/partial context (including group-dependent missingness/measurement noise),
+fairness definitions, and fairness in bandit-style learning. It also includes domain grounding
 for clinical disparities and quantum-network routing. The conclusion summarizes gaps and
 clarifies how the proposed work differentiates itself by explicitly tracking and mitigating
 disparities over time while testing transfer across both domains.
@@ -318,9 +319,9 @@ evaluation architecture shown in Figure~\ref{fig:quantum_framework}. At a high l
 topology/scenarios/capacity semantics, an \emph{evaluator} orchestrates runs and logging, a
 \emph{runner} executes batched scenarios under fixed seeds, a \emph{model} implements the
 routing policy (bandit learner + network), and a \emph{visualizer} aggregates results into
-plots and winner summaries. This modular structure is reused in the proposed work to add
-fairness/service-equity monitoring and mitigation can be computed and applied from the same run artifacts and per-layer state,
-under identical experimental controls.
+plots and winner summaries. This modular structure is reused in the proposed work so that
+fairness/service-equity monitoring and mitigation can be computed and applied from the same
+run artifacts and per-layer state, under identical experimental controls.
 Having grounded the two experimental testbeds, the remainder of this section surveys the
 algorithmic and fairness literature needed to design and evaluate a shared fairness-aware CMAB
 framework across both domains.

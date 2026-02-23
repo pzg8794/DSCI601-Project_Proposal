@@ -82,3 +82,4 @@ Tracking fields:
 - 2026-02-23: Related Work flow: added a bridge sentence after the two testbed subsections to signal the transition into the broader algorithmic + fairness literature survey.
 - 2026-02-23: Survey figure layer text: updated wording to emphasize noise/threat regimes and utility+fairness logging/summaries; generalized algorithm labels to contextual/adversarial/hybrid families to avoid implying EXP3 is contextual.
 - 2026-02-23: Survey intro: defined “diagnostic-like” (explicitly not system debugging), clarified missing context can be group-dependent due to resource constraints/allocation, and enumerated mitigation mechanism types (fairness-regularization, calibration/thresholding, missingness-aware context augmentation).
+- 2026-02-23: Survey intro: explicitly named the clinical testbed pipeline as EQUITAS at first mention; split the Introduction into two paragraphs for readability.
