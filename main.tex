@@ -68,14 +68,14 @@ If successful, this work provides a concrete, reproducible framework for fairnes
 
 
 \paragraph{Approach:} \hspace{-5mm}
-The goal is to implement and evaluate fairness aware and contextual MABs policies across two domains testbeds (diagnostic-like sequential decision simulation + quantum-routing simulator), and to report utility--fairness tradeoffs under shift. The work is structured to be feasible without sensitive clinical data access (simulation-first), while remaining extensible to approved open datasets. The tasks are:
+The goal is to implement and evaluate fairness aware and contextual MABs policies in two domains across two testbeds (diagnostic-like sequential decision simulation + quantum-routing simulator), and to report utility--fairness tradeoffs under shift. The work is structured to be feasible without sensitive clinical data access (simulation-first), while remaining extensible to approved open datasets. The tasks are:
 \begin{itemize}
 \item {\bf Build diagnostic testbed:} implement a sequential decision simulation (test/model choice, retesting, pipeline choice) with distribution shift and controllable context missingness/uneven measurement.
 \item {\bf Build quantum testbed:} integrate policies into the quantum-routing simulator; define flow/node groups and track service equity across groups.
 \item {\bf Implement bandit policies:} non-contextual baselines (epsilon-greedy, UCB, Thompson), a contextual baseline (LinUCB-style), and one informed contextual (iCMAB-style) policy under a shared interface.
 \item {\bf Define reward + metrics:} utility with explicit cost/latency and safety weighting; report regret/utility plus time-evolving fairness metrics (group-wise FNR/FPR gaps and at least one additional criterion).
 \item {\bf Add fairness mitigation:} implement one fairness-aware mechanism (constraint/penalty or calibration) and quantify utility--fairness tradeoffs across both testbeds.
-\item {\bf Package for reproducibility:} Python 3.11+ modular scripts (not one notebook), fixed seeds + configs, and a minimal test suite (sanity checks for simulations and metric computation).
+\item {\bf Package for reproducibility:} Python 3.11+ modular scripts, fixed seeds + configs, and a minimal test suite (sanity checks for simulations and metric computation).
 \end{itemize}
 Phase 1 includes environment + baselines + initial fairness audit/mitigation; Phase 2 includes robustness under shift + ablations + packaging for code review and final report/demo.
 
