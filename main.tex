@@ -99,8 +99,8 @@ P(\hat{Y}=1 \mid Y=1, A=0) \;=\; P(\hat{Y}=1 \mid Y=1, A=1)
 \end{equation}
 \emph{Equalized odds} additionally requires equal false positive rates. In a bandit setting,
 fairness must be tracked over time under partial feedback and changing conditions, making it
-important to monitor time-evolving disparities (e.g., FNR/FPR gaps)
-(not only aggregate averages) and to apply
+important to monitor time-evolving disparities (e.g., FNR/FPR gaps, not only aggregate averages)
+and to apply
 mitigation during the policy update loop rather than only post-hoc.
 
 \subsection{Domain grounding: diagnostics and quantum routing}
@@ -118,8 +118,7 @@ hide subgroup error spikes (e.g., false-negative gaps) unless the system is expl
 monitored and constrained. Unlike many evaluations that report utility-only bandit performance
 or post-hoc fairness for static predictors, the proposed work makes the time-evolving
 utility--fairness tradeoff explicit and tests transfer across both domains.
-In this project, the two testbeds are grounded in prior work described in
-\cite{garcia2025equitable_bioinformatics,garcia2026threat_aware_quantum_routing}.
+These testbeds are described in Section~\ref{sec:related_testbeds}.
 
 
 \section{Related Work}
@@ -169,6 +168,7 @@ Quantum networking (routing under uncertainty + resource scarcity)
 \end{table*}
 
 \subsection{Primary project testbeds (two anchor papers)}
+\label{sec:related_testbeds}
 
 \subsubsection{Equitable bioinformatics for diagnostic-relevant fairness auditing}
 Garcia Bautista~\cite{garcia2025equitable_bioinformatics} presents a fairness-audit and
