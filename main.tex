@@ -35,6 +35,9 @@ Two anchor papers provide the concrete testbeds used in this work: a clinical
 diagnostic--motivated fairness audit and mitigation pipeline in equitable bioinformatics
 \cite{garcia2025equitable_bioinformatics} and a threat-aware quantum-network routing study
 using hybrid contextual bandits \cite{garcia2026threat_aware_quantum_routing}.
+From a real-world perspective, the quantum routing testbed can be interpreted as online
+resource allocation: deciding how to route competing flows when link success is uncertain and
+network conditions change over time, while ensuring equitable service outcomes across groups.
 
 This survey reviews prior work needed to support this framework, including bandit foundations,
 contextual/linear bandits and evaluation, learning under distribution shift and
@@ -52,6 +55,9 @@ settings can amplify inequities when some groups systematically have lower-quali
 or different error profiles. This survey frames these workflows as a contextual bandit
 problem: at each step, choose an action (an ``arm'') given observed context to maximize
 utility while controlling fairness gaps.
+In both domains, outcomes are stochastic and history-dependent: the reward distribution can
+drift over time as conditions evolve, feedback is partial (bandit feedback), and context can
+be delayed, noisy, or missing.
 
 \subsection{Multi-armed bandits and contextual bandits}
 In both domains, multi-armed bandits formalize online decision-making with
@@ -98,8 +104,9 @@ important to monitor time-evolving disparities (e.g., FNR/FPR gaps)
 mitigation during the policy update loop rather than only post-hoc.
 
 \subsection{Domain grounding: diagnostics and quantum routing}
-In the quantum-network routing domain, routing decisions are constrained by probabilistic
-link success, limited entanglement/quantum-resource availability, and time-varying congestion;
+In the quantum-network routing domain, routing decisions act as online resource allocation
+under probabilistic link success, limited entanglement/quantum-resource availability, and
+time-varying congestion;
 context may include link-quality estimates and network load/queue signals, but these signals
 can be delayed, noisy, or partially observed. In this project, service equity is defined as parity in
 routing outcomes (e.g., success probability/latency parity across flow groups) under these
@@ -411,6 +418,8 @@ methodology is generic---not tuned to a single application---while remaining gro
 domain-realistic constraints.
 In particular, \cite{garcia2025equitable_bioinformatics,garcia2026threat_aware_quantum_routing}
 serve as the two primary experimental foundations for the project’s cross-domain transfer study.
+This transfer framing is relevant to high-uncertainty operational regimes (e.g., surges), where
+decision policies must adapt under non-stationarity rather than assuming stable, i.i.d. data.
 
 \noindent\textbf{Overleaf (editable):}
 \url{https://www.overleaf.com/3621132125pfjhvkxzsbkp#0cab76}
