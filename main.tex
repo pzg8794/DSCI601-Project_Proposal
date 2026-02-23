@@ -240,7 +240,7 @@ will be added in the shared evaluation framework.
 	    \node[layer, fill=blue!18, draw=blue, below=0.4cm of configcontent] (evaluator) {\textbf{3. EVALUATOR}};
 	    \node[block, below=0.1cm of evaluator, font=\scriptsize] (evalcontent) {
 	      Orchestrates runs
-	      Logs utility \& fairness metrics
+	      Logs run artifacts \& per-layer state
 	    };
 	    \node[block, below=0.1cm of evalcontent, font=\scriptsize, fill=envgreen!10, draw=envgreen] (env) {
 	      \textbf{Environment (noise/threat):}
@@ -298,7 +298,7 @@ will be added in the shared evaluation framework.
 \caption{\footnotesize Modular framework for quantum routing evaluation, following the evaluation
 stack described in \cite{garcia2026threat_aware_quantum_routing}. The evaluation stack separates allocator,
 configuration, evaluator, runner, model, and visualizer concerns to support systematic
-ablation under consistent capacity and threat semantics.}
+ablation under consistent capacity and threat semantics, with run artifacts and per-layer state captured for downstream utility and fairness analysis.}
 \label{fig:quantum_framework}
 \end{figure}
 
@@ -310,7 +310,8 @@ topology/scenarios/capacity semantics, an \emph{evaluator} orchestrates runs and
 \emph{runner} executes batched scenarios under fixed seeds, a \emph{model} implements the
 routing policy (bandit learner + network), and a \emph{visualizer} aggregates results into
 plots and winner summaries. This modular structure is reused in the proposed work to add
-fairness/service-equity monitoring and mitigation under the same experimental controls.
+fairness/service-equity monitoring and mitigation can be computed and applied from the same run artifacts and per-layer state,
+under identical experimental controls.
 Having grounded the two experimental testbeds, the remainder of this section surveys the
 algorithmic and fairness literature needed to design and evaluate a shared fairness-aware CMAB
 framework across both domains.
