@@ -33,11 +33,13 @@ domain grounding for clinical disparities and quantum networking/routing. The co
 work differentiates itself by explicitly tracking and mitigating disparities over time while testing transfer across both domains.
 
 \section{Background}
+Many real-world workflows in both clinical diagnostics and quantum-network routing require sequential choices under uncertainty, resource constraints, and distribution shift. These settings can amplify inequities when some groups systematically have lower-quality context or different error profiles. This survey frames these workflows as a contextual bandit problem: at each step, choose an action (an ``arm'') given observed context to maximize utility while controlling fairness gaps.
+
 \subsection{Multi-armed bandits and contextual bandits}
-Multi-armed bandits formalize sequential decision-making with an exploration--exploitation tradeoff:
+In both domains, multi-armed bandits formalize online decision-making with exploration--exploitation tradeoffs:
 at each round an agent chooses an action (arm) and observes reward only for the chosen arm (bandit feedback).
-Contextual bandits extend this setting by conditioning the action choice on observed side information (features),
-which can improve sample-efficiency when the context is predictive of outcomes.
+Contextual bandits extend this setting by conditioning the action choice on side information (features),
+which can improve sample-efficiency and stability when the context is predictive of outcomes.
 
 \subsection{Fairness in sequential decision-making}
 Fairness in supervised learning is commonly operationalized through group-based error disparities (e.g., equal opportunity and equalized odds),
@@ -45,9 +47,10 @@ which compare error rates across protected groups. In a bandit setting, fairness
 making it important to monitor time-evolving disparities (not only aggregate averages).
 
 \subsection{Domain grounding: diagnostics and quantum routing}
-In clinical diagnostics, ``context'' can include patient characteristics and sample/test quality indicators, but these may be unevenly measured across groups.
-In quantum networking, routing decisions must account for probabilistic link success, scarce entanglement/quantum-resource availability, and congestion;
-signals used as routing context (link-quality estimates, queue/load indicators) may be delayed, noisy, or partially observed.
+In the quantum-network routing domain, routing decisions are constrained by probabilistic link success, limited entanglement/quantum-resource availability, and time-varying congestion; context may include link-quality estimates and network load/queue signals, but these signals can be delayed, noisy, or partially observed.
+In clinical diagnostics, context may include patient features, test and sample-quality indicators, and operational constraints, but access to context can be incomplete or systematically noisier for some populations.
+These limitations create performance and fairness risks, especially when optimizing aggregate performance, which can hide subgroup error spikes (e.g., false-negative gaps) unless the system is explicitly monitored and constrained.
+Unlike many evaluations that report utility-only bandit performance or post-hoc fairness for static predictors, the proposed work makes the time-evolving utility--fairness tradeoff explicit and tests transfer across both domains.
 
 \section{Related Work}
 Table~\ref{tab:overview} gives a compact map of the works reviewed and how they support the proposed project.
