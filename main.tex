@@ -2,6 +2,7 @@
 
 \usepackage{cite}
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{url}
 \usepackage{booktabs}
 \usepackage{microtype}
@@ -20,33 +21,93 @@
 \begin{document}
 \maketitle
 
-\section{Introduction}
-This project develops a practical, reproducible framework for fairness-aware contextual multi-armed bandits (iC-/C-MABs) to make sequential decisions under uncertainty and limited resources while treating algorithmic fairness as a first-class objective. The work focuses on measuring and improving fairness across two domains---clinical diagnostic-like decision workflows and quantum-network routing---by evaluating the same policy stack in a simulation-first diagnostic environment and in a quantum-network routing simulator, with time-evolving disparity reporting and at least one mitigation mechanism.
 
-This survey reviews prior work needed to support this framework, including bandit foundations, contextual/linear bandits and evaluation, learning under distribution shift and missing/partial context, and fairness definitions and fairness in bandit-style learning. It also includes domain grounding for clinical disparities and quantum-network routing. The conclusion summarizes gaps and clarifies how the proposed work differentiates itself by explicitly tracking and mitigating disparities over time while testing transfer across both domains.
+\section{Introduction}
+This project develops a practical, reproducible framework for fairness-aware contextual
+multi-armed bandits (iC-/C-MABs) to make sequential decisions under uncertainty and limited
+resources while treating algorithmic fairness as a first-class objective. The work focuses
+on measuring and improving fairness across two domains---clinical diagnostic-like decision
+workflows and quantum-network routing---by evaluating the same policy stack in a
+simulation-first diagnostic environment and in a quantum-network routing simulator, with
+time-evolving disparity reporting and at least one mitigation mechanism.
+
+This survey reviews prior work needed to support this framework, including bandit foundations,
+contextual/linear bandits and evaluation, learning under distribution shift and
+missing/partial context, and fairness definitions and fairness in bandit-style learning.
+It also includes domain grounding for clinical disparities and quantum-network routing.
+The conclusion summarizes gaps and clarifies how the proposed work differentiates itself
+by explicitly tracking and mitigating disparities over time while testing transfer across
+both domains.
+
 
 \section{Background}
-Many real-world workflows in both clinical diagnostics and quantum-network routing require sequential choices under uncertainty, resource constraints, and distribution shift. These settings can amplify inequities when some groups systematically have lower-quality context or different error profiles. This survey frames these workflows as a contextual bandit problem: at each step, choose an action (an ``arm'') given observed context to maximize utility while controlling fairness gaps.
+Many real-world workflows in both clinical diagnostics and quantum-network routing require
+sequential choices under uncertainty, resource constraints, and distribution shift. These
+settings can amplify inequities when some groups systematically have lower-quality context
+or different error profiles. This survey frames these workflows as a contextual bandit
+problem: at each step, choose an action (an ``arm'') given observed context to maximize
+utility while controlling fairness gaps.
 
 \subsection{Multi-armed bandits and contextual bandits}
-In both domains, multi-armed bandits formalize online decision-making with exploration--exploitation tradeoffs:
-at each round an agent chooses an action (arm) and observes reward only for the chosen arm (bandit feedback).
-Contextual bandits extend this setting by conditioning the action choice on side information (features),
-which can improve sample-efficiency and stability when the context is predictive of outcomes.
+In both domains, multi-armed bandits formalize online decision-making with
+exploration--exploitation tradeoffs: at each round $t$ an agent chooses an action
+$a_t \in \{1,\ldots,K\}$ and observes reward $r_t$ only for the chosen arm (bandit feedback).
+Performance is measured by \emph{cumulative regret}:
+\begin{equation}
+R_T = \sum_{t=1}^{T} \bigl(\mu^* - \mu_{a_t}\bigr)
+\label{eq:regret}
+\end{equation}
+where $\mu^* = \max_k \mu_k$ is the optimal arm mean and $\mu_{a_t}$ is the mean reward of
+the chosen arm. A policy is desirable if $R_T = o(T)$, meaning the per-step loss vanishes
+over time.
+
+Contextual bandits extend this setting by conditioning action choice on a context vector
+$\mathbf{x}_t \in \mathbb{R}^d$ observed before each decision. The LinUCB
+algorithm~\cite{li2010contextual} maintains a ridge regression estimate
+$\hat{\boldsymbol{\theta}}_a$ per arm and selects actions via:
+\begin{equation}
+a_t = \arg\max_{a} \Bigl(
+  \mathbf{x}_t^\top \hat{\boldsymbol{\theta}}_a
+  + \alpha \sqrt{\mathbf{x}_t^\top \mathbf{A}_a^{-1} \mathbf{x}_t}
+\Bigr)
+\label{eq:linucb}
+\end{equation}
+where $\mathbf{A}_a$ accumulates outer products of context vectors and $\alpha$ controls
+exploration. Contextual policies can improve sample-efficiency and stability when the context
+is predictive of outcomes; however, when context is missing or systematically noisier for
+some groups, these policies can inadvertently encode and amplify measurement inequities.
 
 \subsection{Fairness in sequential decision-making}
-Fairness in supervised learning is commonly operationalized through group-based error disparities (e.g., equal opportunity and equalized odds),
-which compare error rates across protected groups. In a bandit setting, fairness must be tracked over time under partial feedback and changing conditions,
-making it important to monitor time-evolving disparities (not only aggregate averages).
+Fairness in supervised learning is commonly operationalized through group-based error
+disparities. Let $Y \in \{0,1\}$ be a binary outcome, $\hat{Y}$ a predicted label, and
+$A \in \{0,1\}$ a protected group attribute. \emph{Equality of opportunity}~\cite{hardt2016equality}
+requires equal true positive rates across groups:
+\begin{equation}
+P(\hat{Y}=1 \mid Y=1, A=0) \;=\; P(\hat{Y}=1 \mid Y=1, A=1)
+\label{eq:eqopp}
+\end{equation}
+\emph{Equalized odds} additionally requires equal false positive rates. In a bandit setting,
+fairness must be tracked over time under partial feedback and changing conditions, making it
+important to monitor time-evolving disparities (not only aggregate averages) and to apply
+mitigation during the policy update loop rather than only post-hoc.
 
 \subsection{Domain grounding: diagnostics and quantum routing}
-In the quantum-network routing domain, routing decisions are constrained by probabilistic link success, limited entanglement/quantum-resource availability, and time-varying congestion; context may include link-quality estimates and network load/queue signals, but these signals can be delayed, noisy, or partially observed.
-In clinical diagnostics, context may include patient features, test and sample-quality indicators, and operational constraints, but access to context can be incomplete or systematically noisier for some populations.
-These limitations create performance and fairness risks, especially when optimizing aggregate performance, which can hide subgroup error spikes (e.g., false-negative gaps) unless the system is explicitly monitored and constrained.
-Unlike many evaluations that report utility-only bandit performance or post-hoc fairness for static predictors, the proposed work makes the time-evolving utility--fairness tradeoff explicit and tests transfer across both domains.
+In the quantum-network routing domain, routing decisions are constrained by probabilistic
+link success, limited entanglement/quantum-resource availability, and time-varying congestion;
+context may include link-quality estimates and network load/queue signals, but these signals
+can be delayed, noisy, or partially observed. In clinical diagnostics, context may include
+patient features, test and sample-quality indicators, and operational constraints, but access
+to context can be incomplete or systematically noisier for some populations. These limitations
+create performance and fairness risks, especially when optimizing aggregate performance, which
+can hide subgroup error spikes (e.g., false-negative gaps) unless the system is explicitly
+monitored and constrained. Unlike many evaluations that report utility-only bandit performance
+or post-hoc fairness for static predictors, the proposed work makes the time-evolving
+utility--fairness tradeoff explicit and tests transfer across both domains.
+
 
 \section{Related Work}
-Table~\ref{tab:overview} gives a compact map of the works reviewed and how they support the proposed project.
+Table~\ref{tab:overview} gives a compact map of the works reviewed and how they support
+the proposed project.
 
 \begin{table*}[t]
 \caption{High-level overview of related works reviewed in this survey.}
@@ -56,119 +117,259 @@ Table~\ref{tab:overview} gives a compact map of the works reviewed and how they 
 \toprule
 Category & Representative works \\
 \midrule
-Bandit foundations & UCB analysis \cite{auer2002finite}; Thompson sampling tutorial \cite{russo2018tutorial}; bandit textbook \cite{lattimore2020bandit} \\
-Contextual/linear bandits & Contextual bandits in practice \cite{li2010contextual}; linear bandits \cite{abbasi2011linear}; scalable CB \cite{agarwal2014taming}; offline evaluation \cite{dudik2011doubly} \\
-Shift / partial context & Non-stationary UCB \cite{garivier2008ucb}; restricted context \cite{bouneffouf2017context}; unobserved contexts \cite{park2022efficient} \\
-Fairness & Equality of opportunity \cite{hardt2016equality}; fairness in bandits \cite{joseph2016fairness}; clinical bias case study \cite{obermeyer2019dissecting} \\
-Quantum networking & Quantum internet vision \cite{wehner2018quantum}; entanglement routing \cite{pant2019routing} \\
+Bandit foundations
+  & UCB analysis \cite{auer2002finite};
+    Thompson sampling tutorial \cite{russo2018tutorial};
+    bandit textbook \cite{lattimore2020bandit} \\
+Contextual/linear bandits
+  & Epoch-Greedy \cite{langford2007epoch};
+    contextual bandits in practice \cite{li2010contextual};
+    linear bandits \cite{abbasi2011linear};
+    scalable CB \cite{agarwal2014taming};
+    offline evaluation \cite{dudik2011doubly} \\
+Shift / partial context
+  & Non-stationary UCB \cite{garivier2008ucb};
+    non-stationary rewards \cite{besbes2014stochastic};
+    restricted context \cite{bouneffouf2017context};
+    unobserved contexts \cite{park2022efficient} \\
+Fairness
+  & Equality of opportunity \cite{hardt2016equality};
+    fairness in bandits \cite{joseph2016fairness};
+    fairness in RL \cite{jabbari2017fairness};
+    offline fairness guarantees \cite{metevier2019offline};
+    fair contextual MABs \cite{chen2020fair};
+    clinical bias case study \cite{obermeyer2019dissecting} \\
+Quantum networking
+  & Quantum internet vision \cite{wehner2018quantum};
+    entanglement routing \cite{pant2019routing};
+    optimal quantum routing \cite{caleffi2017optimal} \\
 \bottomrule
 \end{tabular}
 \label{tab:overview}
 \end{table*}
 
+
 \subsection{Bandit foundations and core algorithms}
+
 \subsubsection{Upper confidence bound (UCB) analysis}
-Auer et al.~\cite{auer2002finite} provide a classic finite-time regret analysis for multi-armed bandits and introduce UCB-style algorithms
-that choose actions using optimistic confidence bounds. The approach formalizes how exploration can be driven by uncertainty estimates,
-and it yields logarithmic regret in stationary stochastic settings. A limitation for the proposed work is that standard UCB assumes stationarity
-and does not incorporate context or group-based fairness constraints; extensions are required for distribution shift, heterogeneous contexts,
-and explicit disparity monitoring over time.
+Auer et al.~\cite{auer2002finite} provide a foundational finite-time regret analysis for
+multi-armed bandits and introduce UCB-style algorithms that choose actions using optimistic
+confidence bounds, achieving regret bounds that are logarithmic in $T$ under standard
+stochastic assumptions (see Eq.~\ref{eq:regret}). A limitation for the proposed work is that
+standard UCB assumes stationarity and does not incorporate context or group-based fairness
+constraints; extensions are required for distribution shift, heterogeneous contexts, and
+explicit disparity monitoring over time.
 
 \subsubsection{Thompson sampling}
-Russo et al.~\cite{russo2018tutorial} survey Thompson sampling as a Bayesian approach to exploration--exploitation, highlighting strong empirical performance and
-the conceptual simplicity of sampling from a posterior over rewards. Thompson sampling is attractive for the proposed project as a baseline in both domains because it
-adapts to uncertainty naturally and often performs well under limited feedback. However, typical implementations focus on utility/regret and do not provide fairness
-guarantees; when context is missing or systematically noisy for some groups, posterior updates can encode these measurement inequities unless the model explicitly accounts for them.
+Russo et al.~\cite{russo2018tutorial} survey Thompson sampling as a Bayesian approach to
+exploration--exploitation, highlighting strong empirical performance and the conceptual
+simplicity of sampling from a posterior over rewards. Thompson sampling is attractive for the
+proposed project as a baseline in both domains because it adapts to uncertainty naturally and
+often performs well under limited feedback. However, typical implementations focus on
+utility/regret and do not provide fairness guarantees; when context is missing or
+systematically noisy for some groups, posterior updates can encode these measurement
+inequities unless the model explicitly accounts for them.
 
 \subsubsection{Bandit textbook perspective}
-Lattimore and Szepesv\'{a}ri~\cite{lattimore2020bandit} provide a comprehensive reference on bandit algorithms (stochastic, adversarial, contextual, linear),
-including proof techniques and practical design choices. This text is useful for the proposed work as a grounding reference for algorithm selection and for structuring
-ablations (e.g., how reward models, regularization, and confidence construction change performance). A practical limitation is that textbook settings generally assume that
-the context is correctly observed and that objectives are utility-centric; fairness-aware objectives and missingness mechanisms must be layered on top.
+Lattimore and Szepesv\'{a}ri~\cite{lattimore2020bandit} provide a comprehensive reference on
+bandit algorithms (stochastic, adversarial, contextual, linear), including proof techniques
+and practical design choices. This text grounds algorithm selection and ablation design for
+the proposed project. A practical limitation is that textbook settings generally assume
+correctly observed context and utility-centric objectives; fairness-aware objectives and
+missingness mechanisms must be layered on top.
+
 
 \subsection{Contextual and linear bandits in practice}
+
+\subsubsection{Epoch-Greedy contextual bandits}
+Langford and Zhang~\cite{langford2007epoch} introduce the Epoch-Greedy algorithm, one of the
+first contextual bandit algorithms with provable regret bounds. Their approach interleaves
+exploration epochs (uniform arm selection for reward estimation) with exploitation epochs
+(applying the current best policy), and shows that any supervised learning oracle can serve as
+the reward estimator. This motivates the use of offline regression oracles within online bandit
+policies---a strategy relevant to the iCMAB-style informed policy in the proposed project.
+A limitation is the dependence on epoch length, which is often unknown in practice.
+
 \subsubsection{Contextual bandits for personalization}
-Li et al.~\cite{li2010contextual} demonstrate contextual bandits for news recommendation, using context to personalize article selection while balancing exploration and exploitation.
-This work shows how contextual bandits can be deployed in real decision pipelines, and it motivates the use of contextual policies as a general mechanism for sequential
-decisions under uncertainty. The key limitation in the proposed setting is that the context in many real domains is incomplete and can be systematically lower-quality for
-some populations, which can lead to performance disparities if policies are optimized only for average reward.
+Li et al.~\cite{li2010contextual} demonstrate contextual bandits for news recommendation using
+LinUCB (Eq.~\ref{eq:linucb}), showing how context enables personalized decisions while
+balancing exploration and exploitation in a real deployment. The key limitation in the proposed
+setting is that context can be incomplete and systematically lower-quality for some populations,
+leading to performance disparities if policies are optimized only for average reward.
 
 \subsubsection{Linear stochastic bandits}
-Abbasi-Yadkori et al.~\cite{abbasi2011linear} analyze linear stochastic bandits and provide improved algorithms with regret bounds by maintaining confidence sets for linear models.
-Linear contextual bandits (e.g., LinUCB-style policies) are an important baseline for the proposed work because they are simple, sample-efficient, and interpretable, and they
-offer a clean place to inject missingness-handling and fairness-aware penalties/constraints. A limitation is the linear modeling assumption: if the relationship between context
-and outcome differs across groups or shifts over time, a single linear model can underfit and hide subgroup-specific error spikes.
+Abbasi-Yadkori et al.~\cite{abbasi2011linear} analyze linear stochastic bandits and provide
+improved confidence ellipsoids for the unknown parameter vector $\boldsymbol{\theta}$, achieving
+regret bounds that scale as $\tilde{O}(d\sqrt{T})$ under standard stochastic assumptions.
+Linear contextual bandits are a key baseline for the proposed work because they are simple,
+interpretable, and offer a clean place to inject missingness-handling and fairness-aware
+penalties. A limitation is the linear modeling assumption: if the relationship between context
+and outcome differs across groups or shifts over time, the model can underfit and hide
+subgroup-specific error spikes.
 
 \subsubsection{Scalable contextual bandits}
-Agarwal et al.~\cite{agarwal2014taming} propose a computationally efficient reduction-based approach to contextual bandits that makes it practical to use rich policy classes.
-This is relevant to the proposed project because it provides a template for scaling contextual policies beyond simple linear models while keeping training tractable.
-However, the work primarily optimizes reward and assumes that logged data and context are representative; fairness auditing and mitigation under group-dependent context quality
-require additional monitoring and constraints.
+Agarwal et al.~\cite{agarwal2014taming} propose a computationally efficient reduction-based
+approach to contextual bandits that makes it practical to use rich policy classes. This is
+relevant to the proposed project as a template for scaling beyond simple linear models while
+keeping training tractable. However, the work primarily optimizes reward and assumes
+representative context; fairness auditing under group-dependent context quality requires
+additional monitoring and constraints.
 
 \subsubsection{Offline evaluation with bandit feedback}
-Dud\'{i}k et al.~\cite{dudik2011doubly} develop doubly robust estimators for policy evaluation and learning from bandit feedback, combining direct reward modeling with
-inverse-propensity weighting. This is useful for the proposed project because it supports evaluation and comparison of policies under partial feedback, and it can help
-structure experiments where only chosen actions produce outcomes. A limitation is that estimator validity depends on correct propensities and sufficient support in logged data;
-if groups have different action distributions or different context missingness rates, variance and bias can differ by group, complicating fairness assessment.
+Dud\'{i}k et al.~\cite{dudik2011doubly} develop doubly robust estimators for policy evaluation
+and learning from bandit feedback, combining direct reward modeling with inverse-propensity
+weighting. This is useful for the proposed project because it supports evaluation and comparison
+of policies under partial feedback. A limitation is that estimator validity depends on correct
+propensities and sufficient support in logged data; if groups have different action
+distributions or context missingness rates, variance and bias can differ by group, complicating
+fairness assessment.
+
 
 \subsection{Distribution shift and missing/partial context}
-\subsubsection{Non-stationary bandits}
-Garivier and Moulines~\cite{garivier2008ucb} study UCB-style policies for non-stationary bandit problems, motivating mechanisms such as discounting or sliding windows
-to adapt to changes. This is relevant to both domains: patient mix and operational processes can change, and network load and link conditions can vary over time.
-The limitation for the proposed work is that non-stationary regret does not directly capture fairness: even if a policy adapts quickly in aggregate, it may still
-exhibit persistent group disparities if context quality differs systematically across groups.
+
+\subsubsection{Non-stationary bandits: UCB with change detection}
+Garivier and Moulines~\cite{garivier2008ucb} study UCB-style policies for non-stationary
+bandit problems, motivating mechanisms such as discounting or sliding windows to adapt to
+reward changes. This is relevant to both domains: patient mix and operational processes can
+change, and network load and link conditions can vary over time. The limitation for the
+proposed work is that non-stationary regret does not directly capture fairness; even if a
+policy adapts quickly in aggregate, it may exhibit persistent group disparities if context
+quality differs systematically across groups.
+
+\subsubsection{Non-stationary rewards and variation budgets}
+Besbes et al.~\cite{besbes2014stochastic} establish minimax-optimal rates for regret in
+non-stationary bandit problems where arm means change subject to a total variation budget,
+and propose a sliding-window UCB variant. A key finding is that ignoring non-stationarity
+can lead to linear regret. The proposed project incorporates distribution shift as a
+first-class experimental variable, testing bandit policies under both gradual and abrupt
+shifts across both testbeds.
 
 \subsubsection{Restricted context in contextual bandits}
-Bouneffouf et al.~\cite{bouneffouf2017context} consider contextual bandits when only a subset of context features can be observed or used at decision time.
-This framing is directly aligned with the proposed project's focus on missing or unevenly measured context: it formalizes that context is costly or partially available.
-The limitation is that restricted-context selection is typically optimized for reward; extending the selection mechanism to also reduce group disparities (e.g., by prioritizing
-features that stabilize subgroup performance) is not standard and is a key opportunity for innovation.
+Bouneffouf et al.~\cite{bouneffouf2017context} consider contextual bandits when only a
+subset of context features can be observed at decision time, directly aligned with the
+proposed project's focus on missing or unevenly measured context. The limitation is that
+restricted-context selection is typically optimized for reward; extending the selection
+mechanism to also reduce group disparities is not standard and is a key innovation
+opportunity.
 
 \subsubsection{Bandits with unobserved contexts}
-Park and Faradonbeh~\cite{park2022efficient} address bandit control when contexts are unobserved, proposing algorithms that learn to act effectively despite latent context.
-This work is relevant because it motivates algorithm designs that remain robust when the observed context is incomplete or unreliable, and it suggests modeling strategies for
-informative-context bandits. A limitation is that fairness considerations are not central: if latent-context recovery quality differs across groups (because of unequal measurement),
-fairness risks can persist without explicit disparity tracking and mitigation.
+Park and Faradonbeh~\cite{park2022efficient} address bandit control when contexts are
+unobserved, proposing algorithms that learn to act effectively despite latent context.
+This motivates algorithm designs that remain robust when the observed context is incomplete
+or unreliable. A limitation is that fairness considerations are not central: if latent-context
+recovery quality differs across groups due to unequal measurement, fairness risks persist
+without explicit disparity tracking and mitigation.
+
 
 \subsection{Fairness: definitions and fairness in bandit learning}
+
 \subsubsection{Equality of opportunity and error-based fairness}
-Hardt et al.~\cite{hardt2016equality} formalize equality of opportunity and related group-based fairness criteria in supervised learning, emphasizing that fairness can be defined
-in terms of error rates conditioned on true labels (e.g., equalizing false negative rates across groups). These definitions provide a clear measurement target for the clinical domain,
-where false-negative disparities have high stakes. A limitation for the proposed project is that supervised-learning fairness is typically evaluated post-hoc on static predictors;
-sequential decision-making adds partial feedback and time dynamics, so disparities should be measured as a function of time and policy behavior.
+Hardt et al.~\cite{hardt2016equality} formalize equality of opportunity and related
+group-based fairness criteria (Eq.~\ref{eq:eqopp}) in supervised learning, emphasizing that
+fairness can be defined in terms of error rates conditioned on true labels (e.g., equalizing
+false negative rates across groups). These definitions provide a clear measurement target for
+the clinical domain, where false-negative disparities have high stakes. A limitation for the
+proposed project is that supervised-learning fairness is typically evaluated post-hoc on
+static predictors; sequential decision-making adds partial feedback and time dynamics, so
+disparities should be measured as a function of time and policy behavior.
 
 \subsubsection{Fairness in classic and contextual bandits}
-Joseph et al.~\cite{joseph2016fairness} study fairness constraints in bandit learning and analyze how fairness requirements can change achievable regret.
-This work is central to the proposed project because it directly links bandit exploration policies to fairness constraints and highlights that naive utility optimization
-can be incompatible with fairness goals. A limitation is that many fairness formulations in bandits rely on simplified assumptions or require careful definitions of ``groups'' and
-comparability; the proposed project must operationalize group definitions and disparity metrics differently for diagnostics (error gaps) and quantum routing (service equity).
+Joseph et al.~\cite{joseph2016fairness} study fairness constraints in bandit learning and
+analyze how fairness requirements change achievable regret. This work is central to the
+proposed project because it directly links bandit exploration policies to fairness constraints
+and highlights that naive utility optimization can be incompatible with fairness goals.
+A limitation is that many fairness formulations in bandits rely on simplified assumptions;
+the proposed project must operationalize group definitions and disparity metrics differently
+for diagnostics (error gaps) and quantum routing (service equity).
+
+\subsubsection{Fairness in reinforcement learning}
+Jabbari et al.~\cite{jabbari2017fairness} study fairness in reinforcement learning, requiring
+that a policy never takes an action that is unfair to any individual in expectation, and
+provide algorithms with polynomial sample complexity. The key challenge they identify is that
+fairness constraints can slow learning when group-specific feedback is sparse---directly
+relevant to the clinical diagnostics domain, where some patient groups may have systematically
+fewer observations, making it harder to estimate group-wise error rates accurately.
+
+\subsubsection{Offline contextual bandits with high-probability fairness}
+Metevier et al.~\cite{metevier2019offline} propose a method for offline contextual bandits
+that provides high-probability guarantees that a deployed policy satisfies user-specified
+fairness constraints, using importance-weighted estimators and Seldonian optimization.
+A significant limitation is the offline setting assumption: the algorithm requires a fixed
+logged dataset and does not address online fairness under distribution shift. The proposed
+project extends this direction to the online setting, where fairness constraints must be
+maintained continuously as the policy learns from streaming data.
+
+\subsubsection{Fair contextual multi-armed bandits}
+Chen et al.~\cite{chen2020fair} develop algorithms for fair contextual MABs that satisfy
+group fairness constraints (parity in arm-selection rates across groups) while maintaining
+sublinear regret, and characterize the utility--fairness tradeoff as a function of group
+distribution imbalance. This is the most directly related prior work to the proposed project.
+A key limitation is that their fairness criterion focuses on arm-selection parity rather
+than outcome parity (e.g., FNR/FPR gaps), which may not capture the clinically or
+operationally relevant disparities. The proposed project uses outcome-based fairness metrics
+that are more directly interpretable in clinical and service-equity contexts, and extends
+the evaluation to distribution shift and cross-domain transfer.
 
 \subsubsection{Clinical bias case study motivating fairness audits}
-Obermeyer et al.~\cite{obermeyer2019dissecting} analyze a widely used health-risk prediction system and show how proxy targets can encode racial bias, producing systematic under-allocation
-of care for Black patients at the same predicted risk. This motivates the proposed project's emphasis on fairness auditing and on monitoring subgroup-specific errors rather than relying
-on aggregate metrics. A limitation is that this work addresses static prediction/triage rather than sequential decision policies; however, the mechanism is relevant: optimizing a proxy objective
-under biased measurements can yield persistent disparities unless explicitly corrected.
+Obermeyer et al.~\cite{obermeyer2019dissecting} analyze a widely used health-risk prediction
+system and show how proxy targets can encode racial bias, producing systematic
+under-allocation of care for Black patients at the same predicted risk. This motivates the
+proposed project's emphasis on fairness auditing and on monitoring subgroup-specific errors
+rather than relying on aggregate metrics. A limitation is that this work addresses static
+prediction/triage rather than sequential decision policies; however, the mechanism is
+relevant: optimizing a proxy objective under biased measurements can yield persistent
+disparities unless explicitly corrected.
+
 
 \subsection{Quantum networking and routing as a second testbed}
+
 \subsubsection{Quantum internet: vision and engineering constraints}
-Wehner et al.~\cite{wehner2018quantum} describe the vision for a quantum internet and outline key engineering challenges, including entanglement generation, storage, and networking protocols.
-This work provides domain background and motivates why routing decisions in quantum networks face uncertainty and resource scarcity. A limitation is that fairness is not a primary focus;
-the proposed project extends this domain by explicitly considering service equity across user/flow groups when learning routing policies under uncertainty.
+Wehner et al.~\cite{wehner2018quantum} describe the vision for a quantum internet and
+outline key engineering challenges, including entanglement generation, storage, and
+networking protocols. This work provides domain background and motivates why routing
+decisions in quantum networks face uncertainty and resource scarcity. A limitation is that
+fairness is not a primary focus; the proposed project extends this domain by explicitly
+considering service equity across user/flow groups when learning routing policies under
+uncertainty.
 
 \subsubsection{Routing entanglement in the quantum internet}
-Pant et al.~\cite{pant2019routing} develop methods for routing entanglement in quantum networks, addressing how to select paths and manage entanglement distribution.
-This work motivates a concrete quantum routing decision process that can be treated as a sequential decision environment, making it suitable as a second testbed.
-The limitation for the proposed project is that routing work is typically evaluated on throughput/fidelity metrics without group-based disparity monitoring;
-the proposed work adds explicit service-equity tracking and uses a shared fairness-aware contextual bandit evaluation stack across domains.
+Pant et al.~\cite{pant2019routing} develop methods for routing entanglement in quantum
+networks, addressing how to select paths and manage entanglement distribution under
+probabilistic link success. This motivates a concrete quantum routing decision process
+suitable as a second testbed. The limitation for the proposed project is that routing work
+is typically evaluated on throughput/fidelity metrics without group-based disparity
+monitoring; the proposed work adds explicit service-equity tracking using a shared
+fairness-aware contextual MAB evaluation stack.
+
+\subsubsection{Optimal routing for quantum networks}
+Caleffi~\cite{caleffi2017optimal} formulates quantum path selection as an optimization over
+link fidelity, decoherence time, and entanglement generation rate, showing that shortest-path
+routing significantly underperforms optimal routing due to the stochastic nature of link
+success. A limitation is the assumption of a static network with known link statistics;
+in practice, link quality varies dynamically. The proposed project extends the routing problem
+to an online learning setting using contextual bandits, where link-quality context is
+observed but statistics are unknown and shift over time.
+
 
 \section{Conclusion}
-Prior work provides strong foundations for multi-armed bandits, contextual/linear bandits, and evaluation under bandit feedback, as well as clear fairness definitions and initial
-work on fairness constraints in bandit learning. However, a gap remains at the intersection of: (i) missing or unevenly measured context, (ii) time-varying conditions, and
-(iii) explicit, time-evolving disparity monitoring and mitigation in sequential decision systems.
+Prior work provides strong foundations for multi-armed bandits, contextual/linear bandits,
+and evaluation under bandit feedback, as well as clear fairness definitions and initial work
+on fairness constraints in bandit learning. However, a gap remains at the intersection of:
+(i) missing or unevenly measured context, (ii) time-varying conditions, and (iii) explicit,
+time-evolving disparity monitoring and mitigation in sequential decision systems.
 
-The proposed project differentiates itself by building a reusable framework that evaluates fairness-aware contextual MAB policies under controllable missing-context mechanisms and
-distribution shift, tracks group disparities over time, and tests transfer across two distinct domains: clinical diagnostic-like decision-making and quantum-network routing.
-This two-domain evaluation is intended to demonstrate that the methodology is generic (not tuned to a single application) while still being grounded in domain-realistic constraints.
+The proposed project differentiates itself by building a reusable framework that evaluates
+fairness-aware contextual MAB policies under controllable missing-context mechanisms and
+distribution shift, tracks group disparities over time, and tests transfer across two distinct
+domains: clinical diagnostic-like decision-making and quantum-network routing. While
+Chen et al.~\cite{chen2020fair} address fair contextual MABs and Joseph et al.~\cite{joseph2016fairness}
+address fairness in bandit learning, neither evaluates outcome-based disparity metrics
+(FNR/FPR gaps) under distribution shift, nor tests transfer across fundamentally different
+domains. This two-domain evaluation demonstrates that the methodology is generic---not tuned
+to a single application---while remaining grounded in domain-realistic constraints.
+
+\noindent\textbf{Overleaf (editable):}
+\url{https://www.overleaf.com/3621132125pfjhvkxzsbkp#0cab76}
 
 \bibliographystyle{IEEEtran}
 \bibliography{survey-references}
