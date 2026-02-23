@@ -21,16 +21,9 @@
 \maketitle
 
 \section{Introduction}
-This survey reviews prior work needed to support a project on fairness-aware contextual multi-armed bandits (contextual MABs)
-for sequential decision-making when context can be delayed, noisy, or missing for some populations.
-The motivating applications span two domains: (i) clinical diagnostic-like workflows where sequential choices (tests, models, retesting, or
-pipeline selection) are made under limited resources and uneven context quality across patient groups, and (ii) quantum-network routing,
-where routing decisions are made under probabilistic link success and time-varying congestion with scarce quantum resources.
+This project develops a practical, reproducible framework for fairness-aware contextual multi-armed bandits (iC-/C-MABs) to make sequential decisions under uncertainty and limited resources while treating algorithmic fairness as a first-class objective. The work focuses on measuring and improving fairness across two domains---clinical diagnostic-like decision workflows and quantum-network routing---by evaluating the same policy stack in a simulation-first diagnostic environment and in a quantum-network routing simulator, with time-evolving disparity reporting and at least one mitigation mechanism.
 
-The related work is organized into: foundational bandit algorithms; modern contextual/linear bandits and evaluation;
-bandits under non-stationarity and missing/partial context; algorithmic fairness definitions and fairness in bandit-style learning; and
-domain grounding for clinical disparities and quantum networking/routing. The conclusion summarizes gaps and clarifies how the proposed
-work differentiates itself by explicitly tracking and mitigating disparities over time while testing transfer across both domains.
+This survey reviews prior work needed to support this framework, including bandit foundations, contextual/linear bandits and evaluation, learning under distribution shift and missing/partial context, and fairness definitions and fairness in bandit-style learning. It also includes domain grounding for clinical disparities and quantum-network routing. The conclusion summarizes gaps and clarifies how the proposed work differentiates itself by explicitly tracking and mitigating disparities over time while testing transfer across both domains.
 
 \section{Background}
 Many real-world workflows in both clinical diagnostics and quantum-network routing require sequential choices under uncertainty, resource constraints, and distribution shift. These settings can amplify inequities when some groups systematically have lower-quality context or different error profiles. This survey frames these workflows as a contextual bandit problem: at each step, choose an action (an ``arm'') given observed context to maximize utility while controlling fairness gaps.
