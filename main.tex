@@ -4,9 +4,18 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{url}
+\usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{microtype}
+\usepackage[table]{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta}
 \usepackage[hidelinks]{hyperref}
+
+\definecolor{networkblue}{RGB}{52,152,219}
+\definecolor{envgreen}{RGB}{46,204,113}
+\definecolor{algorange}{RGB}{230,126,34}
+\definecolor{allocpurple}{RGB}{155,89,182}
 
 \title{Fair Contextual Bandits for Equitable
 Diagnostic Decision-Making Under Missing Context}
@@ -200,6 +209,108 @@ routing testbed used in the proposed project by providing domain-realistic uncer
 constraints, and adversarial shifts. A limitation for the proposed project is that robustness is
 the primary focus; explicit outcome-based fairness/service-equity monitoring is not central and
 will be added in the shared evaluation framework.
+
+\begin{figure}[t]
+\tiny
+\centering
+\resizebox{0.6\columnwidth}{!}{%
+    \begin{tikzpicture}[
+      node distance=0.5cm,
+      block/.style={rectangle, draw, fill=white, text width=5.0cm, text centered, rounded corners, minimum height=0.1cm, line width=0.5pt},
+      layer/.style={rectangle, draw, fill=white, text width=5.0cm, text centered, minimum height=0.1cm, line width=0.5pt, font=\small},
+      arrow/.style={-Stealth, line width=0.6pt},
+      lab/.style={font=\scriptsize}
+    ]
+
+    \node[layer, fill=allocpurple!18, draw=allocpurple] (alloc) {\textbf{1. ALLOCATOR}};
+    \node[block, below=0.1cm of alloc, font=\scriptsize] (alloccontent) {
+      \textbf{Strategies:} Fixed, Thompson, DynamicUCB, Random
+    };
+
+    \node[layer, fill=gray!18, draw=gray, below=0.4cm of alloccontent] (config) {\textbf{2. CONFIGURATION}};
+    \node[block, below=0.1cm of config, font=\scriptsize] (configcontent) {
+      Topology: 4 nodes, 4 paths
+      Scenarios: 5 threats
+      Algorithms: CPursuitNeuralUCB, iCPursuitNeuralUCB, GNeuralUCB, EXPNeuralUCB
+      Capacity: replay type ($T_b$ vs.\ $T$), scale $s\in\{1,1.5,2\}$\\
+      Seeds: 3--10 runs
+    };
+
+    \node[layer, fill=blue!18, draw=blue, below=0.4cm of configcontent] (evaluator) {\textbf{3. EVALUATOR}};
+    \node[block, below=0.1cm of evaluator, font=\scriptsize] (evalcontent) {
+      Orchestrates runs
+      Logs results
+    };
+    \node[block, below=0.1cm of evalcontent, font=\scriptsize, fill=envgreen!10, draw=envgreen] (env) {
+      \textbf{Environment Threat:}
+      $Y_t(r,\mathbf{x}) \sim \mathrm{Bernoulli}\!\big(h_r(\mathbf{x}) \cdot A_t(r)\big)$
+      None, Stochastic, Markov, Adaptive, OnlineAdaptive
+    };
+
+    \node[layer, fill=blue!10, draw=blue!60, below=0.4cm of env] (runner) {\textbf{4. RUNNER}};
+    \node[block, below=0.1cm of runner, font=\scriptsize] (runnercontent) {
+      Batch execution
+      Parallel runs
+      Per-scenario/per-seed Oracle tracking
+      Applies the allocator to distribute qubits across paths
+    };
+
+    \node[layer, fill=blue!10, draw=blue!60, below=0.4cm of runnercontent] (model) {\textbf{5. MODEL}};
+    \node[block, below=0.1cm of model, font=\scriptsize, fill=networkblue!10, draw=networkblue] (net) {
+      \textbf{Quantum network:}
+      4 paths, 35-qubit capacity
+    };
+    \node[block, below=0.05cm of net, font=\scriptsize, fill=algorange!10, draw=algorange] (algo) {
+      \textbf{Algorithms:}
+      EXPNeuralUCB
+      GNeuralUCB
+      CPursuitNeuralUCB
+      iCPursuitNeuralUCB
+      Structure: EXP3 group + neural/pursuit-based arm selection
+    };
+
+    \node[layer, fill=orange!18, draw=orange, below=0.4cm of algo] (visualizer) {\textbf{6. VISUALIZER}};
+    \node[block, below=0.1cm of visualizer, font=\scriptsize] (viscontent) {
+      Efficiency curves
+      Summary tables
+      Scenario ranking
+      Heatmaps
+      Winner highlighting
+    };
+
+    \draw[arrow] (alloccontent.south) -- (config.north);
+    \draw[arrow] (configcontent.south) -- (evaluator.north);
+    \draw[arrow] (env.south) -- (runner.north);
+    \draw[arrow] (runnercontent.south) -- (model.north);
+    \draw[arrow] (algo.south) -- (visualizer.north);
+
+    \draw[arrow, dashed, bend left=20] (config.east) to node[lab, right] {config} (evaluator.east);
+    \draw[arrow, dashed, bend left=15] (config.east) to (runner.east);
+    \draw[arrow, dashed, bend left=20] (config.east) to (model.east);
+    \draw[arrow, dashed, bend left=25] (config.east) to (visualizer.east);
+
+    \draw[arrow, dashed, bend left=20] (model.west) to node[left, lab, align=center] {per-run\\results} (runner.west);
+    \draw[arrow, dashed, bend left=20] (runner.west) to node[left, lab, align=center] {aggregated\\logs} (evaluator.west);
+    \draw[arrow, dashed, bend right=40] (evaluator.west) to node[left, lab, align=center] {summaries\\+\\plots} (visualizer.west);
+    \end{tikzpicture}
+}
+\vspace{-0.45cm}
+\caption{\tiny Modular framework for quantum routing evaluation, adapted from
+\cite{garcia2026threat_aware_quantum_routing}. The evaluation stack separates allocator,
+configuration, evaluator, runner, model, and visualizer concerns to support systematic
+ablation under consistent capacity and threat semantics.}
+\label{fig:quantum_framework}
+\end{figure}
+
+\paragraph{Algorithmic framework (modular evaluation stack).}
+The quantum-routing testbed in \cite{garcia2026threat_aware_quantum_routing} uses the layered
+evaluation architecture shown in Figure~\ref{fig:quantum_framework}. At a high level, an
+\emph{allocator} specifies a resource-distribution rule, a shared \emph{configuration} fixes
+topology/scenarios/capacity semantics, an \emph{evaluator} orchestrates runs and logging, a
+\emph{runner} executes batched scenarios under fixed seeds, a \emph{model} implements the
+routing policy (bandit learner + network), and a \emph{visualizer} aggregates results into
+plots and winner summaries. This modular structure is reused in the proposed work to add
+fairness/service-equity monitoring and mitigation under the same experimental controls.
 
 
 \subsection{Bandit foundations and core algorithms}
