@@ -1,51 +1,24 @@
-\documentclass[12pt]{article}
+\documentclass[conference]{IEEEtran}
 
-\input{proposal-defs-alt}
-\usepackage[margin=0.6in]{geometry}
-\usepackage{url}
-\usepackage{latexsym}
+\usepackage{cite}
 \usepackage{amsmath}
-\usepackage{enumitem}
-\usepackage[hidelinks]{hyperref}
-\usepackage{microtype}
+\usepackage{url}
 \usepackage{booktabs}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
 
-\setlist[itemize]{leftmargin=1.25em, itemsep=0.1em, topsep=0.2em}
-\setlength{\parskip}{0.2em}
-\setlength{\parindent}{0pt}
+\title{Fair Contextual Bandits for Equitable Diagnostic Decision-Making Under Missing Context}
+
+\author{
+\IEEEauthorblockN{Piter Z. Garcia Bautista}
+\IEEEauthorblockA{MS Data Science / Bioinformatics\\Rochester Institute of Technology\\pizg8794@g.rit.edu}
+\and
+\IEEEauthorblockN{Daniel Krutz, Travis Desell}
+\IEEEauthorblockA{Department of Software Engineering, Data Science\\Rochester Institute of Technology\\dxkvse@g.rit.edu, tjdvse@g.rit.edu}
+}
 
 \begin{document}
-
-\pagestyle{empty}
-
-\begin{center}
-{\large\bf Related Work Survey: Fairness-Aware Contextual Bandits Under Missing Context}\\
-\vspace{0.2em}
-{\normalsize (Clinical Diagnostics and Quantum-Network Routing)}
-\end{center}
-
-\begin{center}
-\begin{minipage}{0.48\linewidth}
-\begin{center}
-{\bf Piter Z. Garcia Bautista}\\
-\begin{small}
-MS Data Science / Bioinformatics\\
-Rochester Institute of Technology\\
-{\it pizg8794@g.rit.edu}
-\end{small}
-\end{center}
-\end{minipage}
-\begin{minipage}{0.48\linewidth}
-\begin{center}
-{\bf Dr. Daniel Krutz, Travis Desell}\\
-\begin{small}
-Department of Software Engineering, Data Science\\
-DSCI 601 Project Advisors\\
-{\it dxkvse@g.rit.edu, tjdvse@g.rit.edu}
-\end{small}
-\end{center}
-\end{minipage}
-\end{center}
+\maketitle
 
 \section{Introduction}
 This survey reviews prior work needed to support a project on fairness-aware contextual multi-armed bandits (contextual MABs)
@@ -79,10 +52,11 @@ signals used as routing context (link-quality estimates, queue/load indicators) 
 \section{Overview of Reviewed Works}
 Table~\ref{tab:overview} gives a compact map of the works reviewed and how they support the proposed project.
 
-\begin{table}[h]
+\begin{table*}[t]
+\caption{High-level overview of related works reviewed in this survey.}
 \centering
 \small
-\begin{tabular}{p{0.26\linewidth} p{0.68\linewidth}}
+\begin{tabular}{p{0.22\textwidth} p{0.74\textwidth}}
 \toprule
 Category & Representative works \\
 \midrule
@@ -93,9 +67,8 @@ Fairness & Equality of opportunity \cite{hardt2016equality}; fairness in bandits
 Quantum networking & Quantum internet vision \cite{wehner2018quantum}; entanglement routing \cite{pant2019routing} \\
 \bottomrule
 \end{tabular}
-\caption{High-level overview of related works reviewed in this survey.}
 \label{tab:overview}
-\end{table}
+\end{table*}
 
 \section{Related Work Descriptions}
 
@@ -207,4 +180,3 @@ This two-domain evaluation is intended to demonstrate that the methodology is ge
 \bibliography{survey-references}
 
 \end{document}
-
