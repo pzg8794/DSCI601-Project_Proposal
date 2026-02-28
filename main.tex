@@ -35,7 +35,7 @@ Diagnostic Decision-Making Under Limited Context\\[0.3em]
 
 \section{Introduction}
 This project develops a practical, reproducible framework for fairness-aware contextual
-multi-armed bandits (CMAB/iCMAB) to support sequential decision-making under uncertainty,
+bandits (CMAB/iCMAB) to support sequential decision-making under uncertainty,
 limited context, and non-stationarity while treating algorithmic fairness as a
 first-class objective. The same framework is instantiated in two domains---clinical
 diagnostic-like decision workflows and quantum-network routing---by evaluating a shared
@@ -273,7 +273,7 @@ will be added in the shared evaluation framework.
 	    };
 		    \node[block, below=0.05cm of net, font=\scriptsize, fill=algorange!10, draw=algorange] (algo) {
 		      \textbf{Algorithms:}
-		      Contextual (CMAB/iCMAB)
+		      Contextual bandits (CMAB/iCMAB)
 		      Adversarial (EXP3-family)
 		      Hybrid pursuit--neural variants
 		      Structure: EXP3 group + neural/pursuit-based arm selection
@@ -517,7 +517,7 @@ probabilistic link success. This motivates a concrete quantum routing decision p
 suitable as a second testbed. The limitation for the proposed project is that routing work
 is typically evaluated on throughput/fidelity metrics without group-based disparity
 monitoring; the proposed work adds explicit service-equity tracking using a shared
-fairness-aware contextual MAB evaluation stack.
+fairness-aware contextual bandit evaluation stack.
 
 \subsubsection{Optimal routing for quantum networks}
 Caleffi~\cite{caleffi2017optimal} formulates quantum path selection as an optimization over
@@ -537,7 +537,7 @@ on fairness constraints in bandit learning. However, a gap remains at the inters
 time-evolving disparity monitoring and mitigation in sequential decision systems.
 
 The proposed project differentiates itself by building a reusable framework that evaluates
-fairness-aware contextual MAB policies under controllable limited-context mechanisms and
+fairness-aware contextual bandit policies under controllable limited-context mechanisms and
 distribution shift, tracks group disparities over time, and tests transfer across two distinct
 domains: clinical diagnostic-like decision-making and quantum-network routing. While
 Chen et al.~\cite{chen2020fair} address fair contextual MABs and Joseph et al.~\cite{joseph2016fairness}
