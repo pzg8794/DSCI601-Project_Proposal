@@ -218,7 +218,7 @@ performance under strategic attacks; it further validates robustness trends via 
 evaluation across external quantum-network simulators. This work grounds the quantum-network
 routing testbed used in the proposed project by providing domain-realistic uncertainty, resource
 constraints, and adversarial shifts. A limitation for the proposed project is that robustness is
-the primary focus; explicit outcome-based fairness/service-equity monitoring is not central and
+the primary focus; explicit outcome-based fairness/service equity monitoring is not central and
 will be added in the shared evaluation framework.
 
 \begin{figure}[t]
@@ -320,7 +320,7 @@ topology/scenarios/capacity semantics, an \emph{evaluator} orchestrates runs and
 \emph{runner} executes batched scenarios under fixed seeds, a \emph{model} implements the
 routing policy (bandit learner + network), and a \emph{visualizer} aggregates results into
 plots and winner summaries. This modular structure is reused in the proposed work so that
-fairness/service-equity monitoring and mitigation can be computed and applied from the same
+fairness/service equity monitoring and mitigation can be computed and applied from the same
 logged run state, under identical experimental controls.
 Having grounded the two experimental testbeds, the remainder of this section surveys the
 algorithmic and fairness literature needed to design and evaluate a shared fairness-aware CMAB
@@ -486,7 +486,7 @@ distribution imbalance. This is the most directly related prior work to the prop
 A key limitation is that their fairness criterion focuses on arm-selection parity rather than
 outcome parity (e.g., FNR/FPR gaps), which may not capture the clinically or operationally
 relevant disparities. The proposed project uses outcome-based fairness metrics that are more
-directly interpretable in clinical and service-equity contexts, and extends the evaluation to
+directly interpretable in clinical and service equity contexts, and extends the evaluation to
 distribution shift and cross-domain transfer.
 
 \subsubsection{Clinical bias case study motivating fairness audits}
@@ -516,7 +516,7 @@ networks, addressing how to select paths and manage entanglement distribution un
 probabilistic link success. This motivates a concrete quantum routing decision process
 suitable as a second testbed. The limitation for the proposed project is that routing work
 is typically evaluated on throughput/fidelity metrics without group-based disparity
-monitoring; the proposed work adds explicit service-equity tracking using a shared
+monitoring; the proposed work adds explicit service equity tracking using a shared
 fairness-aware contextual bandit evaluation stack.
 
 \subsubsection{Optimal routing for quantum networks}

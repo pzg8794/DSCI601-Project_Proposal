@@ -118,3 +118,4 @@ Tracking fields:
 - 2026-02-28: Survey (`main.tex`): restored “(CMAB/iCMAB)” where it clarifies the referenced contextual bandit family (removed the unintended “LinUCB-style” specificity from the framework diagram).
 - 2026-02-28: Survey (`main.tex`): consistency tweak: refer to the project as “contextual bandits” (title term), while using “CMAB/iCMAB” only as a clarifying parenthetical; also fixed the diagram label to read “Contextual bandits (CMAB/iCMAB)”.
 - 2026-02-28: Survey (`main.tex`): small consistency polish: changed “nonstationarity” to “non-stationarity” in the related-work overview table label.
+- 2026-02-28: Survey (`main.tex`): consistency polish: standardized “service equity” formatting (removed mixed “service-equity” hyphenation).
