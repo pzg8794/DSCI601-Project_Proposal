@@ -93,3 +93,4 @@ Tracking fields:
 - 2026-02-28: Proposal (`proposal.tex`): made the Phase 1/Phase 2 plan explicitly follow “baseline disparities, then mitigation,” and noted an initial demo in Phase 1 to match the project execution expectations.
 - 2026-02-28: Proposal (`proposal.tex`): removed class-specific wording in the header by changing “DSCI 601 Project Advisors” to “Research Advisors”.
 - 2026-02-28: Proposal (`proposal.tex`): clarified the Approach metrics bullet so it explicitly lists both domain-specific fairness metrics (diagnostic FNR/FPR gaps; quantum service-equity gaps in success probability/latency).
+- 2026-02-28: Proposal (`proposal.tex`): updated the opening sentence to include “limited context” and non-stationarity for a more academic, compact framing; “lack of context” remains the core motivating concept and is treated as a first-class driver of fairness risk throughout the proposal.
