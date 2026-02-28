@@ -120,3 +120,4 @@ Tracking fields:
 - 2026-02-28: Survey (`main.tex`): small consistency polish: changed “nonstationarity” to “non-stationarity” in the related-work overview table label.
 - 2026-02-28: Survey (`main.tex`): consistency polish: standardized “service equity” formatting (removed mixed “service-equity” hyphenation).
 - 2026-02-28: Survey (`main.tex`): cosmetic polish: changed “Algorithmic Fairness” to “Algorithmic~Fairness” in the author affiliation to prevent awkward line breaks.
+- 2026-02-28: Survey (`main.tex`): small terminology alignment: replaced “fairness-aware CMAB framework” with “fairness-aware contextual bandit framework” to match the title language.
