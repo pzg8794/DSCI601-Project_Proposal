@@ -110,3 +110,4 @@ Tracking fields:
 - 2026-02-28: Proposal + Survey: updated affiliations to use “Rochester Institute of Technology (RIT)” and added “Research Advisors” to the advisor block for consistency.
 - 2026-02-28: Proposal + Survey: shortened the advisor affiliation line to “RIT Research Advisors” to avoid repeating the institute name on both sides.
 - 2026-02-28: Survey (`main.tex`): updated the title wording from “Bandits” to “MABs” for consistency with the proposal title.
+- 2026-02-28: Survey (`main.tex`): terminology consistency pass (minimal): replaced “missing/partial/missing/incomplete/unevenly measured” phrasing with “limited context” and “measurement noise”, and updated “missing-context” to “limited-context” (no other rewording).

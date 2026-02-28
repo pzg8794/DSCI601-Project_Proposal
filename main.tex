@@ -36,7 +36,7 @@ Diagnostic Decision-Making Under Missing Context\\[0.3em]
 \section{Introduction}
 This project develops a practical, reproducible framework for fairness-aware contextual
 multi-armed bandits (CMAB/iCMAB) to support sequential decision-making under uncertainty,
-missing/partial context, and non-stationarity while treating algorithmic fairness as a
+limited context, and non-stationarity while treating algorithmic fairness as a
 first-class objective. The same framework is instantiated in two domains---clinical
 diagnostic-like decision workflows and quantum-network routing---by evaluating a shared
 policy stack in a simulation-first diagnostic environment and in a quantum-network routing
@@ -45,7 +45,7 @@ Here, ``diagnostic-like'' refers to sequential decision workflows such as diagno
 selection, triage or follow-up escalation, and model/pipeline selection under partial
 feedback and non-stationarity; it also includes cases where key diagnostic components
 (tests, instruments, or patient information) are unavailable or delayed due to resource
-constraints or allocation policies, creating group-dependent missing context.
+constraints or allocation policies, creating group-dependent limited context.
 Mitigation mechanisms considered include fairness-regularized policy updates
 (constraints/penalties), group-aware calibration or thresholding, and missingness-aware
 context augmentation (e.g., feature acquisition or imputation policies).
@@ -64,7 +64,7 @@ one domain remain effective and equitable when applied to the other, focusing on
 
 This survey reviews prior work needed to support this framework, including bandit foundations,
 contextual/linear bandits and evaluation, learning under distribution shift and
-missing/partial context (including group-dependent missingness/measurement noise),
+limited context (including group-dependent missingness/measurement noise),
 fairness definitions, and fairness in bandit-style learning. It also includes domain grounding
 for clinical disparities and quantum-network routing. The conclusion summarizes gaps and
 clarifies how the proposed work differentiates itself by explicitly tracking and mitigating
@@ -80,7 +80,7 @@ problem: at each step, choose an action (an ``arm'') given observed context to m
 utility while controlling fairness gaps.
 In both domains, outcomes are stochastic and history-dependent: the reward distribution can
 drift over time as conditions evolve, feedback is partial (bandit feedback), and context can
-be delayed, noisy, or missing.
+be delayed, noisy, or unavailable.
 
 \subsection{Multi-armed bandits and contextual bandits}
 In both domains, multi-armed bandits formalize online decision-making with
@@ -108,7 +108,7 @@ a_t = \arg\max_{a} \Bigl(
 \end{equation}
 where $\mathbf{A}_a$ accumulates outer products of context vectors and $\alpha$ controls
 exploration. Contextual policies can improve sample-efficiency and stability when the context
-is predictive of outcomes; however, when context is missing or systematically noisier for
+is predictive of outcomes; however, when context is limited or systematically noisier for
 some groups, these policies can inadvertently encode and amplify measurement inequities.
 
 \subsection{Fairness in sequential decision-making}
@@ -134,10 +134,10 @@ context may include link-quality estimates and network load/queue signals, but t
 can be delayed, noisy, or partially observed. In this project, service equity is defined as parity in
 routing outcomes, quantified by group disparities in success probability and latency across flow groups, under these
 constraints. Both domains share a common mathematical structure: stochastic, history-dependent
-dynamics with non-stationarity, partial context, and compounding decisions over time.
+dynamics with non-stationarity, limited context, and compounding decisions over time.
 In clinical diagnostics, context may include patient features, test and
 sample-quality indicators, and operational constraints, but access to context can be
-incomplete or systematically noisier for some populations. These limitations create
+limited or systematically noisier for some populations. These limitations create
 performance and fairness risks, especially when optimizing aggregate performance, which can
 hide subgroup error spikes (e.g., false-negative gaps) unless the system is explicitly
 monitored and constrained. Unlike many evaluations that report utility-only bandit performance
@@ -171,7 +171,7 @@ Contextual/linear bandits (side information + evaluation)
     linear bandits \cite{abbasi2011linear};
     scalable CB \cite{agarwal2014taming};
     offline evaluation \cite{dudik2011doubly} \\
-Shift / partial context (missingness + nonstationarity)
+Shift / limited context (missingness + nonstationarity)
   & Non-stationary UCB \cite{garivier2008ucb};
     non-stationary rewards \cite{besbes2014stochastic};
     restricted context \cite{bouneffouf2017context};
@@ -344,7 +344,7 @@ exploration--exploitation, highlighting strong empirical performance and the con
 simplicity of sampling from a posterior over rewards. Thompson sampling is attractive for the
 proposed project as a baseline in both domains because it adapts to uncertainty naturally and
 often performs well under limited feedback. However, typical implementations focus on
-utility/regret and do not provide fairness guarantees; when context is missing or
+utility/regret and do not provide fairness guarantees; when context is limited or
 systematically noisy for some groups, posterior updates can encode these measurement
 inequities unless the model explicitly accounts for them.
 
@@ -372,7 +372,7 @@ project. A limitation is the dependence on epoch length, which is often unknown 
 Li et al.~\cite{li2010contextual} demonstrate contextual bandits for news recommendation
 using LinUCB (Eq.~\ref{eq:linucb}), showing how context enables personalized decisions while
 balancing exploration and exploitation in a real deployment. The key limitation in the
-proposed setting is that context can be incomplete and systematically lower-quality for some
+proposed setting is that context can be limited and systematically lower-quality for some
 populations, leading to performance disparities if policies are optimized only for average
 reward.
 
@@ -404,7 +404,7 @@ have different action distributions or context missingness rates, variance and b
 by group, complicating fairness assessment.
 
 
-\subsection{Distribution shift and missing/partial context}
+\subsection{Distribution shift and limited context}
 
 \subsubsection{Non-stationary bandits: UCB with change detection}
 Garivier and Moulines~\cite{garivier2008ucb} study UCB-style policies for non-stationary
@@ -426,7 +426,7 @@ shifts across both testbeds.
 \subsubsection{Restricted context in contextual bandits}
 Bouneffouf et al.~\cite{bouneffouf2017context} consider contextual bandits when only a
 subset of context features can be observed at decision time, directly aligned with the
-proposed project's focus on missing or unevenly measured context. The limitation is that
+proposed project's focus on limited context or measurement noise. The limitation is that
 restricted-context selection is typically optimized for reward; extending the selection
 mechanism to also reduce group disparities is not standard and is a key innovation
 opportunity.
@@ -434,7 +434,7 @@ opportunity.
 \subsubsection{Bandits with unobserved contexts}
 Park and Faradonbeh~\cite{park2022efficient} address bandit control when contexts are
 unobserved, proposing algorithms that learn to act effectively despite latent context.
-This motivates algorithm designs that remain robust when the observed context is incomplete
+This motivates algorithm designs that remain robust when the observed context is limited
 or unreliable. A limitation is that fairness considerations are not central: if latent-context
 recovery quality differs across groups due to unequal measurement, fairness risks persist
 without explicit disparity tracking and mitigation.
@@ -533,11 +533,11 @@ but statistics are unknown and shift over time.
 Prior work provides strong foundations for multi-armed bandits, contextual/linear bandits,
 and evaluation under bandit feedback, as well as clear fairness definitions and initial work
 on fairness constraints in bandit learning. However, a gap remains at the intersection of:
-(i) missing or unevenly measured context, (ii) time-varying conditions, and (iii) explicit,
+(i) limited context or measurement noise, (ii) time-varying conditions, and (iii) explicit,
 time-evolving disparity monitoring and mitigation in sequential decision systems.
 
 The proposed project differentiates itself by building a reusable framework that evaluates
-fairness-aware contextual MAB policies under controllable missing-context mechanisms and
+fairness-aware contextual MAB policies under controllable limited-context mechanisms and
 distribution shift, tracks group disparities over time, and tests transfer across two distinct
 domains: clinical diagnostic-like decision-making and quantum-network routing. While
 Chen et al.~\cite{chen2020fair} address fair contextual MABs and Joseph et al.~\cite{joseph2016fairness}
