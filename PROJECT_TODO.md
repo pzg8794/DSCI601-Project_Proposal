@@ -100,3 +100,4 @@ Tracking fields:
 - 2026-02-28: Proposal (`proposal.tex`): terminology consistency follow-up: standardized to “measurement noise” (instead of “measurement limitations”), updated the Phase 1 line to match, and replaced “uneven” with “differ” in Broader Impacts to avoid “evenness” framing.
 - 2026-02-28: Proposal (`proposal.tex`): terminology consistency pass (minimal): replaced “incomplete” with “limited” for context access in the clinical sentence to match the overall “limited context” framing.
 - 2026-02-28: Proposal (`proposal.tex`): tightened “iCMABs/CMABs” formatting while preventing margin overflow by inserting an invisible break hint (`\\allowbreak{}`) after the slash.
+- 2026-02-28: Proposal (`proposal.tex`): terminology consistency pass (minimal): updated the diagnostic-like definition to use “limited context” (instead of “missing context”) to match the paper-wide framing.
