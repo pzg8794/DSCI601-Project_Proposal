@@ -108,4 +108,5 @@ Tracking fields:
 - 2026-02-28: Proposal (`proposal.tex`): prevented “Fairness” from wrapping to its own line in the author affiliation by using a non-breaking space in “Algorithmic~Fairness”.
 - 2026-02-28: Proposal (`proposal.tex`): ensured the program line stays on a single line by wrapping it in `\mbox{}` and slightly reducing its font size (prevents “Fairness” from wrapping in the narrow minipage).
 - 2026-02-28: Proposal + Survey: updated affiliations to use “Rochester Institute of Technology (RIT)” and added “Research Advisors” to the advisor block for consistency.
+- 2026-02-28: Proposal + Survey: shortened the advisor affiliation line to “RIT Research Advisors” to avoid repeating the institute name on both sides.
 - 2026-02-28: Survey (`main.tex`): updated the title wording from “Bandits” to “MABs” for consistency with the proposal title.
