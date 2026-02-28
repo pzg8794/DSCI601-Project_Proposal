@@ -92,3 +92,4 @@ Tracking fields:
 - 2026-02-28: Proposal (`proposal.tex`): made the mitigation methods explicit near the top by listing fairness-regularized updates, calibration/thresholding, and missingness-aware context augmentation (matches the survey phrasing and clarifies what “mitigation” means).
 - 2026-02-28: Proposal (`proposal.tex`): made the Phase 1/Phase 2 plan explicitly follow “baseline disparities, then mitigation,” and noted an initial demo in Phase 1 to match the project execution expectations.
 - 2026-02-28: Proposal (`proposal.tex`): removed class-specific wording in the header by changing “DSCI 601 Project Advisors” to “Research Advisors”.
+- 2026-02-28: Proposal (`proposal.tex`): clarified the Approach metrics bullet so it explicitly lists both domain-specific fairness metrics (diagnostic FNR/FPR gaps; quantum service-equity gaps in success probability/latency).
