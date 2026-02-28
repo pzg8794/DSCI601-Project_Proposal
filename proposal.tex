@@ -49,12 +49,14 @@ DSCI 601 Project Advisors\\
 \end{center}
 
 \noindent
-This project will develop a practical, reproducible framework for {\bf contextual multi-armed bandits} (iC-/C-MABs)
+This project will develop a practical, reproducible framework for {\bf contextual multi-armed bandits} (iCMABs/CMABs)
 to make sequential decisions under uncertainty and limited resources while treating {\bf algorithmic fairness} as a first-class objective.
 The work on this generic framework focuses on measuring and improving fairness across the clinical (diagnostic-like) and quantum-network routing domains through the following deliverables:
 i) a simulation-first diagnostic-like sequential decision environment with controllable context missingness/uneven measurement and distribution shift,
 ii) a fairness-aware contextual MAB evaluation stack (baselines + contextual policies) with time-evolving group disparity reporting and at least one mitigation mechanism,
 and iii) a transfer study demonstrating the same policy stack in a quantum-network routing simulator.
+
+Here, ``diagnostic-like'' refers to clinical diagnostic sequential decision workflows such as diagnostic test selection, triage or follow-up escalation, and model/pipeline selection under partial feedback and non-stationarity. It also includes cases where key diagnostic components (tests, instruments, or patient information) are unavailable or delayed due to resource constraints or allocation policies, creating group-dependent missing context.
 
 
 \paragraph{Background:} \hspace{-5mm}
