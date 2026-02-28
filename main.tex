@@ -35,7 +35,7 @@ Diagnostic Decision-Making Under Limited Context\\[0.3em]
 
 \section{Introduction}
 This project develops a practical, reproducible framework for fairness-aware contextual
-bandits to support sequential decision-making under uncertainty,
+multi-armed bandits (CMAB/iCMAB) to support sequential decision-making under uncertainty,
 limited context, and non-stationarity while treating algorithmic fairness as a
 first-class objective. The same framework is instantiated in two domains---clinical
 diagnostic-like decision workflows and quantum-network routing---by evaluating a shared
@@ -273,7 +273,7 @@ will be added in the shared evaluation framework.
 	    };
 		    \node[block, below=0.05cm of net, font=\scriptsize, fill=algorange!10, draw=algorange] (algo) {
 		      \textbf{Algorithms:}
-		      Contextual (LinUCB-style)
+		      Contextual (CMAB/iCMAB)
 		      Adversarial (EXP3-family)
 		      Hybrid pursuit--neural variants
 		      Structure: EXP3 group + neural/pursuit-based arm selection

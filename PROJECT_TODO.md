@@ -115,3 +115,4 @@ Tracking fields:
 - 2026-02-28: Proposal (`proposal.tex`): updated the title wording from “Under Missing Context” to “Under Limited Context” to match the paper-wide terminology.
 - 2026-02-28: Proposal (`proposal.tex`): kept “Bandits” (instead of “MABs”) in the title since it does not affect layout length and reads naturally.
 - 2026-02-28: Survey (`main.tex`): updated the title to “Fair Contextual Bandits … Under Limited Context” (no “Missing”), and removed the “(CMAB/iCMAB)” parenthetical (replaced with plain “bandits” / “LinUCB-style” where needed).
+- 2026-02-28: Survey (`main.tex`): restored “(CMAB/iCMAB)” where it clarifies the referenced contextual bandit family (removed the unintended “LinUCB-style” specificity from the framework diagram).
