@@ -88,3 +88,4 @@ Tracking fields:
 - 2026-02-23: Title formatting: added a small subtitle “(Related Work Survey)” on its own line under the main title.
 - 2026-02-27: Proposal (`proposal.tex`): updated the author name to “Piter Z. Garcia”, updated the program line to “MS Data Science / Decision-Making \& Algorithmic Fairness”, and standardized the two self-cite reference author names to “Garcia, P. Z.”.
 - 2026-02-28: Proposal (`proposal.tex`): standardized the acronym formatting to “iCMABs/CMABs” and added a short, positive-only “diagnostic-like” definition immediately after the i/ii/iii deliverables block (keeps the deliverables list easy to scan while still defining the term early).
+- 2026-02-28: Proposal (`proposal.tex`): made the quantum fairness metric explicit in Background by defining service equity as group disparities in routing success probability and latency across flow groups.
