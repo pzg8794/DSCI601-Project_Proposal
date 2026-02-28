@@ -113,3 +113,4 @@ Tracking fields:
 - 2026-02-28: Survey (`main.tex`): terminology consistency pass (minimal): replaced “missing/partial/missing/incomplete/unevenly measured” phrasing with “limited context” and “measurement noise”, and updated “missing-context” to “limited-context” (no other rewording).
 - 2026-02-28: Proposal (`proposal.tex`): restored “Diagnostic Decision-Making” in the title while keeping “MABs” (reverts an unintended shortening of the title wording).
 - 2026-02-28: Proposal (`proposal.tex`): updated the title wording from “Under Missing Context” to “Under Limited Context” to match the paper-wide terminology.
+- 2026-02-28: Proposal (`proposal.tex`): kept “Bandits” (instead of “MABs”) in the title since it does not affect layout length and reads naturally.
