@@ -103,3 +103,4 @@ Tracking fields:
 - 2026-02-28: Proposal (`proposal.tex`): terminology consistency pass (minimal): updated the diagnostic-like definition to use “limited context” (instead of “missing context”) to match the paper-wide framing.
 - 2026-02-28: Proposal (`proposal.tex`): adjusted the title layout by breaking before “Under Missing Context” to improve readability and alignment.
 - 2026-02-28: Proposal (`proposal.tex`): updated the title to a shorter, one-line form (“Fair Contextual MABs for Equitable Diagnostics Under Missing Context”) to improve scanability while keeping the same project framing.
+- 2026-02-28: Proposal (`proposal.tex`): added a second-line subtitle “(Research Proposal)” under the title for quick document-type clarity.
