@@ -86,3 +86,4 @@ Tracking fields:
 - 2026-02-23: Survey figure: changed logging phrasing to “captures full layered run state” and aligned caption/paragraph to “logged run state” (enables downstream utility/fairness analysis); Background domain grounding now explicitly states the quantum fairness metric as group disparity in success probability/latency across flow groups.
 - 2026-02-23: References: updated the two self-cite BibTeX author fields to “Garcia, Piter Z.” to match the author block and in-text “Garcia~\cite{...}” mentions.
 - 2026-02-23: Title formatting: added a small subtitle “(Related Work Survey)” on its own line under the main title.
+- 2026-02-27: Proposal (`proposal.tex`): updated the author name to “Piter Z. Garcia”, updated the program line to “MS Data Science / Decision-Making \& Algorithmic Fairness”, and standardized the two self-cite reference author names to “Garcia, P. Z.”.
