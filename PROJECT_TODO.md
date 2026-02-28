@@ -106,3 +106,4 @@ Tracking fields:
 - 2026-02-28: Proposal (`proposal.tex`): added a second-line subtitle “(Research Proposal)” under the title for quick document-type clarity.
 - 2026-02-28: Proposal (`proposal.tex`): changed the subtitle styling from bold to italic to match the intended visual hierarchy.
 - 2026-02-28: Proposal (`proposal.tex`): prevented “Fairness” from wrapping to its own line in the author affiliation by using a non-breaking space in “Algorithmic~Fairness”.
+- 2026-02-28: Proposal (`proposal.tex`): ensured the program line stays on a single line by wrapping it in `\mbox{}` and slightly reducing its font size (prevents “Fairness” from wrapping in the narrow minipage).
