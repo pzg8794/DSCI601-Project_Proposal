@@ -122,16 +122,16 @@ More broadly, the project contributes a reusable evaluation framework for compar
 
 
 \paragraph{Approach:} \hspace{-5mm}
-The goal is to implement and evaluate fairness-aware contextual MAB policies in two domains across two testbeds (diagnostic-like sequential decision simulation + quantum-network routing simulator), and to report utility--fairness tradeoffs under shift. The work is structured to be feasible without sensitive clinical data access (simulation-first), while remaining extensible to approved open datasets. The tasks are:
+The goal is to implement and evaluate fairness-aware bandit methods across two testbeds: a simulation-first clinical diagnostic decision environment and a quantum-network routing simulator. The comparison is organized as a spectrum from non-contextual to contextual to informative contextual bandit methods, with the aim of measuring utility--fairness tradeoffs under limited context, missing information, and distribution shift. The work is structured to remain feasible without sensitive clinical data access while still being extensible to approved open datasets. The tasks are:
 \begin{itemize}
-\item {\bf Build diagnostic testbed:} implement a sequential decision simulation (test/model choice, retesting, pipeline choice) with distribution shift and controllable limited context and measurement noise.
-\item {\bf Build quantum testbed:} integrate policies into the quantum-network routing simulator; define flow/node groups and track service equity across groups.
-\item {\bf Implement bandit policies:} non-contextual baselines (epsilon-greedy, UCB, Thompson), a contextual baseline (LinUCB-style), and one informed contextual (iCMAB-style) policy under a shared interface.
-\item {\bf Define reward + metrics:} utility with explicit cost/latency and safety weighting; report regret/utility plus time-evolving fairness metrics (diagnostics: group-wise FNR/FPR gaps; quantum routing: service-equity gaps in success probability and latency).
-\item {\bf Add fairness mitigation:} implement one fairness-aware mechanism (constraint/penalty or calibration) and quantify utility--fairness tradeoffs across both testbeds.
-\item {\bf Package for reproducibility:} modular scripts, fixed seeds + configs, and sanity checks for simulations and metric computation.
+\item {\bf Build clinical testbed:} implement a sequential decision simulation for diagnostic test choice, follow-up escalation, retesting, and model or pipeline selection under controllable missing context, measurement noise, and distribution shift.
+\item {\bf Build quantum testbed:} integrate the same bandit decision framework into the quantum-network routing simulator; define flow or user groups and track service equity across groups.
+\item {\bf Implement bandit methods:} compare non-contextual baselines (epsilon-greedy, UCB, Thompson), a contextual baseline (LinUCB-style), and an informative contextual bandit policy under a shared interface.
+\item {\bf Define reward + metrics:} track utility with explicit cost, latency, and safety weighting; report regret/utility together with time-evolving fairness metrics (clinical: group-wise FNR/FPR gaps or delayed-escalation disparities; quantum: service-equity gaps in success probability and latency).
+\item {\bf Add fairness mitigation:} implement at least one fairness-aware mechanism (constraint, penalty, calibration, or context-aware adjustment) and quantify the resulting utility--fairness tradeoffs across both testbeds.
+\item {\bf Package for reproducibility:} develop modular scripts, fixed seeds and configs, and sanity checks for simulations and metric computation.
 \end{itemize}
-Phase 1 establishes baseline performance and group disparities under controlled limited context and measurement noise, evaluates an initial mitigation mechanism, and produces an initial demo; Phase 2 tests robustness under distribution shift and finalizes packaging for the final report/demo.
+Phase 1 establishes baseline performance and baseline unfairness under controlled missing context and measurement noise, evaluates an initial mitigation mechanism, and produces an initial demo. Phase 2 tests robustness under distribution shift and finalizes packaging for the final report and demo.
 
 
 \paragraph{References:} \hspace{-5mm}

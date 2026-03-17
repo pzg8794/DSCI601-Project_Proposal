@@ -292,3 +292,41 @@ Why this change was made:
 - keeps both domains visible while emphasizing practical/public consequences
 - reframes fairness as a design principle rather than a post-hoc evaluation step
 - preserves the reusable-evaluation-framework contribution without dropping into implementation detail
+
+### Item 6. Approach
+
+Status:
+- approved and applied
+
+Before:
+
+```text
+The goal is to implement and evaluate fairness-aware contextual MAB policies in two domains across two testbeds (diagnostic-like sequential decision simulation + quantum-network routing simulator), and to report utility--fairness tradeoffs under shift. The work is structured to be feasible without sensitive clinical data access (simulation-first), while remaining extensible to approved open datasets. The tasks are:
+- Build diagnostic testbed
+- Build quantum testbed
+- Implement bandit policies
+- Define reward + metrics
+- Add fairness mitigation
+- Package for reproducibility
+Phase 1 establishes baseline performance and group disparities under controlled limited context and measurement noise, evaluates an initial mitigation mechanism, and produces an initial demo; Phase 2 tests robustness under distribution shift and finalizes packaging for the final report/demo.
+```
+
+After:
+
+```text
+The goal is to implement and evaluate fairness-aware bandit methods across two testbeds: a simulation-first clinical diagnostic decision environment and a quantum-network routing simulator. The comparison is organized as a spectrum from non-contextual to contextual to informative contextual bandit methods, with the aim of measuring utility--fairness tradeoffs under limited context, missing information, and distribution shift. The work is structured to remain feasible without sensitive clinical data access while still being extensible to approved open datasets. The tasks are:
+- Build clinical testbed
+- Build quantum testbed
+- Implement bandit methods
+- Define reward + metrics
+- Add fairness mitigation
+- Package for reproducibility
+Phase 1 establishes baseline performance and baseline unfairness under controlled missing context and measurement noise, evaluates an initial mitigation mechanism, and produces an initial demo. Phase 2 tests robustness under distribution shift and finalizes packaging for the final report and demo.
+```
+
+Why this change was made:
+- makes the method spectrum explicit in the approach section, as requested in transcript feedback
+- replaces stale `diagnostic-like` framing with clearer clinical wording
+- keeps the clinical and quantum testbeds parallel and easier to understand
+- adds baseline unfairness language explicitly
+- preserves the original task structure while aligning it to the revised project framing
