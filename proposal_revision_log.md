@@ -231,3 +231,39 @@ Why this change was made:
 - removes `Under Limited Context`, which no longer reflects the preferred framing
 - makes both domains explicit
 - reflects the intended method spectrum discussed in transcript feedback
+
+### Item 2. Opening summary paragraph
+
+Status:
+- approved and applied
+
+Before:
+
+```text
+This project will develop a practical, reproducible framework for contextual multi-armed bandits (iCMABs/CMABs) to support sequential decision-making under uncertainty, limited context, and non-stationarity while treating algorithmic fairness as a first-class objective.
+The work on this generic framework focuses on measuring and improving fairness across the clinical (diagnostic-like) and quantum-network routing domains through the following deliverables:
+i) a simulation-first diagnostic-like sequential decision environment with controllable limited context, measurement noise, and distribution shift,
+ii) a fairness-aware contextual MAB evaluation stack (baselines + contextual policies) with time-evolving group disparity reporting and at least one mitigation mechanism,
+and iii) a transfer study demonstrating the same policy stack in a quantum-network routing simulator.
+
+Here, ``diagnostic-like'' refers to clinical diagnostic sequential decision workflows such as diagnostic test selection, triage or follow-up escalation, and model/pipeline selection under partial feedback and non-stationarity. It also includes cases where key diagnostic components (tests, instruments, or patient information) are unavailable or delayed due to resource constraints or allocation policies, creating group-dependent limited context.
+
+Mitigation mechanisms considered include fairness-regularized policy updates (constraints/penalties), group-aware calibration or thresholding, and missingness-aware context augmentation (e.g., feature acquisition or imputation policies).
+```
+
+After:
+
+```text
+This project develops a practical, reproducible framework for fairness-aware sequential decision-making in two target settings: clinical diagnostic workflows and quantum-network routing. The methodological focus is a spectrum of bandit methods ranging from non-contextual to contextual to informative contextual bandits, designed to study how different levels of available context affect fairness, equity, and performance under uncertainty, non-stationarity, and resource constraints.
+
+On the clinical side, the project focuses on sequential workflows such as diagnostic test selection, triage, follow-up escalation, and model or pipeline choice when patient context may be incomplete, delayed, noisy, or unevenly available across groups. On the quantum side, the project focuses on routing and allocation decisions under probabilistic link success, scarce resources, and time-varying congestion, where service-equity gaps can emerge across flow or user groups.
+
+The initial deliverables are: i) a simulation-first clinical decision environment with controllable missing context, measurement noise, and distribution shift; ii) a shared evaluation stack for non-contextual, contextual, and informative bandit policies with time-evolving disparity reporting, baseline unfairness assessment, and at least one mitigation mechanism; and iii) a quantum-routing implementation of the same decision-making framework to study fairness, robustness, and cross-domain transfer. Mitigation mechanisms considered include fairness-regularized policy updates, group-aware calibration or thresholding, and missingness-aware context augmentation.
+```
+
+Why this change was made:
+- replaces the ambiguous `diagnostic-like` framing with clearer clinical language
+- makes the method spectrum explicit in the way discussed in transcript feedback
+- removes stale `generic framework` and `transfer study` language from the opening
+- strengthens the fairness/equity/performance framing at the top of the proposal
+- signals baseline unfairness assessment rather than only post-mitigation reporting
