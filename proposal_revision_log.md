@@ -267,3 +267,28 @@ Why this change was made:
 - removes stale `generic framework` and `transfer study` language from the opening
 - strengthens the fairness/equity/performance framing at the top of the proposal
 - signals baseline unfairness assessment rather than only post-mitigation reporting
+
+### Item 5. Broader Impacts
+
+Status:
+- approved and applied
+
+Before:
+
+```text
+If successful, this work provides a concrete, reproducible framework for fairness-aware contextual sequential decision systems in both clinical diagnostics and quantum-network routing. In the clinical diagnostic domain (diagnostic-like test/model/retesting selection, including COVID-style test allocation), the framework supports measuring and mitigating disparities that can arise when resources and context quality differ across patient groups. In quantum-network routing, it advances trustworthy routing by adding explicit service-equity monitoring and disparity-aware constraints to online routing policies under probabilistic link success, time-varying congestion, and scarce quantum resources across user/flow groups. The result is a reusable evaluation harness (two testbeds + shared policy API) for benchmarking fairness-aware contextual MAB policies, while reporting and mitigating fairness disparities over time rather than only post-hoc.
+```
+
+After:
+
+```text
+If successful, this project provides a concrete and reproducible way to study fairness-aware sequential decision-making in settings where limited context, scarce resources, and shifting conditions can produce unequal outcomes. In clinical diagnostic workflows, the work supports measuring and mitigating disparities that arise when some patient groups receive weaker context, delayed information, or lower-quality decision support. In quantum-network routing, it supports more trustworthy resource allocation by making service-equity gaps visible and testable rather than leaving them hidden inside aggregate routing performance.
+
+More broadly, the project contributes a reusable evaluation framework for comparing bandit methods under fairness, equity, and performance objectives across more than one domain. That matters not only for this proposal's two testbeds, but also for the larger principle behind the work: fairness should be treated as part of the design and evaluation of sequential decision systems, not as a post-hoc audit added after optimization is already complete.
+```
+
+Why this change was made:
+- makes the section read like broader impacts rather than a second technical summary
+- keeps both domains visible while emphasizing practical/public consequences
+- reframes fairness as a design principle rather than a post-hoc evaluation step
+- preserves the reusable-evaluation-framework contribution without dropping into implementation detail
