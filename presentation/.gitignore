@@ -4,3 +4,5 @@
 *.out
 *.snm
 *.toc
+!DSCI601_Project_Proposal_Presentation_2026_beamer.pdf
+!proposal_framework_figure.pdf
