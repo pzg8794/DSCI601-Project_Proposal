@@ -4,6 +4,7 @@
 \usecolortheme{default}
 \setbeamertemplate{navigation symbols}{}
 \setbeamertemplate{footline}[frame number]
+\setbeamertemplate{blocks}[rounded][shadow=false]
 
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
@@ -15,25 +16,35 @@
 \usepackage{tikz}
 \usetikzlibrary{positioning}
 
-\definecolor{DeepNavy}{RGB}{27,42,73}
-\definecolor{TealAccent}{RGB}{34,139,154}
-\definecolor{FairOrange}{RGB}{217,125,49}
-\definecolor{ContextTeal}{RGB}{52,152,219}
-\definecolor{SeqPurple}{RGB}{112,48,160}
-\definecolor{ClinicalGreen}{RGB}{86,155,64}
-\definecolor{SoftGray}{RGB}{92,92,92}
-\definecolor{RiskRed}{RGB}{192,80,77}
-\definecolor{PaleGray}{RGB}{246,248,251}
+\definecolor{DeepNavy}{RGB}{11,26,51}
+\definecolor{TealAccent}{RGB}{0,201,167}
+\definecolor{FairOrange}{RGB}{245,166,35}
+\definecolor{ContextTeal}{RGB}{52,190,255}
+\definecolor{SeqPurple}{RGB}{126,87,194}
+\definecolor{ClinicalGreen}{RGB}{45,176,150}
+\definecolor{SoftGray}{RGB}{86,100,126}
+\definecolor{RiskRed}{RGB}{214,74,74}
+\definecolor{PaleGray}{RGB}{244,248,252}
+\definecolor{SoftInk}{RGB}{33,42,62}
+\definecolor{HeaderLine}{RGB}{115,232,255}
 
-\setbeamercolor{title}{fg=DeepNavy}
-\setbeamercolor{frametitle}{fg=DeepNavy}
-\setbeamercolor{normal text}{fg=black,bg=white}
+\setbeamercolor{title}{fg=white}
+\setbeamercolor{subtitle}{fg=PaleGray}
+\setbeamercolor{titlelike}{fg=white,bg=DeepNavy}
+\setbeamercolor{frametitle}{fg=white,bg=DeepNavy}
+\setbeamercolor{normal text}{fg=SoftInk,bg=white}
 \setbeamercolor{block title}{fg=white,bg=DeepNavy}
-\setbeamercolor{block body}{fg=black,bg=PaleGray}
+\setbeamercolor{block body}{fg=SoftInk,bg=PaleGray}
 \setbeamercolor{itemize item}{fg=DeepNavy}
 \setbeamercolor{itemize subitem}{fg=DeepNavy}
+\setbeamercolor{structure}{fg=TealAccent}
+\setbeamercolor{palette primary}{fg=white,bg=DeepNavy}
+\setbeamercolor{palette secondary}{fg=white,bg=SeqPurple}
+\setbeamercolor{palette tertiary}{fg=white,bg=DeepNavy}
+\setbeamercolor{footline}{fg=SoftInk,bg=PaleGray}
 
 \setbeamerfont{title}{series=\bfseries,size=\Large}
+\setbeamerfont{subtitle}{series=\mdseries,size=\large}
 \setbeamerfont{frametitle}{series=\bfseries,size=\large}
 \setbeamerfont{block title}{series=\bfseries}
 
@@ -47,31 +58,47 @@
   \begin{tikzpicture}
     \node[
       rounded corners=10pt,
-      fill=#1!18,
-      draw=#1!70!black,
+      fill=#1!14,
+      draw=#1!80!black,
       text width=0.92\linewidth,
-      minimum height=1.6cm,
+      minimum height=1.35cm,
       align=center,
-      inner sep=7pt
+      inner sep=5pt
     ] {
-      {\bfseries\color{DeepNavy} #2}\\[3pt]
-      \color{SoftGray} #3
+      {\bfseries\small\color{DeepNavy} #2}\\[2pt]
+      {\footnotesize\color{SoftGray} #3}
     };
   \end{tikzpicture}
 }
 
 \begin{document}
 
-\begin{frame}
-  \titlepage
-  \vspace{0.2em}
+\begin{frame}[plain]
+  \begin{beamercolorbox}[wd=\paperwidth,ht=3.15cm,dp=0ex,leftskip=0.8cm,rightskip=0.8cm]{titlelike}
+    \vspace{0.35cm}
+    {\centering\fontsize{17}{20}\selectfont\bfseries
+    \parbox{0.94\paperwidth}{\centering Fairness-Aware Decision-Making in Quantum Routing and Clinical Settings}\par}
+    \vspace{0.18cm}
+    {\centering\usebeamerfont{subtitle}
+    via Multi-Armed, Contextual, and Informative Bandit Methods\par}
+    \vspace{0.18cm}
+    {\color{HeaderLine}\rule{0.58\paperwidth}{1.4pt}}
+  \end{beamercolorbox}
+  \vspace{0.45cm}
+  {\centering\large\color{DeepNavy} Piter Z. Garcia Bautista\par}
+  \vspace{0.18cm}
+  {\centering\small\color{SoftInk} MS Data Science / Decision-Making \& Algorithmic Fairness, RIT\par}
+  {\centering\small\color{SoftGray} Advisors: Dr. Daniel Krutz, Travis Desell\par}
+  \vspace{0.28cm}
+  {\centering\normalsize\color{DeepNavy} DSCI 601 \textbullet\ Applied Data Science I \textbullet\ Spring 2026\par}
+  \vspace{0.35cm}
   \begin{columns}[T,onlytextwidth]
     \column{0.32\textwidth}
-      \pillbox{FairOrange}{Fairness}{Track outcome gaps over time, not only average performance.}
+      \pillbox{FairOrange}{Fairness}{Track outcome gaps over time, not just average utility.}
     \column{0.32\textwidth}
-      \pillbox{ContextTeal}{Context Quality}{Study missing, delayed, noisy, or unevenly available context.}
+      \pillbox{ContextTeal}{Context Quality}{Study missing, delayed, noisy, and uneven context.}
     \column{0.32\textwidth}
-      \pillbox{SeqPurple}{Sequential Decisions}{Model workflows where each choice affects what comes next.}
+      \pillbox{SeqPurple}{Sequential Decisions}{Model workflows where each choice shapes the next step.}
   \end{columns}
 \end{frame}
 
