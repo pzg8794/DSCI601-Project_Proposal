@@ -133,22 +133,22 @@
       \textbf{Routing:} success and latency gaps across user or flow groups.
     \end{block}
     \begin{block}{Why bandits?}
-      Bandits model \textbf{partial feedback}: you only observe the outcome of the action you chose.
+      Multi-armed bandits model \textbf{partial feedback}: you only observe the outcome of the action you chose.
     \end{block}
 \end{columns}
 
 \refs{Fairness targets: Hardt et al. (equality of opportunity); Joseph et al. (fair bandits).}
 \end{frame}
 
-\begin{frame}{Background: Bandit Learning and Two Testbeds}
+\begin{frame}{Background: Sequential Decision-Making Under Partial Feedback}
 \small
 \textcolor{TealAccent}{The project studies how different levels of decision context affect fairness, equity, and performance over time.}
 
 \vspace{0.35em}
 \begin{columns}[T,onlytextwidth]
   \column{0.31\textwidth}
-    \begin{block}{Non-contextual bandits}
-      Use reward history alone.\\[0.2em]
+    \begin{block}{Non-contextual multi-armed bandits}
+      Choose among actions using reward history alone.\\[0.2em]
       \textcolor{SoftGray}{Examples: $\epsilon$-greedy, UCB, Thompson sampling.}
     \end{block}
   \column{0.31\textwidth}
@@ -157,7 +157,7 @@
       \textcolor{SoftGray}{Example: LinUCB-style policies.}
     \end{block}
   \column{0.31\textwidth}
-    \begin{block}{Informative context}
+    \begin{block}{Informative / restricted context}
       Use richer or selectively acquired context.\\[0.2em]
       \textcolor{SoftGray}{Useful when context quality is itself uneven.}
     \end{block}
@@ -368,9 +368,9 @@ Same evaluation harness across domains: configure $\rightarrow$ testbed $\righta
 \end{block}
 \end{frame}
 
-\begin{frame}{Approach for the Next Two Semesters}
+\begin{frame}{Approach Across the Next Two Semesters}
 \small
-\textcolor{TealAccent}{This slide satisfies the assignment requirement for the next two semesters.}
+\textcolor{TealAccent}{Implementation proceeds in two stages: foundation first, then robustness and cross-domain transfer.}
 
 \vspace{0.35em}
 \begin{columns}[T,onlytextwidth]
