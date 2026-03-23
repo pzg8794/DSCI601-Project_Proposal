@@ -14,7 +14,8 @@
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{positioning}
+\usetikzlibrary{positioning,arrows.meta,calc}
+\usepackage{amsmath,amssymb}
 
 \definecolor{DeepNavy}{RGB}{11,26,51}
 \definecolor{TealAccent}{RGB}{0,201,167}
@@ -48,11 +49,11 @@
 \setbeamerfont{frametitle}{series=\bfseries,size=\large}
 \setbeamerfont{block title}{series=\bfseries}
 
-\title{Fairness-Aware Decision-Making in Quantum Routing and Clinical Settings}
-\subtitle{via Multi-Armed, Contextual, and Informative Bandit Methods}
+\title{Fairness-Aware Sequential Decision-Making}
+\subtitle{Limited Context, Bandit Learning, and Two Testbeds (Clinical + Quantum Routing)}
 \author{Piter Z. Garcia Bautista}
 \institute{MS Data Science / Decision-Making \& Algorithmic Fairness, RIT\\Advisors: Dr. Daniel Krutz, Travis Desell}
-\date{DSCI 601 • Applied Data Science I • Spring 2026}
+\date{DSCI 601 \textbullet\ Applied Data Science I \textbullet\ Spring 2026}
 
 \newcommand{\pillbox}[3]{%
   \begin{tikzpicture}
@@ -61,7 +62,7 @@
       fill=#1!14,
       draw=#1!80!black,
       text width=0.92\linewidth,
-      minimum height=1.35cm,
+      minimum height=1.25cm,
       align=center,
       inner sep=5pt
     ] {
@@ -71,286 +72,353 @@
   \end{tikzpicture}
 }
 
+\newcommand{\refs}[1]{%
+  \vspace{0.15em}
+  \begin{flushright}
+    \scriptsize\color{SoftGray}{#1}
+  \end{flushright}
+}
+
 \begin{document}
 
 \begin{frame}[plain]
   \begin{beamercolorbox}[wd=\paperwidth,ht=3.15cm,dp=0ex,leftskip=0.8cm,rightskip=0.8cm]{titlelike}
     \vspace{0.35cm}
-    {\centering\fontsize{17}{20}\selectfont\bfseries
-    \parbox{0.94\paperwidth}{\centering Fairness-Aware Decision-Making in Quantum Routing and Clinical Settings}\par}
-    \vspace{0.18cm}
+    {\centering\fontsize{18}{21}\selectfont\bfseries
+    \parbox{0.94\paperwidth}{\centering Fairness-Aware Sequential Decision-Making}\par}
+    \vspace{0.15cm}
     {\centering\usebeamerfont{subtitle}
-    via Multi-Armed, Contextual, and Informative Bandit Methods\par}
+    Limited Context, Bandit Learning, and Two Testbeds (Clinical + Quantum Routing)\par}
     \vspace{0.18cm}
-    {\color{HeaderLine}\rule{0.58\paperwidth}{1.4pt}}
+    {\color{HeaderLine}\rule{0.62\paperwidth}{1.4pt}}
   \end{beamercolorbox}
+
   \vspace{0.45cm}
   {\centering\large\color{DeepNavy} Piter Z. Garcia Bautista\par}
-  \vspace{0.18cm}
+  \vspace{0.15cm}
   {\centering\small\color{SoftInk} MS Data Science / Decision-Making \& Algorithmic Fairness, RIT\par}
   {\centering\small\color{SoftGray} Advisors: Dr. Daniel Krutz, Travis Desell\par}
-  \vspace{0.28cm}
+  \vspace{0.25cm}
   {\centering\normalsize\color{DeepNavy} DSCI 601 \textbullet\ Applied Data Science I \textbullet\ Spring 2026\par}
-  \vspace{0.35cm}
+
+  \vspace{0.3cm}
   \begin{columns}[T,onlytextwidth]
-    \column{0.32\textwidth}
-      \pillbox{FairOrange}{Fairness}{Track outcome gaps over time, not just average utility.}
-    \column{0.32\textwidth}
-      \pillbox{ContextTeal}{Context Quality}{Study missing, delayed, noisy, and uneven context.}
-    \column{0.32\textwidth}
-      \pillbox{SeqPurple}{Sequential Decisions}{Model workflows where each choice shapes the next step.}
+    \column{0.33\textwidth}
+      \pillbox{FairOrange}{Fairness}{Track outcome gaps over time, not just averages.}
+    \column{0.33\textwidth}
+      \pillbox{ContextTeal}{Context Quality}{Missing, noisy, or delayed context can drive unfairness.}
+    \column{0.33\textwidth}
+      \pillbox{SeqPurple}{Sequential Effects}{Each decision shapes later evidence and outcomes.}
   \end{columns}
 \end{frame}
 
-\begin{frame}{Why This Problem Matters}
-  \small
-  \textcolor{TealAccent}{Uneven context can create unequal outcomes long before a model looks ``wrong.''}
-  \vspace{0.4em}
-  \begin{columns}[T,onlytextwidth]
-    \column{0.62\textwidth}
+\begin{frame}{Motivation}
+\small
+\textcolor{TealAccent}{Key claim: unequal measurement can create unequal decisions before a model ever looks biased.}
+
+\vspace{0.45em}
+\begin{columns}[T,onlytextwidth]
+  \column{0.60\textwidth}
+    \begin{block}{Two domains, same structure}
       \begin{itemize}
-        \item Many real systems make repeated decisions under uncertainty: which test to order, whether to escalate care, or how to route scarce resources.
-        \item Some groups systematically receive weaker, delayed, or noisier context than others.
-        \item If we optimize only aggregate utility, subgroup failures can remain hidden.
-        \item The project asks how fairness, context quality, and sequential decision-making interact over time.
+        \item \textbf{Clinical:} choose tests or escalation steps under partial feedback.
+        \item \textbf{Quantum routing:} choose paths and allocate scarce resources while network conditions shift.
+        \item In both settings, some groups may systematically receive weaker, delayed, or noisier context.
+        \item If we optimize only aggregate reward, subgroup failures can remain hidden.
       \end{itemize}
-    \column{0.36\textwidth}
-      \begin{block}{Observed in practice}
-        Partial feedback and resource constraints.
-      \end{block}
-      \begin{block}{Risk}
-        Aggregate metrics can hide false-negative or service gaps.
-      \end{block}
-      \begin{block}{Goal}
-        Make fairness visible during learning, not only after it.
-      \end{block}
-  \end{columns}
+    \end{block}
+  \column{0.38\textwidth}
+    \begin{block}{Fairness examples}
+      \textbf{Clinical:} FNR/FPR gaps, delayed escalation.\\[0.3em]
+      \textbf{Routing:} success and latency gaps across user or flow groups.
+    \end{block}
+    \begin{block}{Why bandits?}
+      Bandits model \textbf{partial feedback}: you only observe the outcome of the action you chose.
+    \end{block}
+\end{columns}
+
+\refs{Fairness targets: Hardt et al. (equality of opportunity); Joseph et al. (fair bandits).}
 \end{frame}
 
-\begin{frame}{Background: Sequential Decisions and Bandit Methods}
-  \small
-  \textcolor{TealAccent}{Decision context changes what the system knows before each action.}
-  \vspace{0.5em}
-  \begin{columns}[T,onlytextwidth]
-    \column{0.32\textwidth}
-      \begin{block}{Non-contextual bandits}
-        Choose actions from reward history alone.\\[0.2em]
-        \textcolor{SoftGray}{Examples: $\epsilon$-greedy, UCB, Thompson sampling.}
-      \end{block}
-    \column{0.32\textwidth}
-      \begin{block}{Contextual bandits}
-        Use current features before acting.\\[0.2em]
-        \textcolor{SoftGray}{Example: LinUCB-style policies.}
-      \end{block}
-    \column{0.32\textwidth}
-      \begin{block}{Informative contextual bandits}
-        Use richer or selectively acquired context.\\[0.2em]
-        \textcolor{SoftGray}{Useful when context quality is uneven.}
-      \end{block}
-  \end{columns}
-  \vspace{0.3em}
-  \begin{itemize}
-    \item All three settings still face partial feedback: you only observe the outcome of the action you chose.
-    \item The project compares these methods as a spectrum rather than assuming more context is always enough to solve fairness.
-  \end{itemize}
-\end{frame}
+\begin{frame}{Background: Bandit Learning and Two Testbeds}
+\small
+\textcolor{TealAccent}{The project studies how different levels of decision context affect fairness, equity, and performance over time.}
 
-\begin{frame}{Background: Two Target Domains}
-  \small
-  \textcolor{TealAccent}{Clinical diagnostics and quantum routing look different, but both are sequential decision systems under constrained information.}
-  \vspace{0.5em}
-  \begin{columns}[T,onlytextwidth]
-    \column{0.49\textwidth}
-      \begin{block}{Clinical diagnostic workflows}
-        \begin{itemize}
-          \item Decisions: test selection, follow-up escalation, model or pipeline choice.
-          \item Context may be incomplete, delayed, noisy, or uneven across groups.
-          \item Fairness concern: subgroup error gaps, delayed care, weaker support.
-        \end{itemize}
-      \end{block}
-    \column{0.49\textwidth}
-      \begin{block}{Quantum routing and resource allocation}
-        \begin{itemize}
-          \item Decisions: path selection and scarce-resource allocation under uncertain link success.
-          \item Context may be partial or stale as congestion and threat conditions change.
-          \item Fairness concern: service-equity gaps in success, latency, or access.
-        \end{itemize}
-      \end{block}
-  \end{columns}
-  \vspace{0.2em}
-  \centering
-  \textcolor{DeepNavy}{Common structure: limited context + partial feedback + non-stationarity + fairness/utility tradeoffs}
+\vspace{0.35em}
+\begin{columns}[T,onlytextwidth]
+  \column{0.31\textwidth}
+    \begin{block}{Non-contextual bandits}
+      Use reward history alone.\\[0.2em]
+      \textcolor{SoftGray}{Examples: $\epsilon$-greedy, UCB, Thompson sampling.}
+    \end{block}
+  \column{0.31\textwidth}
+    \begin{block}{Contextual bandits}
+      Use current features before acting.\\[0.2em]
+      \textcolor{SoftGray}{Example: LinUCB-style policies.}
+    \end{block}
+  \column{0.31\textwidth}
+    \begin{block}{Informative context}
+      Use richer or selectively acquired context.\\[0.2em]
+      \textcolor{SoftGray}{Useful when context quality is itself uneven.}
+    \end{block}
+\end{columns}
+
+\vspace{0.35em}
+\begin{columns}[T,onlytextwidth]
+  \column{0.49\textwidth}
+    \begin{block}{Clinical diagnostic workflows}
+      Decisions: test selection, follow-up escalation, or model/pipeline choice.\\[0.2em]
+      \textcolor{SoftGray}{Fairness concern: subgroup error gaps and delayed care.}
+    \end{block}
+  \column{0.49\textwidth}
+    \begin{block}{Quantum routing and resource allocation}
+      Decisions: path selection and scarce-resource allocation under uncertain link success.\\[0.2em]
+      \textcolor{SoftGray}{Fairness concern: service-equity gaps in success, latency, or access.}
+    \end{block}
+\end{columns}
+
+\refs{Bandit foundations: Auer et al., Li et al.; domain framing from the revised proposal and survey.}
 \end{frame}
 
 \begin{frame}{Related Work Overview}
-  \scriptsize
-  \textcolor{TealAccent}{The survey organizes prior work by the decision problem it helps clarify for this project.}
-  \vspace{0.5em}
-  \begin{tabular}{>{\RaggedRight\arraybackslash}p{0.16\linewidth} >{\RaggedRight\arraybackslash}p{0.24\linewidth} >{\RaggedRight\arraybackslash}p{0.27\linewidth} >{\RaggedRight\arraybackslash}p{0.27\linewidth}}
-    \toprule
-    \textbf{Subtopic} & \textbf{Representative works} & \textbf{What they contribute} & \textbf{What remains open} \\
-    \midrule
-    Bandit foundations & UCB, Thompson sampling, LinUCB & Core online decision-making and regret baselines & Do not directly address fairness or uneven context quality \\
-    \addlinespace[0.2em]
-    Limited context and shift & Restricted-context and unobserved-context bandits; non-stationary bandits & Show how policies behave when context is missing or environments drift & Mostly optimize utility, not subgroup disparities over time \\
-    \addlinespace[0.2em]
-    Fairness in sequential learning & Equality of opportunity, fair bandits, fair RL, offline fairness & Define fairness targets and constraints for learning systems & Often focus on simplified group notions rather than outcome gaps \\
-    \addlinespace[0.2em]
-    Domain testbeds & EQUITAS; threat-aware quantum routing & Provide fairness auditing and domain-realistic quantum routing & Need a shared fairness-aware framework across both domains \\
-    \bottomrule
-  \end{tabular}
+\scriptsize
+\textcolor{TealAccent}{The survey organizes prior work by the technical role each subtopic plays in the project.}
+
+\vspace{0.35em}
+\begin{tabular}{>{\RaggedRight\arraybackslash}p{0.16\linewidth} >{\RaggedRight\arraybackslash}p{0.24\linewidth} >{\RaggedRight\arraybackslash}p{0.27\linewidth} >{\RaggedRight\arraybackslash}p{0.27\linewidth}}
+  \toprule
+  \textbf{Subtopic} & \textbf{Representative works} & \textbf{What they contribute} & \textbf{What remains open} \\
+  \midrule
+  Bandit foundations & UCB, Thompson sampling, LinUCB & Core online decision-making and regret baselines & Do not directly address fairness or uneven context quality \\
+  \addlinespace[0.2em]
+  Limited context and shift & Restricted-context, unobserved-context, non-stationary bandits & Show how policies behave when context is missing or environments drift & Mostly optimize utility, not subgroup disparities over time \\
+  \addlinespace[0.2em]
+  Fairness in sequential learning & Equality of opportunity, fair bandits, fair RL, offline fairness & Define fairness targets and constraints for learning systems & Often focus on simplified group notions rather than outcome gaps \\
+  \addlinespace[0.2em]
+  Domain testbeds & EQUITAS; threat-aware quantum routing & Provide fairness auditing and domain-realistic quantum routing & Need a shared fairness-aware framework across both domains \\
+  \bottomrule
+\end{tabular}
+
+\refs{Survey anchor: DSCI 601 related-work survey and proposal bibliography.}
 \end{frame}
 
 \begin{frame}{Related Work: Bandits, Limited Context, and Shift}
-  \small
-  \textcolor{TealAccent}{These works explain how online decision policies learn, and where they struggle when context is incomplete or environments change.}
-  \vspace{0.5em}
-  \begin{columns}[T,onlytextwidth]
-    \column{0.32\textwidth}
-      \begin{block}{Bandit foundations}
-        UCB and Thompson sampling establish strong online-learning baselines.\\[0.2em]
-        \textcolor{SoftGray}{LinUCB shows how context can improve decisions.}
-      \end{block}
-    \column{0.32\textwidth}
-      \begin{block}{Limited context}
-        Restricted or unobserved-context work motivates settings where information is uneven or delayed.\\[0.2em]
-        \textcolor{SoftGray}{Important for both diagnostics and routing.}
-      \end{block}
-    \column{0.32\textwidth}
-      \begin{block}{Key limitation}
-        Most of this literature optimizes utility under uncertainty.\\[0.2em]
-        \textcolor{SoftGray}{Fairness is usually not tracked as the policy learns.}
-      \end{block}
-  \end{columns}
+\small
+\textcolor{TealAccent}{These works explain how policies learn online, and why limited context plus shift is the right stress test here.}
+
+\vspace{0.35em}
+\begin{columns}[T,onlytextwidth]
+  \column{0.32\textwidth}
+    \begin{block}{What the work does}
+      UCB, Thompson sampling, and LinUCB establish the main non-contextual and contextual learning baselines.
+    \end{block}
+  \column{0.32\textwidth}
+    \begin{block}{Why it matters here}
+      Restricted-context, unobserved-context, and non-stationary bandits motivate uneven information, missingness, and drift in both domains.
+    \end{block}
+  \column{0.32\textwidth}
+    \begin{block}{What remains open}
+      Most of this literature still optimizes utility, not time-evolving disparity or worst-group outcomes.
+    \end{block}
+\end{columns}
+
+\refs{Auer et al.; Li et al.; Besbes et al.; Garivier \& Moulines; restricted-context bandit literature.}
 \end{frame}
 
 \begin{frame}{Related Work: Fairness in Sequential Learning}
-  \small
-  \textcolor{TealAccent}{Fairness work gives the project its measurement targets, but not yet the full two-domain framework.}
-  \vspace{0.5em}
-  \begin{columns}[T,onlytextwidth]
-    \column{0.32\textwidth}
-      \begin{block}{Error-based fairness}
-        Equality of opportunity and clinical-bias work motivate outcome-based disparities such as FNR/FPR gaps.\\[0.2em]
-        \textcolor{SoftGray}{This is critical for high-stakes settings.}
-      \end{block}
-    \column{0.32\textwidth}
-      \begin{block}{Fair bandits and RL}
-        Fair bandits and fair RL show that fairness constraints change what can be learned efficiently.\\[0.2em]
-        \textcolor{SoftGray}{They make fairness part of the policy update loop.}
-      \end{block}
-    \column{0.32\textwidth}
-      \begin{block}{What still lacks}
-        Many methods use simplified group or action-parity notions of fairness.\\[0.2em]
-        \textcolor{SoftGray}{Fewer works track outcome-based disparities under shift over time.}
-      \end{block}
-  \end{columns}
+\small
+\textcolor{TealAccent}{Fairness work gives the measurement targets and mitigation logic, but not yet the full cross-domain framework.}
+
+\vspace{0.35em}
+\begin{columns}[T,onlytextwidth]
+  \column{0.32\textwidth}
+    \begin{block}{What the work does}
+      Equality of opportunity, clinical bias work, fair bandits, and fair RL define fairness targets and constraints for learning systems.
+    \end{block}
+  \column{0.32\textwidth}
+    \begin{block}{Why it matters here}
+      These papers justify tracking FNR/FPR gaps, delayed escalation gaps, and service-equity gaps during learning rather than only after deployment.
+    \end{block}
+  \column{0.32\textwidth}
+    \begin{block}{What remains open}
+      Fewer works study outcome-based disparity curves under distribution shift and differing context quality across groups.
+    \end{block}
+\end{columns}
+
+\refs{Hardt et al.; Joseph et al.; Chen et al.; broader fair RL and clinical-bias literature.}
 \end{frame}
 
 \begin{frame}{Related Work: Domain Testbeds}
-  \small
-  \textcolor{TealAccent}{The project is grounded in one fairness-oriented diagnostic line of work and one quantum routing line of work.}
-  \vspace{0.5em}
-  \begin{columns}[T,onlytextwidth]
-    \column{0.49\textwidth}
-      \begin{block}{EQUITAS / equitable bioinformatics}
-        \begin{itemize}
-          \item Gives the project a fairness-audit and mitigation perspective in diagnostic-relevant settings.
-          \item Shows why predictive performance and fairness should be evaluated together.
-          \item Limitation: primarily offline/static rather than online sequential decision-making.
-        \end{itemize}
-      \end{block}
-    \column{0.49\textwidth}
-      \begin{block}{Threat-aware quantum routing}
-        \begin{itemize}
-          \item Provides a realistic routing testbed with uncertainty, resource scarcity, and adversarial conditions.
-          \item Shows bandit-style methods can work in quantum networking.
-          \item Limitation: robustness is central, but explicit service-equity tracking is not yet the focus.
-        \end{itemize}
-      \end{block}
-  \end{columns}
+\small
+\textcolor{TealAccent}{The project is grounded in one fairness-oriented diagnostic line of work and one quantum routing line of work.}
+
+\vspace{0.35em}
+\begin{columns}[T,onlytextwidth]
+  \column{0.49\textwidth}
+    \begin{block}{EQUITAS / equitable bioinformatics}
+      \begin{itemize}
+        \item Gives the project a fairness-audit and mitigation perspective in diagnostic-relevant settings.
+        \item Shows why predictive performance and fairness should be evaluated together.
+        \item Limitation: primarily offline/static rather than online sequential decision-making.
+      \end{itemize}
+    \end{block}
+  \column{0.49\textwidth}
+    \begin{block}{Threat-aware quantum routing}
+      \begin{itemize}
+        \item Provides a realistic routing testbed with uncertainty, resource scarcity, and adversarial conditions.
+        \item Shows bandit-style methods can work in quantum networking.
+        \item Limitation: robustness is central, but explicit service-equity tracking is not yet the focus.
+      \end{itemize}
+    \end{block}
+\end{columns}
+
+\refs{EQUITAS paper; threat-aware quantum routing paper; network context from Wehner, Pant, and Caleffi.}
 \end{frame}
 
 \begin{frame}{Proposed Project: Core Research Question}
-  \small
-  \textcolor{TealAccent}{How does the amount and quality of decision context change fairness, equity, and performance under shift?}
-  \vspace{0.5em}
-  \begin{itemize}
-    \item Compare non-contextual, contextual, and informative contextual bandit methods in two domains.
-    \item Measure when additional context reduces disparity, when it only shifts who benefits, and when fairness-aware mitigation is still required.
-    \item Test whether the same fairness-aware decision principles remain meaningful across clinical and quantum settings.
-  \end{itemize}
-  \vspace{0.4em}
-  \begin{columns}[T,onlytextwidth]
-    \column{0.48\textwidth}
-      \begin{block}{Clinical setting}
-        Outcome-based fairness: subgroup error gaps, delayed escalation, unequal support.
-      \end{block}
-    \column{0.48\textwidth}
-      \begin{block}{Quantum setting}
-        Service equity: success, latency, and access gaps under scarce resources.
-      \end{block}
-  \end{columns}
+\small
+\textcolor{TealAccent}{Goal: learn a policy that is high utility and low disparity under missing context and shift.}
+
+\vspace{0.3em}
+\begin{block}{Compressed formal problem}
+At round $t$, observe group $g_t \in \mathcal{G}$ and degraded context $\tilde{x}_t$, choose action $a_t \in \{1,\dots,K\}$, and observe only the reward of the chosen action.
+\[
+\tilde{x}_t = M_t(g_t)\odot x_t
+\]
+where $M_t(g_t)$ models group-dependent missingness or noise.
+\end{block}
+
+\vspace{0.25em}
+\begin{columns}[T,onlytextwidth]
+  \column{0.49\textwidth}
+    \begin{block}{Utility objective}
+      Maximize expected reward or minimize regret under partial feedback.
+    \end{block}
+  \column{0.49\textwidth}
+    \begin{block}{Fairness monitoring}
+      Track time-evolving disparity windows, e.g. equality-of-opportunity gaps or service-equity gaps.
+    \end{block}
+\end{columns}
+
+\refs{Li et al.; Hardt et al.; Besbes et al.; Garivier \& Moulines.}
+\end{frame}
+
+\begin{frame}{Proposed Project: Two Testbeds to Build}
+\scriptsize
+\textcolor{TealAccent}{One simulation-first clinical environment plus one quantum routing environment with the same evaluation logic.}
+
+\vspace{0.2em}
+\begin{columns}[T,onlytextwidth]
+  \column{0.54\textwidth}
+    \begin{block}{Clinical testbed}
+      \begin{itemize}
+        \item State: patient context plus a missingness mask.
+        \item Actions: next test, model, or escalation step.
+        \item Metrics: utility, delay cost, and group disparity curves.
+      \end{itemize}
+    \end{block}
+    \begin{block}{Quantum testbed}
+      \begin{itemize}
+        \item Paths or path-groups act like arms under uncertain link success.
+        \item Regimes include stochastic and adaptive threat conditions.
+        \item Metrics: success, latency, and access gaps across groups.
+      \end{itemize}
+    \end{block}
+  \column{0.42\textwidth}
+    \centering
+    \begin{tikzpicture}[
+      node/.style={circle, draw=DeepNavy, fill=ContextTeal!10, minimum size=7mm, inner sep=0pt},
+      edge/.style={-Stealth, line width=0.9pt, draw=DeepNavy},
+      lab/.style={font=\scriptsize, color=SoftGray}
+    ]
+      \node[node] (n1) {1};
+      \node[node, right=1.8cm of n1] (n2) {2};
+      \node[node, below=1.3cm of n1] (n3) {3};
+      \node[node, below=1.3cm of n2] (n4) {4};
+      \draw[edge] (n1) -- (n2);
+      \draw[edge] (n1) -- (n3);
+      \draw[edge] (n2) -- (n4);
+      \draw[edge] (n3) -- (n4);
+      \node[lab, above=0.15cm of n1] {Src};
+      \node[lab, right=0.15cm of n4] {Dst};
+      \node[lab, right=0.2cm of n2] {$0.95$ per hop};
+    \end{tikzpicture}
+
+    \vspace{0.2em}
+    \begin{block}{Toy routing intuition}
+      2-hop success: $0.95^2 = 0.9025$\\
+      3-hop success: $0.95^3 \approx 0.8574$
+    \end{block}
+\end{columns}
+
+\refs{Quantum scaffold from Paper2 / \texttt{quantum\_project}; clinical simulation-first design from the revised proposal.}
 \end{frame}
 
 \begin{frame}{Proposed Project: Shared Evaluation Framework}
-  \small
-  \textcolor{TealAccent}{How the project moves from setup to cross-domain findings.}
-  \vspace{0.35em}
-  \centering
-  \includegraphics[width=0.97\linewidth]{proposal_framework_figure.pdf}
-  \vspace{0.35em}
+\small
+\textcolor{TealAccent}{One evaluation logic across both domains: configure, run policies, log outcomes, and measure fairness over time.}
 
-  \begin{block}{Why this matters}
-    Same evaluation logic across both domains: configure $\rightarrow$ testbeds $\rightarrow$ methods $\rightarrow$ metrics $\rightarrow$ mitigation and findings.
-  \end{block}
+\vspace{0.1em}
+\centering
+\includegraphics[width=0.94\linewidth]{proposal_framework_figure.pdf}
+
+\vspace{0.1em}
+\begin{block}{Why this is the contribution}
+Same evaluation harness across domains: configure $\rightarrow$ testbed $\rightarrow$ policy $\rightarrow$ metrics $\rightarrow$ mitigation and findings.
+\end{block}
 \end{frame}
 
 \begin{frame}{Approach for the Next Two Semesters}
-  \small
-  \textcolor{TealAccent}{This is the implementation path for DSCI 601 and DSCI 602.}
-  \vspace{0.5em}
-  \begin{columns}[T,onlytextwidth]
-    \column{0.49\textwidth}
-      \begin{block}{DSCI 601: foundation}
-        \begin{itemize}
-          \item Build the clinical decision environment.
-          \item Implement non-contextual and contextual baselines.
-          \item Define utility and time-evolving fairness metrics.
-          \item Add an initial mitigation mechanism and baseline-unfairness analysis.
-        \end{itemize}
-      \end{block}
-    \column{0.49\textwidth}
-      \begin{block}{DSCI 602: robustness and transfer}
-        \begin{itemize}
-          \item Integrate the quantum routing environment.
-          \item Extend to informative contextual methods.
-          \item Test robustness under distribution shift and adversarial conditions.
-          \item Package code, evaluate transfer, and finalize the report/demo.
-        \end{itemize}
-      \end{block}
-  \end{columns}
-  \vspace{0.2em}
-  \centering
-  \scriptsize \textcolor{SoftGray}{Tools and workflow: Python, pandas/scikit-learn-style workflows, reproducible experiments, Colab/local/GCP, and simulation-first evaluation.}
+\small
+\textcolor{TealAccent}{This slide satisfies the assignment requirement for the next two semesters.}
+
+\vspace{0.35em}
+\begin{columns}[T,onlytextwidth]
+  \column{0.49\textwidth}
+    \begin{block}{DSCI 601}
+      \begin{itemize}
+        \item Build the clinical simulation-first environment.
+        \item Implement non-contextual and contextual baselines.
+        \item Define utility and time-evolving fairness metrics.
+        \item Add one mitigation mechanism and an initial missingness ablation.
+      \end{itemize}
+    \end{block}
+  \column{0.49\textwidth}
+    \begin{block}{DSCI 602}
+      \begin{itemize}
+        \item Integrate the quantum routing environment.
+        \item Extend to informative or restricted-context methods.
+        \item Stress-test under shift and adversarial conditions.
+        \item Package the codebase and finalize cross-domain evaluation.
+      \end{itemize}
+    \end{block}
+\end{columns}
+
+\refs{Implementation plan aligned with the revised proposal and current GA research direction.}
 \end{frame}
 
-\begin{frame}{Expected Contribution}
-  \small
-  \textcolor{TealAccent}{The goal is not just a model, but a reusable fairness-aware decision framework.}
-  \vspace{0.5em}
-  \begin{itemize}
-    \item A shared evaluation framework for fairness-aware sequential decision-making across two structurally similar but technically different domains.
-    \item Evidence for when better context improves fairness and when explicit mitigation is still necessary.
-    \item A clearer path from fairness-aware research toward reproducible implementation in future dissertation work.
-  \end{itemize}
-  \vspace{0.5em}
-  \begin{block}{Takeaway}
-    Fairness should be part of how sequential decision systems are designed and evaluated, not something added only after optimization is complete.
-  \end{block}
-  \vspace{0.2em}
-  \centering
-  \textcolor{DeepNavy}{Questions? \textbullet\ pizg8794@g.rit.edu}
+\begin{frame}{Takeaway}
+\small
+\textcolor{TealAccent}{The goal is not just a model, but a reusable fairness-aware decision framework.}
+
+\vspace{0.3em}
+\begin{block}{Main message}
+Context is not just ``more features.'' It is a resource whose unequal quality can create persistent outcome gaps unless fairness is monitored and mitigated during learning.
+\end{block}
+
+\vspace{0.25em}
+\begin{itemize}
+  \item Shared framework across two structurally similar but technically different domains.
+  \item Evidence for when better context reduces disparity and when explicit mitigation is still required.
+  \item A practical bridge from course project to dissertation-scale research.
+\end{itemize}
+
+\vspace{0.3em}
+\begin{block}{Questions?}
+  \textcolor{DeepNavy}{pizg8794@g.rit.edu}
+\end{block}
+
+\refs{Core references: Auer, Li, Hardt, Joseph, Chen, and the two domain anchor papers.}
 \end{frame}
 
 \end{document}
