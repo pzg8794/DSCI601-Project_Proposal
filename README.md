@@ -8,6 +8,7 @@ testbeds.
 
 - `proposal.tex`: current project proposal source
 - `survey-related-work.tex`: related-work survey aligned to the current proposal framing
+- `ethics_fairness_report/ethics_fairness_report.tex`: one-page DSCI601 ethics/fairness report
 - `presentation/DSCI601_Project_Proposal_Presentation_2026_beamer.tex`: Beamer deck source
 - `presentation/presentation_revision_log.md`: presentation rationale, slide decisions, and
   rubric mapping
@@ -26,6 +27,11 @@ Survey:
 1. `pdflatex survey-related-work.tex`
 2. run `pdflatex survey-related-work.tex` again if needed
 
+Ethics and Fairness Report:
+
+1. `cd ethics_fairness_report`
+2. `latexmk -xelatex ethics_fairness_report.tex`
+
 Presentation:
 
 1. `cd presentation`
@@ -38,3 +44,5 @@ Presentation:
   while still reading like a research talk rather than a class artifact.
 - Slide-level rationale and the decision history for the presentation live in
   `presentation/presentation_revision_log.md`.
+- The ethics/fairness report is mirrored here as a course-deliverable copy; the longer
+  drafting lineage and foundation archive remain in the public `IDAI700` repo.
