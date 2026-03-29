@@ -289,18 +289,18 @@ unequal \Ctx{measurement} produces unequal \Fair{decisions} before any model “
 
 \vspace{0.25em}
 \begin{columns}[T,onlytextwidth]
-  \column{0.33\textwidth}
-    \begin{cblock}{SeqPurple}{MAB (non-contextual)}
+  \column{0.29\textwidth}
+    \begin{cblock}{SeqPurple}{MAB (no context)}
       Choose using reward history.\\
       \textcolor{SoftGray}{UCB, Thompson, $\epsilon$-greedy.}
     \end{cblock}
-  \column{0.33\textwidth}
+  \column{0.30\textwidth}
     \begin{cblock}{ContextTeal}{CMAB (contextual)}
-      Observe features $x_t$ before acting.\\
-      \textcolor{SoftGray}{Example: LinUCB.}
+      Observe features $x_t$ before acting.
+      \textcolor{SoftGray}{e.g.:LinUCB.}
     \end{cblock}
-  \column{0.33\textwidth}
-    \begin{cblock}{ContextTeal}{iCMAB / restricted context}
+  \column{0.37\textwidth}
+    \begin{cblock}{ContextTeal}{iCMAB/restricted context}
       Decide what context to acquire when context is costly/uneven.
     \end{cblock}
 \end{columns}
