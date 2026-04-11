@@ -49,35 +49,32 @@ RIT Research Advisors\\
 \maketitle
 
 \section{Approach Overview}
-This approach writeup is designed as a direct methodological companion to the related-work
-survey for the same project. The survey establishes the literature foundation, domain
-motivation, and research gap; this document turns that framing into an explicit design for a
-shared, reproducible evaluation framework. In both documents, the project is defined as
-fairness-aware sequential decision-making across two target settings: clinical diagnostic
-workflows and quantum-network routing/resource allocation. The unifying claim is that both
-settings involve repeated decisions under uncertainty, partial feedback, uneven context
-quality, and group-dependent risk of disparate outcomes.
+This work addresses fairness-aware sequential decision-making across two
+technically distinct but structurally analogous domains: clinical diagnostic
+workflows and quantum-network routing and resource allocation. Both settings
+involve repeated decisions under uncertainty, partial observability, and
+group-dependent risk of disparate outcomes---conditions that motivate a
+unified evaluation framework rather than two independent application studies.
 
-The methodological focus is a spectrum of bandit methods ranging from non-contextual to
-contextual to informative contextual models. This spectrum matters because the project is
-not only asking which policy achieves the highest average utility, but whether richer context
-reduces subgroup disparities, merely shifts them, or still requires explicit fairness-aware
-mitigation. As in the survey, the clinical setting concerns sequential choices such as test
-selection, triage, and follow-up escalation when patient context can be incomplete, delayed,
-or noisier for some populations. Likewise, the quantum setting concerns routing and
-resource-allocation decisions under probabilistic link success, scarce entanglement
-resources, and changing network conditions, where service-equity gaps can emerge across
-flows or user groups.
+The methodological contribution is a shared, reproducible bandit-method
+evaluation framework spanning three levels of context richness: non-contextual
+multi-armed bandits (MABs), contextual multi-armed bandits (CMABs), and
+informative contextual multi-armed bandits (iCMABs). This spectrum is central
+to the research question: it is not assumed \textit{a priori} that richer
+context improves fairness outcomes. In settings where context quality is
+uneven across groups, increasing context may preserve or amplify disparities
+rather than reduce them. The framework is therefore designed to measure this
+effect explicitly across both domains under a common interaction model,
+fairness-logging pipeline, and comparison logic.
 
-Two prior works anchor these testbeds and connect this approach directly to the survey.
-First, equitable bioinformatics work provides a clinical fairness foundation and motivates
-the subgroup disparity metrics used in the clinical simulation
-\cite{garcia2025equitable_bioinformatics}. Second, threat-aware quantum routing work
-provides the domain-realistic routing and resource-allocation foundation used for the
-quantum testbed \cite{garcia2026threat_aware_quantum_routing}. The contribution is
-therefore not a loose pairing of two applications, but a shared decision framework that uses
-the same interaction logic, comparison spectrum, and fairness-reporting structure across
-both domains.
+Two prior works anchor the testbeds. Equitable bioinformatics work provides
+the clinical fairness foundation and subgroup disparity metrics
+\cite{garcia2025equitable_bioinformatics}, while threat-aware quantum
+routing work provides the domain-realistic routing and resource-allocation
+environment \cite{garcia2026threat_aware_quantum_routing}. The cross-domain
+structure is a deliberate research feature: it tests whether fairness-aware
+decision principles generalize across settings with different state spaces,
+reward structures, and operational fairness definitions.
 
 \section{Motivating Workflows}
 The survey introduces the two domains in parallel, and the approach follows that same
@@ -175,8 +172,8 @@ context is richer but still subject to noise, missingness, or non-uniform qualit
 This spectrum matters because the project is not committed in advance to the idea that more
 context is always better. In some cases, richer context may improve utility but preserve or
 even amplify disparities if the context itself is unevenly available across groups. The
-comparison is therefore central to the project’s scientific question and keeps the approach
-aligned with the survey’s treatment of fairness under limited and shifting information.
+comparison is therefore central to the project's scientific question and keeps the approach
+aligned with the survey's treatment of fairness under limited and shifting information.
 
 \subsection{Why this design is better than simpler alternatives}
 Several simpler alternatives would be easier to communicate, but they would weaken the
