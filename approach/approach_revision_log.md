@@ -38,3 +38,36 @@ proposal framing.
   `../transcripts/`.
 - This log is package-specific; proposal-wide revisions should continue to be tracked in
   `proposal/proposal_revision_log.md`.
+
+## 2026-04-10 (style sync pass)
+
+Reformatted and rewrote the approach draft so it reads like a companion document to the
+survey instead of an internal memo.
+
+### Scope
+
+- Converted the draft from an `article`-style note into the same IEEE-style document format
+  used by the survey.
+- Matched the survey title pattern, author block, package usage, and section-based
+  structure.
+- Rewrote the opening so the approach explicitly identifies itself as the survey's
+  methodological companion for the same paper/project.
+- Added a closing section that states how the survey and approach document fit together.
+- Tightened the wording so the clinical and quantum explanations parallel the survey's
+  language and priorities.
+
+### Why
+
+- The survey is currently the strongest writing artifact in the repo and should be the style
+  benchmark for proposal-facing materials.
+- The previous approach draft sounded more like a planning note than part of the same
+  paper, which weakened the perceived coherence of the project.
+- Matching the survey's formatting and rhetorical structure makes the approach package more
+  defensible as part of one unified research narrative.
+
+### Notes
+
+- This pass focused on style, structure, and cross-document coherence rather than changing
+  the underlying research claims.
+- The next polish step should be to mirror any future title or framing adjustments across the
+  survey, approach draft, and proposal text together.
