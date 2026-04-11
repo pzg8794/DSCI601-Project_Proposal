@@ -25,6 +25,7 @@ _minted*
 *.pdf
 !main.pdf
 !ethics_fairness_report/ethics_fairness_report.pdf
+!approach/draft/approach-writeup.pdf
 
 # OS/editor junk
 .DS_Store
