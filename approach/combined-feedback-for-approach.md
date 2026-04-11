@@ -6,8 +6,19 @@ Primary raw inputs:
 - `Semester5/DSCI601/transcripts/2026-03-04 Lecture_ Ethics_Fairness Report, Contextual Bandits in Clinical Workflows, and Capstone Guidance-transcript.txt`
 - `Semester5/DSCI601/transcripts/2026-03-23 Lecture_ Fairness-Aware Sequential Decision-Making-transcript.txt`
 
+Cleaned versions of these transcripts are available alongside the raw files with the `.cleaned.md` suffix.
+
+Additional transcripts referenced for structure, reproducibility, and “what good looks like” patterns:
+
+- `Semester5/DSCI601/transcripts/2026-03-18 Lecture_ Project Proposal Presentations, Reproducible Python Environments, and CI-Driven Code Review Practices-transcript.txt`
+- `Semester5/DSCI601/transcripts/2026-03-16 Class Meeting_ In-Class Code Review, Documentation Standards, CI_CD, and Testing (April 20)-transcript.txt`
+- `Semester5/DSCI601/transcripts/2026-03-25 Lecture_ Deep Learning for EEG, Predictive Maintenance DSL, and Adaptive GNNs-transcript.txt`
+- `Semester5/DSCI601/transcripts/2026-02-20 Lecture_ Graph Neural Networks Paper Structure, Depth–Scope Trade-off, and OGB Benchmarking-transcript.txt`
+- `Semester4/GA-Work/transcripts/2026-02-24 Publication-First Plan_ Manuscript, Testbed Results, and GRE-Focused PhD Prep (2026-02-24)-transcript.txt`
+
 Supporting synthesis aids:
 
+- `approach/approach-writing-brief.md`
 - `notes/02-20 ... Meeting Minutes.md`
 - `notes/02-20 ... Meeting Summary.md`
 - `notes/02-20 ... Summary.md`
@@ -37,6 +48,25 @@ The approach section has to repair that. It must show that the work is a single 
 - Partial feedback and distribution shift are part of the problem, not side conditions.
 - The method spectrum is necessary because the project studies how different levels of available context change fairness and utility.
 - The evaluation design is strong enough to show baseline unfairness before claiming any mitigation benefit.
+
+## Hard requirements checklist (Approach Writing Brief)
+
+This is the non-negotiable checklist that the approach writeup must satisfy.
+
+Required claims:
+
+- the contribution is a shared fairness-aware sequential decision framework (not “two applications”)
+- uneven context quality + shift are the core fairness drivers being studied
+- method family is a deliberate comparison spectrum: MAB → contextual → informative
+- fairness is measured during learning over time (not only post-hoc)
+- simulation-first clinical design is intentional and justified
+- quantum testbed is credible because it builds on existing routing/testbed work
+- the shared framework is better than simpler alternatives (single-domain, contextual-only, post-hoc audit)
+
+Required examples:
+
+- one concrete clinical workflow example (explicit sequential decision)
+- one concrete quantum routing/resource-allocation example (explicit sequential decision)
 
 ## What must come before the task list
 
@@ -110,9 +140,23 @@ The text must explain how these entities interact and why this architecture just
 - Use formal third-person voice.
 - Avoid class framing.
 - Avoid ambiguous terms such as plain `diagnostics`.
+- Include a compact “elevator speech” explanation before heavy jargon.
 - Do not assume the reader knows the prior coursework or internal acronyms.
 - Describe prior work explicitly instead of relying on shorthand.
 - Use a research-facing title and explicit references.
+
+## Reproducibility expectations (Implementation Plan support)
+
+The approach writeup should make the artifact sound reviewable and real by committing to:
+
+- explicit dependency management (pinned requirements / reproducible environment)
+- a “fresh clone → install → quick run” pathway
+- small/fast experiment configs (avoid requiring multi-hour runs to validate basics)
+- unit/integration tests that validate key claims:
+  - testbed stepping
+  - policy interface
+  - metric/fairness logging
+- optional but credibility-boosting: CI checks for lint/tests
 
 ## Top failure modes to avoid
 
