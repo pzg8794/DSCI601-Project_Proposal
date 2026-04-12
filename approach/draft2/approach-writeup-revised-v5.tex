@@ -17,15 +17,9 @@
 \definecolor{phase3orange}{RGB}{230,126,34}
 \definecolor{phase4purple}{RGB}{155,89,182}
 
-<<<<<<< HEAD
 \title{{\LARGE\textbf{Fairness-Aware Routing in Quantum Networks \& Clinical Settings}}\\
 {\Large\textit{via Multi-Armed, Contextual, and Informative Bandit Methods}}\\
 {\large\texttt{(Approach Writeup)}}}
-=======
-\title{Fairness-Aware Routing in Quantum Networks and Clinical Settings\\[0.3em]
-{\large\textit{via Multi-Armed, Contextual, and Informative Bandit Methods}}\\[0.3em]
-{\large\textit{(Approach Writeup)}}}
->>>>>>> c4bc989 (Update: remove approach-writeup-revised-v4 (1).tex, add revised-v4.tex, revised-v5.tex, and revised-v7.tex (repo sync))
 
 \author{%
 \begin{minipage}{0.48\textwidth}
@@ -59,7 +53,6 @@ RIT Research Advisors\\
 %% ─────────────────────────────────────────────────────────────
 
 Both quantum-network routing and clinical resource allocation are, at their
-<<<<<<< HEAD
 core, \textit{routing problems}---and both fail for the same reason:
 \textit{missing context}. In quantum networking, entanglement and qubit
 resources must be routed across competing flows under probabilistic link
@@ -70,7 +63,7 @@ uncertainty and partial information; tools calibrated on non-representative
 populations are blind to the context of those they exclude. In both cases,
 the groups whose context is missing absorb the worst outcomes---and the
 degradation is not merely an equity concern but a direct performance failure.
-This shared root cause makes the two domains analytically equivalent and
+This shared root cause makes the two domains structurally comparable and
 motivates a unified evaluation framework.
 
 The contribution is a reproducible bandit-method framework spanning three
@@ -80,35 +73,11 @@ is absent, partially available, or actively recovered. Two prior works anchor
 the testbeds: equitable bioinformatics work provides the clinical fairness
 foundation \cite{garcia2025equitable_bioinformatics}, and threat-aware
 quantum routing work provides the network environment
-\cite{garcia2026threat_aware_quantum_routing}. Quantum networking is a
-proven, emerging technology poised to transform communication and resource
-allocation; pairing it with clinical fairness through the structural bridge
-of missing-context routing positions this work at the intersection of present
-necessity and future breakthrough.
-=======
-core, \textit{routing problems}. In quantum networking, entanglement and
-qubit resources must be routed across competing flows under probabilistic
-link success and scarcity. In clinical settings, diagnostic and treatment
-resources must be routed among patients under uncertainty and partial context.
-In both cases, \textit{unfair routing is not merely an equity problem; it is
-a performance problem}: when a group of flows or patients is systematically
-deprioritized, the degradation in success probability, latency, or care
-quality is direct and measurable. This shared structure makes the two domains
-analytically equivalent and motivates a unified evaluation framework.
-
-The contribution is a reproducible bandit-method framework spanning three
-context-richness levels---non-contextual MABs, contextual CMABs, and
-informative iCMABs---applied under the same interaction model, fairness-
-logging pipeline, and comparison logic in both domains. Two prior works
-anchor the testbeds: equitable bioinformatics work provides the clinical
-fairness foundation \cite{garcia2025equitable_bioinformatics}, and
-threat-aware quantum routing work provides the network environment
-\cite{garcia2026threat_aware_quantum_routing}. Quantum networking is a
-proven, emerging technology poised to transform communication and resource
-allocation; pairing it with clinical fairness---connected through the
-structural bridge of routing---positions this work at the intersection of
-present human necessity and future breakthrough.
->>>>>>> c4bc989 (Update: remove approach-writeup-revised-v4 (1).tex, add revised-v4.tex, revised-v5.tex, and revised-v7.tex (repo sync))
+\cite{garcia2026threat_aware_quantum_routing}. Quantum networking is an
+emerging technology with growing practical relevance for communication and
+resource allocation; pairing it with clinical fairness through the structural
+bridge of missing-context routing positions this work at the intersection of
+present need and future-oriented system design.
 
 %% ─────────────────────────────────────────────────────────────
 \section{Motivating Workflows}
@@ -117,7 +86,6 @@ present human necessity and future breakthrough.
 \subsection{Clinical Routing Workflow}
 The clinical decision-maker routes resources---screens, confirmatory tests,
 escalation follow-ups---among patients under incomplete, delayed, or
-<<<<<<< HEAD
 group-unequal context. As demonstrated in the COVID-19 response, uneven
 routing context systematically under-resources certain subgroups, producing
 higher false-negative rates, delayed escalation, and inferior care. A
@@ -127,18 +95,10 @@ incomplete population, rendering certain groups---including Black and minority
 communities---structurally invisible to the instrument. The result is missing
 context at the point of decision, amplifying risk for the very groups already
 bearing the highest burden.
-=======
-group-unequal context. Uneven context quality causes the routing policy to
-systematically under-resource certain subgroups, producing higher
-false-negative rates or inferior downstream care. Clinical fairness is
-therefore treated as a time-evolving property of the routing process, not a
-static post-hoc audit.
->>>>>>> c4bc989 (Update: remove approach-writeup-revised-v4 (1).tex, add revised-v4.tex, revised-v5.tex, and revised-v7.tex (repo sync))
 
 \subsection{Quantum Routing Workflow}
 The quantum decision-maker routes entanglement by selecting paths and
 allocating scarce entanglement-generation attempts among competing flows
-<<<<<<< HEAD
 under noisy, stale, or partial context. Standard MABs ignore context
 entirely; CMABs use it but remain vulnerable to noise and missingness.
 Empirical testing reveals that iCMABs consistently outperform both---because
@@ -147,42 +107,30 @@ This is not a coincidence; it is the same structural problem. Missing context
 in the routing policy produces the same outcome as missing context in the
 clinical instrument: the groups whose information is least represented absorb
 the worst outcomes.
-=======
-under noisy, stale, or partial context. Unreliable routing context leads to
-consistent assignment of degraded paths or resources to certain flow groups,
-creating service-equity gaps in success probability, latency, and access.
-This makes quantum routing a genuine fairness domain, not merely a
-throughput benchmark.
->>>>>>> c4bc989 (Update: remove approach-writeup-revised-v4 (1).tex, add revised-v4.tex, revised-v5.tex, and revised-v7.tex (repo sync))
 
 %% ─────────────────────────────────────────────────────────────
 \section{Shared Domain Model}
 %% ─────────────────────────────────────────────────────────────
 
 The shared domain model (Figure~\ref{fig:domain_model}) organizes the
-<<<<<<< HEAD
 routing-decision process into four phases---
-=======
-routing-decision process into four color-coded phases---
->>>>>>> c4bc989 (Update: remove approach-writeup-revised-v4 (1).tex, add revised-v4.tex, revised-v5.tex, and revised-v7.tex (repo sync))
 \textcolor{phase1blue}{\textbf{Environment}} (blue),
 \textcolor{phase2green}{\textbf{Context Observation}} (green),
 \textcolor{phase3orange}{\textbf{Routing Decision}} (orange),
 \textcolor{phase4purple}{\textbf{Evaluation and Mitigation}} (purple)---
-<<<<<<< HEAD
 structurally identical across testbeds. Operational semantics differ:
 a routing action is a diagnostic decision in the clinical domain and a
 path-selection decision in the quantum domain; fairness is measured as
 outcome disparity across patient or network flow groups.
 
-The COVID-19 pandemic provides the clearest real-world instance of what
-this model is designed to study. Diagnostic tests---scarce, unevenly routed,
-and delayed---failed the communities bearing the highest risk, producing
-measurably worse infection, hospitalization, and mortality rates among Black,
-Latino, and other minority groups, confirming that unfair routing is a
-performance failure, not only an equity concern.
+The COVID-19 pandemic provides a clear real-world example of this model in
+practice. Diagnostic tests---scarce, unevenly routed, and delayed---failed
+the communities bearing the highest risk, producing measurably worse
+infection, hospitalization, and mortality rates among Black, Latino, and
+other minority groups. This confirms that unfair routing is a performance
+failure, not only an equity concern.
 
-What makes this framework a genuine breakthrough is that both domains share
+What unifies this framework at a deeper level is that both domains share
 not only the routing structure, but the root cause of failure: missing
 context. In clinical settings, excluded populations are invisible to the
 instrument. In quantum routing, iCMABs outperform MABs and CMABs not due to
@@ -192,31 +140,23 @@ properly captured. \textbf{Phase~2 is therefore not a passive observation
 step; it is where the root cause of routing unfairness lives}---and the
 primary phase this framework is designed to interrogate. Phase~4 then
 detects, logs, and mitigates the downstream consequences before they compound.
-=======
-that are structurally identical across both testbeds. Operational semantics
-differ: a routing action is a diagnostic decision in the clinical domain and
-a path-selection decision in the quantum domain; fairness is measured as
-outcome disparity across patient subgroups or network flow groups,
-respectively.
->>>>>>> c4bc989 (Update: remove approach-writeup-revised-v4 (1).tex, add revised-v4.tex, revised-v5.tex, and revised-v7.tex (repo sync))
 
 %% ─────────────────────────────────────────────────────────────
 \section{Design Rationale and Novelty}
 %% ─────────────────────────────────────────────────────────────
 
-<<<<<<< HEAD
-\subsection{The Approach and its Uniqueness}
-No prior work evaluates fairness-aware sequential routing under a unified
-bandit framework spanning clinical and quantum domains, and no prior work has
-identified missing context as the shared structural root cause of routing
-unfairness across both. Clinical bandit research optimizes treatment decisions
-without examining how missing population context degrades routing equity;
-quantum routing research maximizes throughput without connecting context
-missingness to service-equity disparities. Studying them together produces
-findings that improve today's clinical systems and inform fair routing in
-tomorrow's quantum-enabled infrastructures.
+\subsection{Why This Approach}
+To our knowledge, prior work has not evaluated fairness-aware sequential
+routing under a unified bandit framework spanning clinical and quantum
+domains, nor identified missing context as the shared structural root cause
+of routing unfairness across both. Clinical bandit research optimizes
+treatment decisions without examining how missing population context degrades
+routing equity; quantum routing research maximizes throughput without
+connecting context missingness to service-equity disparities. Studying them
+together produces findings that improve today's clinical systems and inform
+fair routing in tomorrow's quantum-enabled infrastructures.
 
-\subsection{The Approach and its Benefits}
+\subsection{Why This Approach Is Stronger Than Simpler Alternatives}
 Single-domain approaches cannot verify whether missing context drives routing
 unfairness structurally or only situationally; findings remain confined to
 one state space and one fairness definition. Post-hoc audits cannot capture
@@ -234,7 +174,7 @@ noise, and group-specific degradation without sensitive patient data.
 \textit{Existing quantum environment extended:} reusing a grounded,
 threat-aware routing environment preserves the domain-realistic missing-context
 conditions empirically observed in iCMAB performance. \textit{MAB / CMAB /
-iCMAB spectrum:} each directly operationalizes the core
+iCMAB spectrum:} each level directly operationalizes the core
 question---does recovering missing routing context reduce disparities, or are
 additional fairness mechanisms still required?
 
@@ -243,10 +183,11 @@ Each design decision corresponds to a deliberate choice about what a specific
 phase must do and why.
 
 \textbf{Phase~1 (Environment)} is shaped by the simulation-first clinical
-testbed and the quantum environment extension. The simulation introduces missing and group-unequal context as a controlled variable, making
-Phase~1 a research instrument rather than just a data source. The quantum
-extension means Phase~1 inherits domain-realistic conditions---link success
-rates, entanglement scarcity, threat signals---that reproduce the same
+testbed and the quantum environment extension. The simulation introduces
+missing and group-unequal context as a controlled variable, making Phase~1
+a research instrument rather than just a data source. The quantum extension
+means Phase~1 inherits domain-realistic conditions---link success rates,
+entanglement scarcity, threat signals---that reproduce the same
 missing-context failure mode without fabricating a testbed.
 
 \textbf{Phase~2 (Context Observation)} is shaped by the MAB/CMAB/iCMAB
@@ -269,61 +210,11 @@ trajectory, making it possible to pinpoint exactly when missing context
 causes disparities to emerge, persist, or resolve under mitigation. The
 domain model is the organizational structure that determined every design
 choice from Phase~1 through Phase~4.
-=======
-\subsection{Q1: Why this approach, and why has it not been done before?}
-No prior work evaluates fairness-aware sequential routing under a unified
-bandit framework spanning clinical and quantum domains. Clinical bandit
-research optimizes treatment decisions without modeling routing fairness
-across patient subgroups; quantum routing research maximizes throughput
-without examining service-equity disparities under partial context. The
-critical unaddressed gap is that routing unfairness and routing performance
-are inseparable in both domains. Studying them together under a shared
-framework---with quantum at the frontier of breakthrough technology and
-clinical settings at the frontier of human impact---produces findings that
-can improve today's clinical systems and inform the design of fair routing
-in tomorrow's quantum-enabled infrastructures.
-
-\subsection{Q2: Why is this approach better than others?}
-Single-domain approaches cannot test whether a fairness principle is
-structurally general or domain-specific; findings remain unverifiable across
-different state spaces, reward structures, and fairness definitions. Post-hoc
-fairness audits cannot capture how routing disparities compound over time
-under learning. This framework measures fairness at every step under the
-same partial-feedback conditions that make routing difficult in practice,
-enabling real-time detection, mitigation evaluation, and cross-domain
-comparison that no single-domain or post-hoc alternative can provide.
-
-\subsection{Q3: What design and implementation decisions were made, and why?}
-\textit{Bandits over full RL:} both domains provide only partial feedback
-(the outcome of the chosen route, not counterfactuals), making bandit methods
-the correct formulation. \textit{Simulation-first clinical testbed:} a
-simulation allows controlled, reproducible injection of missingness, noise,
-and group-specific context degradation without sensitive patient data.
-\textit{Existing quantum environment extended:} reusing a grounded,
-threat-aware quantum routing environment preserves domain realism and avoids
-fabricated-testbed credibility risk. \textit{MAB / CMAB / iCMAB spectrum:}
-the three levels directly operationalize the core question---whether richer
-routing context reduces disparities or amplifies them when context quality
-is uneven across groups.
-
-\subsection{Q4: How do these decisions connect to the domain model?}
-Each decision maps to a specific phase in Figure~\ref{fig:domain_model}.
-The bandit formulation is a \textbf{Phase~3} choice constrained by the
-partial-feedback structure of \textbf{Phase~4}. The clinical simulation and
-quantum environment extension are \textbf{Phase~1} choices that determine
-testbed inputs and conditions. The context spectrum is a \textbf{Phase~2}
-choice controlling what routing context is observable and how degraded it
-can be. The shared fairness-logging and mitigation loop is a
-\textbf{Phase~4} choice ensuring fairness is a per-step first-class output.
-The domain model is not a post-hoc diagram; it is the organizational
-structure that determined each design choice.
->>>>>>> c4bc989 (Update: remove approach-writeup-revised-v4 (1).tex, add revised-v4.tex, revised-v5.tex, and revised-v7.tex (repo sync))
 
 %% ─────────────────────────────────────────────────────────────
 \section{Implementation and Evaluation Plan}
 %% ─────────────────────────────────────────────────────────────
 
-<<<<<<< HEAD
 Both testbeds expose the same policy interface, so MAB, CMAB, and iCMAB
 methods are evaluated under a shared logging and analysis pipeline. The
 clinical simulation models test ordering, retesting, and escalation under
@@ -332,59 +223,30 @@ environment reproduces the domain-realistic context missingness that drives
 the empirically observed iCMAB advantage. The reward layer tracks accuracy,
 cost, success rate, and latency; the fairness layer tracks clinical
 false-negative and delayed-escalation gaps and quantum service-equity gaps
-across flow groups. Experiments use explicit configurations, fixed
-random seeds, and per-step metric logging; at least one fairness-aware
-mitigation mechanism is evaluated to enable policy comparison
-that ignore, partially use, or actively recover missing context.
-=======
-Both testbeds expose the same policy interface so that MAB, CMAB, and iCMAB
-methods are evaluated under a shared logging and analysis pipeline. The
-clinical simulation models test ordering, retesting, and escalation decisions
-under group-unequal context; the quantum environment models path selection
-and entanglement allocation under probabilistic link success and load. The
-reward layer tracks accuracy, cost, success rate, and latency; the fairness
-layer tracks clinical false-negative and delayed-escalation gaps and quantum
-service-equity gaps across flow groups. Experiments run from explicit
-configuration files with fixed random seeds and per-step metric logging,
-and at least one fairness-aware mitigation mechanism is evaluated within the
-same framework to enable direct comparison against baseline policies.
->>>>>>> c4bc989 (Update: remove approach-writeup-revised-v4 (1).tex, add revised-v4.tex, revised-v5.tex, and revised-v7.tex (repo sync))
+across flow groups. Experiments use explicit configurations, fixed random
+seeds, and per-step metric logging; at least one fairness-aware mitigation
+mechanism is evaluated to enable comparison among policies that ignore,
+partially use, or actively recover missing context.
 
 %% ─────────────────────────────────────────────────────────────
 \section{Research Contribution}
 %% ─────────────────────────────────────────────────────────────
 
-<<<<<<< HEAD
 This work makes three contributions. First, it identifies routing and missing
 context as the shared structural ground between clinical and quantum domains,
-and builds the first fairness-aware sequential decision framework evaluating
-both under identical conditions. Second, it provides the first systematic
+and constructs a unified fairness-aware sequential decision framework for
+evaluating both under identical conditions. Second, it provides a systematic
 MAB/CMAB/iCMAB comparison with respect to routing fairness, directly
 measuring how much disparity is explained by missing context and how much
 requires additional mitigation. Third, by connecting a domain of immediate
-human health impact to a proven breakthrough technology through their shared
+human health impact to an emerging technology through their shared
 missing-context failure mode, the findings serve both as an evaluation of
 current systems and a foundation for fair routing in next-generation
 quantum-enabled infrastructures.
 
 %% ─── Figure at end — does not count toward two-page limit ───
-% \clearpage
+\clearpage
 \begin{figure*}[!t]
-=======
-This work makes three contributions. First, it identifies routing as the
-structural common ground between clinical and quantum domains and builds the
-first fairness-aware sequential decision framework evaluating both under
-identical conditions. Second, it provides the first systematic MAB/CMAB/iCMAB
-comparison with respect to routing fairness, isolating whether richer context
-reduces or amplifies disparities when context quality is uneven. Third, by
-connecting a domain of immediate human health impact to a proven breakthrough
-technology through their shared routing structure, the findings serve both as
-an evaluation of current systems and as a foundation for fair routing in
-next-generation quantum-enabled infrastructures.
-
-%% ─── Figure at end — does not count toward two-page limit ───
-\begin{figure*}[!b]
->>>>>>> c4bc989 (Update: remove approach-writeup-revised-v4 (1).tex, add revised-v4.tex, revised-v5.tex, and revised-v7.tex (repo sync))
 \centering
 \resizebox{0.97\textwidth}{!}{%
 \begin{tikzpicture}[
@@ -417,7 +279,6 @@ next-generation quantum-enabled infrastructures.
 \draw[arr] (fb)--(log);   \draw[arr] (log)--(mit);
 
 \begin{pgfonlayer}{background}
-<<<<<<< HEAD
   % Full diagram height reference
   \node[inner sep=8pt,
         fit=(clin)(quant)(env)(ctx)(deg)(pol)(act)(fb)(log)(mit)] (all) {};
@@ -435,12 +296,6 @@ next-generation quantum-enabled infrastructures.
       (bg3.west |- all.north) rectangle (bg3.east |- all.south);
   \fill[phase4purple!15, rounded corners=6pt]
       (bg4.west |- all.north) rectangle (bg4.east |- all.south);
-=======
-  \node[fill=phase1blue!15,   rounded corners=6pt, inner sep=5pt, fit=(clin)(quant)(env)] (bg1) {};
-  \node[fill=phase2green!15,  rounded corners=6pt, inner sep=5pt, fit=(ctx)(deg)]         (bg2) {};
-  \node[fill=phase3orange!15, rounded corners=6pt, inner sep=5pt, fit=(pol)(act)]         (bg3) {};
-  \node[fill=phase4purple!15, rounded corners=6pt, inner sep=5pt, fit=(fb)(log)(mit)]     (bg4) {};
->>>>>>> c4bc989 (Update: remove approach-writeup-revised-v4 (1).tex, add revised-v4.tex, revised-v5.tex, and revised-v7.tex (repo sync))
 \end{pgfonlayer}
 
 \node[lbl, text=phase1blue,   below=0.15cm of bg1] {\textbf{Phase 1}\\Environment};
@@ -452,7 +307,6 @@ next-generation quantum-enabled infrastructures.
 \caption{%
   Shared domain model organized into four color-coded phases.
   \textcolor{phase1blue}{\textbf{Phase 1 (blue) --- Environment / Input:}}
-<<<<<<< HEAD
     Clinical and quantum routing workflows feed into a shared testbed interface,
     each with domain-realistic missing-context conditions.
   \textcolor{phase2green}{\textbf{Phase 2 (green) --- Context Observation:}}
@@ -467,23 +321,6 @@ next-generation quantum-enabled infrastructures.
 \label{fig:domain_model}
 \end{figure*}
 
-
-
-=======
-    Clinical and quantum routing workflows feed into a shared testbed interface.
-  \textcolor{phase2green}{\textbf{Phase 2 (green) --- Context Observation:}}
-    Available routing context is observed, subject to missingness, noise, or
-    delay---an explicit part of the research question, not an implementation detail.
-  \textcolor{phase3orange}{\textbf{Phase 3 (orange) --- Routing Decision:}}
-    A policy from the selected method family (MAB, CMAB, or iCMAB) selects a
-    routing action under the observed context.
-  \textcolor{phase4purple}{\textbf{Phase 4 (purple) --- Evaluation and Mitigation:}}
-    Partial feedback is returned; utility and fairness are logged per step;
-    baseline and fairness-aware mitigation policies are compared within the same loop.}
-\label{fig:domain_model}
-\end{figure*}
-
->>>>>>> c4bc989 (Update: remove approach-writeup-revised-v4 (1).tex, add revised-v4.tex, revised-v5.tex, and revised-v7.tex (repo sync))
 \begin{thebibliography}{9}\setlength{\itemsep}{0em}
 \bibitem{garcia2025equitable_bioinformatics}
 Garcia, P. Z. Equitable Bioinformatics: Enhancing Diagnostic
@@ -495,8 +332,4 @@ and Qubit Allocation via Hybrid Contextual Bandits. Unpublished
 manuscript, Rochester Institute of Technology, 2026.
 \end{thebibliography}
 
-<<<<<<< HEAD
 \end{document}
-=======
-\end{document}
->>>>>>> c4bc989 (Update: remove approach-writeup-revised-v4 (1).tex, add revised-v4.tex, revised-v5.tex, and revised-v7.tex (repo sync))
