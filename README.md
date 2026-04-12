@@ -12,28 +12,24 @@ and revision history together.
 - `survey/`
   Related-work survey materials aligned to the current proposal framing.
 - `approach/`
-  Standalone approach package used to isolate and iterate on the approach section before
-  merging it into the full proposal. Includes the writing brief, domain model plan,
-  feedback synthesis, revision log, and draft writeup/PDF.
+  Final approach writeup package for review (single source, PDF, and change log).
 - `presentation/`
-  Beamer deck source, compiled slides, figure assets, and presentation revision log.
+  Beamer deck source and compiled slides.
 - `ethics_fairness_report/`
   One-page DSCI601 ethics/fairness report and submission checklist.
-- `docs/`
-  Supporting reference documents and archived deep-research notes.
+
+Notes:
+- Working materials (drafts, notes, archived docs) are kept locally and are not tracked.
+- The repo root `main.tex` is set to compile the latest approach writeup for easy sharing.
 
 ## Primary Documents
 
 - `proposal/proposal.tex`: current project proposal source
-- `proposal/proposal_revision_log.md`: proposal revision history and source feedback synthesis
 - `survey/survey-related-work.tex`: related-work survey aligned to the current proposal framing
-- `survey/survey_revision_log.md`: survey sync history
-- `approach/draft/approach-writeup.tex`: standalone approach-section draft
-- `approach/approach_revision_log.md`: approach-package revision history and rationale
+- `approach/approach-writeup.tex`: final approach writeup source
+- `approach/CHANGES.md`: approach writeup change log
 - `ethics_fairness_report/ethics_fairness_report.tex`: one-page DSCI601 ethics/fairness report
 - `presentation/DSCI601_Project_Proposal_Presentation_2026_beamer.tex`: Beamer deck source
-- `presentation/presentation_revision_log.md`: presentation rationale, slide decisions, and
-  rubric mapping
 
 ## Compile
 
@@ -51,7 +47,7 @@ Survey:
 
 Approach package:
 
-1. `cd approach/draft`
+1. `cd approach`
 2. `pdflatex approach-writeup.tex`
 3. run `pdflatex approach-writeup.tex` again if needed for stable output
 
@@ -68,13 +64,7 @@ Presentation:
 
 ## Notes
 
-- The `approach/` directory is the active workspace for refining the shared methodology
-  before folding that language back into `proposal/proposal.tex`.
-- The approach package is intentionally paired with cleaned transcript companions stored in
-  the parent workspace under `../transcripts/`.
 - The presentation deck is designed to satisfy the DSCI 601 proposal-presentation rubric
   while still reading like a research talk rather than a class artifact.
-- Slide-level rationale and the decision history for the presentation live in
-  `presentation/presentation_revision_log.md`.
 - The ethics/fairness report is mirrored here as a course-deliverable copy; the longer
   drafting lineage and foundation archive remain in the public `IDAI700` repo.

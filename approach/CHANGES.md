@@ -5,14 +5,16 @@
 
 ---
 
-## File Index
+## File Index (Shareable)
 
 | File | Description |
 |---|---|
-| `approach-writeup-original.tex` | Pre-edit version — SHA faaf72235b055faa16e1e2981e81dd6e096d0cf7 |
-| `approach-writeup-revised.tex` | v1 — formal tone fix across all sections |
-| `approach-writeup-revised-v2.tex` | v2 — routing reframe + rubric alignment |
-| `approach-writeup-revised-v3.tex` | v3 — Q-labeled subsections + figure at end |
+| `approach-writeup.tex` | Current approach writeup source (v5) |
+| `approach-writeup.pdf` | Compiled PDF for review |
+| `CHANGES.md` | Revision history (this file) |
+
+Note: older intermediate drafts were used during editing but are kept local-only and are
+not tracked in the shareable repo view.
 
 ---
 
@@ -124,3 +126,18 @@ Subsection titles now carry explicit Q-prefixes for rubric traceability:
 | How decisions relate to domain model | Yes — Q4 in §4 |
 | Novelty claim | Yes — Q1, supported by literature gap |
 | Common ground coherent + defensible | Yes — routing as shared structure |
+
+---
+
+## v3 → v5: Formatting + Full-Width Domain Model (IEEE two-column)
+
+**Goal:** Improve readability and IEEE-style layout while keeping the writeup within the
+expected page constraints (excluding the diagram page).
+
+**Changes:**
+- Updated the author/title block so names and affiliations present cleanly in a two-column
+  layout.
+- Implemented a full-width `figure*` domain-model diagram and ensured stable placement on
+  its own page.
+- Tightened cross-references so the figure label (`fig:domain_model`) resolves correctly
+  after rebuild.

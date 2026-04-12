@@ -25,7 +25,30 @@ _minted*
 *.pdf
 !main.pdf
 !ethics_fairness_report/ethics_fairness_report.pdf
-!approach/draft/approach-writeup.pdf
+!approach/approach-writeup.pdf
+!proposal/proposal.pdf
+!presentation/DSCI601_Project_Proposal_Presentation_2026_beamer.pdf
+
+# Shareable-only repo view (keep working materials local)
+docs/
+notes/
+
+# Internal revision logs (keep local-only)
+proposal/proposal_revision_log.md
+survey/survey_revision_log.md
+presentation/presentation_revision_log.md
+
+# Presentation scratch assets (kept local-only)
+presentation/proposal_framework_figure.pdf
+presentation/proposal_framework_figure.tex
+
+# Approach working drafts (kept local; do not track)
+approach/draft/
+approach/draft2/
+
+# Approach internal notes (keep only the final deliverables)
+approach/*.md
+!approach/CHANGES.md
 
 # OS/editor junk
 .DS_Store

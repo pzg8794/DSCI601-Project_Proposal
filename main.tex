@@ -9,562 +9,420 @@
 \usepackage{microtype}
 \usepackage[table]{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta}
+\usetikzlibrary{positioning,arrows.meta,fit,backgrounds}
 \usepackage[hidelinks]{hyperref}
 
-\definecolor{networkblue}{RGB}{52,152,219}
-\definecolor{envgreen}{RGB}{46,204,113}
-\definecolor{algorange}{RGB}{230,126,34}
-\definecolor{allocpurple}{RGB}{155,89,182}
+\definecolor{phase1blue}{RGB}{52,152,219}
+\definecolor{phase2green}{RGB}{46,204,113}
+\definecolor{phase3orange}{RGB}{230,126,34}
+\definecolor{phase4purple}{RGB}{155,89,182}
 
-\title{Fairness-Aware Decision-Making in Quantum Routing and Clinical Settings\\[0.3em]
-{\large\textit{via Multi-Armed, Contextual, and Informative Bandit Methods}}\\[0.3em]
-{\large\textit{(Related Work Survey)}}}
+\title{{\LARGE\textbf{Fairness-Aware Routing in Quantum Networks \& Clinical Settings}}\\
+{\Large\textit{via Multi-Armed, Contextual, and Informative Bandit Methods}}\\
+{\large\texttt{(Approach Writeup)}}}
 
-\author{
-\IEEEauthorblockN{Piter Z. Garcia}
-\IEEEauthorblockA{MS Data Science / Decision-Making \& Algorithmic~Fairness\\Rochester Institute of Technology (RIT)\\pizg8794@g.rit.edu}
-\and
-\IEEEauthorblockN{Daniel Krutz, Travis Desell}
-\IEEEauthorblockA{Department of Software Engineering, Data Science\\RIT Research Advisors\\dxkvse@g.rit.edu, tjdvse@g.rit.edu}
+\author{%
+\begin{minipage}{0.48\textwidth}
+\begin{center}
+{\bf Piter Z. Garcia}\\
+\begin{small}
+MS Data Science / Decision-Making \& Algorithmic Fairness\\
+Rochester Institute of Technology (RIT)\\
+{\it pizg8794@g.rit.edu}
+\end{small}
+\end{center}
+\end{minipage}
+\hfill
+\begin{minipage}{0.48\textwidth}
+\begin{center}
+{\bf Dr. Daniel Krutz, Travis Desell}\\
+\begin{small}
+Department of Software Engineering, Data Science\\
+RIT Research Advisors\\
+{\it dxkvse@g.rit.edu, tjdvse@g.rit.edu}
+\end{small}
+\end{center}
+\end{minipage}%
 }
 
 \begin{document}
 \maketitle
 
+%% ─────────────────────────────────────────────────────────────
+\section{Approach Overview}
+%% ─────────────────────────────────────────────────────────────
 
-\section{Introduction}
-This survey supports a project that develops a practical, reproducible framework for
-fairness-aware sequential decision-making in two target settings: clinical diagnostic
-workflows and quantum-network routing. The methodological focus is a spectrum of bandit
-methods ranging from non-contextual to contextual to informative contextual bandits,
-designed to study how different levels of available context affect fairness, equity, and
-performance under uncertainty, non-stationarity, and resource constraints.
+Quantum-network routing and clinical resource allocation are, at their
+core, \textit{routing problems}---and both fail for the same reason:
+\textit{missing context}. In quantum networking, entanglement and qubit
+resources must be routed across competing flows under probabilistic link
+success and scarcity; standard policies underperform because they ignore,
+misuse, or lose the context that would guide fair allocation. In clinical
+settings, diagnostic and treatment resources are routed among patients under
+uncertainty and partial information; tools calibrated on non-representative
+populations are blind to the context of those they exclude. 
+In both cases, the groups whose context is missing absorb the worst outcomes---and the
+degradation is a direct performance failure. This shared root cause makes the two
+domains structurally comparable and motivates a unified evaluation framework.
 
-On the clinical side, the project focuses on sequential workflows such as diagnostic test
-selection, triage, follow-up escalation, and model or pipeline choice when patient context
-may be incomplete, delayed, noisy, or unevenly available across groups. On the quantum
-side, the project focuses on routing and resource-allocation decisions under probabilistic
-link success, scarce resources, and time-varying congestion, where service-equity gaps can
-emerge across flow or user groups. Across both settings, the project emphasizes
-time-evolving disparity reporting, baseline unfairness assessment, and fairness-aware
-mitigation rather than utility-only evaluation.
+The contribution is a reproducible bandit-method framework spanning three
+context-richness levels---non-contextual MABs, contextual CMABs, and
+informative iCMABs---designed specifically to probe what happens when context
+is absent, partially available, or actively recovered. Two prior works anchor
+the testbeds: equitable bioinformatics work provides the clinical fairness
+foundation \cite{garcia2025equitable_bioinformatics}, and threat-aware
+quantum routing work provides the network environment
+\cite{garcia2026threat_aware_quantum_routing}. Quantum networking is an
+emerging technology with growing practical relevance for communication and
+resource allocation; pairing it with clinical fairness through the structural
+bridge of missing-context routing positions this work at the intersection of
+present need and future-oriented system design.
 
-Two prior works provide the concrete testbeds used in this work: a clinical
-diagnostic--motivated fairness audit and mitigation pipeline (EQUITAS) in equitable bioinformatics
-\cite{garcia2025equitable_bioinformatics} and a threat-aware quantum-network routing study
-using hybrid contextual bandits \cite{garcia2026threat_aware_quantum_routing}.
-From a real-world perspective, the quantum routing testbed can be interpreted as online
-resource allocation: deciding how to route competing flows when link success is uncertain and
-network conditions change over time, while ensuring equitable service outcomes across groups.
-while ensuring equitable service outcomes across groups. The two-domain design is not only a
-transfer study, but a way to test whether fairness-aware decision principles remain meaningful
-across technically different but structurally similar sequential problems.
+%% ─────────────────────────────────────────────────────────────
+\section{Motivating Workflows}
+%% ─────────────────────────────────────────────────────────────
 
-This survey reviews the prior work needed to support that framework, including bandit
-foundations, contextual and linear bandits, learning under distribution shift and limited
-context, fairness definitions, and fairness in bandit-style learning. It also includes domain
-grounding for clinical disparities and quantum-network routing. The conclusion summarizes
-the main research gap and clarifies how the proposed work differentiates itself by explicitly
-tracking and mitigating disparities over time across both domains.
+\subsection{Clinical Routing Workflow}
+The clinical decision-maker routes resources---screens, confirmatory tests,
+escalation follow-ups---among patients under incomplete, delayed, or
+group-unequal context. As demonstrated in the COVID-19 response, uneven
+routing context systematically under-resources certain subgroups, producing
+higher false-negative rates, delayed escalation, and inferior care. A
+compounding failure reveals a second dimension: diagnostic protocols built
+from non-representative control groups calibrated thresholds against an
+incomplete population, rendering certain groups structurally invisible to the instrument. 
+The result is missing context at the point of decision, amplifying risk for the very groups already
+bearing the highest burden.
 
+\subsection{Quantum Routing Workflow}
+The quantum decision-maker routes entanglement by selecting paths and
+allocating scarce entanglement-generation attempts among competing flows
+under noisy, stale, or partial context. Standard MABs ignore context
+entirely; CMABs use it but remain vulnerable to noise and missingness.
+Empirical testing reveals that iCMABs consistently outperform both---because
+they recover and correctly weight context the other methods miss or misuse.
+This is the same structural problem. Missing context
+in the routing policy produces the same outcome as in the clinical instrument: 
+the groups whose information is least represented absorb the worst outcomes.
 
-\section{Background}
-Many real-world workflows in both clinical diagnostics and quantum-network routing require
-sequential choices under uncertainty, resource constraints, and distribution shift. These
-settings can amplify inequities when some groups systematically have lower-quality context
-or different error profiles. This survey frames both settings as bandit-style decision
-problems: at each step, the system must choose an action given limited context, observe
-partial feedback, and balance utility with fairness over time.
+%% ─────────────────────────────────────────────────────────────
+\section{Shared Domain Model}
+%% ─────────────────────────────────────────────────────────────
 
-In a clinical diagnostic workflow, the decision may involve which test to order next,
-whether to escalate follow-up, or which model or pipeline to trust when patient information
-is incomplete, delayed, or noisier for some groups. In that setting, fairness matters
-because optimizing only overall accuracy can hide subgroup failures, such as false-negative
-gaps or delayed care for populations whose context is systematically weaker.
+The shared domain model (Figure~\ref{fig:domain_model}(a)) organizes the
+routing-decision process into four phases---
+\textcolor{phase1blue}{\textbf{Environment}} (blue),
+\textcolor{phase2green}{\textbf{Context Observation}} (green),
+\textcolor{phase3orange}{\textbf{Routing Decision}} (orange),
+\textcolor{phase4purple}{\textbf{Evaluation and Mitigation}} (purple)---
+structurally identical across testbeds. Operational semantics differ:
+a routing action is a diagnostic decision in the clinical domain and a
+path-selection decision in the quantum domain; fairness is measured as
+outcome disparity across patient or network flow groups.
 
-In a quantum-network routing workflow, the decision may involve which path to route through
-or how to allocate scarce resources under probabilistic link success and time-varying
-congestion. In that setting, fairness appears as service equity: whether different flow or
-user groups receive comparable routing success, latency, and access to limited quantum
-resources rather than having one group consistently absorb the failures of the network.
+The COVID-19 pandemic provides a clear real-world example of this routing
+problem in practice. Diagnostic tests were scarce, unevenly routed, and delayed, 
+producing measurably worse outcomes for Black, Latino, and other minority 
+groups---confirming that unfair routing is a performance failure, not only an equity concern.
 
-By pairing these two settings, the project studies how different levels of context affect
-fairness, equity, and performance in sequential decision-making, while making the
-utility--fairness tradeoff explicit rather than treating it as a hidden side effect of
-optimization.
+What unifies this framework at a deeper level is that both domains share
+not only the routing structure, but the root cause of failure: missing
+context. In clinical settings, excluded populations are invisible to the
+instrument. In quantum routing, iCMABs outperform MABs and CMABs not due to
+complexity, but because they recover context the other methods discard. The
+underperforming groups in both cases are those whose context was never
+properly captured. \textit{Phase~2 is therefore where the root cause of routing 
+unfairness lives}---and the primary phase this framework is designed to interrogate. 
+\textit{Phase~4}, operationally expanded in Figure~\ref{fig:domain_model}(b),
+then detects, logs, and mitigates the downstream consequences before they compound.
 
-\subsection{Multi-armed bandits and contextual bandits}
-In both domains, multi-armed bandits formalize online decision-making with
-exploration--exploitation tradeoffs: at each round $t$ an agent chooses an action
-$a_t \in \{1,\ldots,K\}$ and observes reward $r_t$ only for the chosen arm (bandit feedback).
-Performance is measured by \emph{cumulative regret}:
-\begin{equation}
-R_T = \sum_{t=1}^{T} \bigl(\mu^* - \mu_{a_t}\bigr)
-\label{eq:regret}
-\end{equation}
-where $\mu^* = \max_k \mu_k$ is the optimal arm mean and $\mu_{a_t}$ is the mean reward of
-the chosen arm. A policy is desirable if $R_T = o(T)$, meaning the per-step loss vanishes
-over time.
+%% ─────────────────────────────────────────────────────────────
+\section{Design Rationale and Novelty}
+%% ─────────────────────────────────────────────────────────────
 
-Contextual bandits extend this setting by conditioning action choice on a context vector
-$\mathbf{x}_t \in \mathbb{R}^d$ observed before each decision. The LinUCB
-algorithm~\cite{li2010contextual} maintains a ridge regression estimate
-$\hat{\boldsymbol{\theta}}_a$ per arm and selects actions via:
-\begin{equation}
-a_t = \arg\max_{a} \Bigl(
-  \mathbf{x}_t^\top \hat{\boldsymbol{\theta}}_a
-  + \alpha \sqrt{\mathbf{x}_t^\top \mathbf{A}_a^{-1} \mathbf{x}_t}
-\Bigr)
-\label{eq:linucb}
-\end{equation}
-where $\mathbf{A}_a$ accumulates outer products of context vectors and $\alpha$ controls
-exploration. Contextual policies can improve sample-efficiency and stability when the context
-is predictive of outcomes; however, when context is limited or systematically noisier for
-some groups, these policies can inadvertently encode and amplify measurement inequities.
+\subsection{Why This Approach}
+To our knowledge, prior work has not evaluated fairness-aware sequential
+routing under a unified bandit framework spanning clinical and quantum
+domains, nor identified missing context as the shared structural root cause
+of routing unfairness across both domains. Clinical bandit research optimizes
+treatment decisions without examining how missing population context degrades
+routing equity; quantum routing research maximizes throughput without
+connecting context missingness to service-equity disparities. Studying them
+together produces findings that improve today's clinical systems and inform
+routing in tomorrow's quantum-enabled infrastructures where fairness is itself
+a performance criterion.
 
-\subsection{Fairness in sequential decision-making}
-Fairness in supervised learning is commonly operationalized through group-based error
-disparities. Let $Y \in \{0,1\}$ be a binary outcome, $\hat{Y}$ a predicted label, and
-$A \in \{0,1\}$ a protected group attribute. \emph{Equality of opportunity}~\cite{hardt2016equality}
-requires equal true positive rates across groups:
-\begin{equation}
-P(\hat{Y}=1 \mid Y=1, A=0) \;=\; P(\hat{Y}=1 \mid Y=1, A=1)
-\label{eq:eqopp}
-\end{equation}
-\emph{Equalized odds} additionally requires equal false positive rates. In a bandit setting,
-fairness must be tracked over time under partial feedback and changing conditions, making it
-important to monitor time-evolving disparities (e.g., FNR/FPR gaps, not only aggregate averages)
-and to apply
-mitigation during the policy update loop rather than only post-hoc.
+\subsection{Why This Approach Is Stronger Than Simpler Alternatives}
+Single-domain approaches cannot verify whether missing context drives routing
+unfairness structurally or only situationally; findings remain confined to
+one state space and one fairness definition. Post-hoc audits cannot capture
+how context gaps compound into routing disparities over time under learning.
+This framework measures fairness at every step under the same partial-feedback
+conditions that make routing difficult in practice, enabling real-time
+detection of where and when missing context causes disparity, and direct
+comparison of policies that ignore, use, or recover that context.
 
-\subsection{Domain grounding: diagnostics and quantum routing}
-In the quantum-network domain, routing decisions act as online resource allocation
-under probabilistic link success, limited entanglement/quantum-resource availability, and
-time-varying congestion;
-context may include link-quality estimates and network load/queue signals, but these signals
-can be delayed, noisy, or partially observed. In this project, service equity is defined as parity in
-routing outcomes, quantified by group disparities in success probability and latency across flow groups, under these
-constraints. Both domains share a common mathematical structure: stochastic, history-dependent
-dynamics with non-stationarity, limited context, and compounding decisions over time.
-In clinical diagnostics, context may include patient features, test and
-sample-quality indicators, and operational constraints, but access to context can be
-limited or systematically noisier for some populations. These limitations create
-performance and fairness risks, especially when optimizing aggregate performance, which can
-hide subgroup error spikes (e.g., false-negative gaps) unless the system is explicitly
-monitored and constrained. Unlike many evaluations that report utility-only bandit performance
-or post-hoc fairness for static predictors, the proposed work makes the time-evolving
-utility--fairness tradeoff explicit and tests transfer across both domains.
-These testbeds are described in Section~\ref{sec:related_testbeds}.
+\subsection{Design and Implementation Decisions Made}
+\textit{Bandits over full RL:} both domains return only partial feedback,
+making bandit methods the correct formulation. \textit{Simulation-first
+clinical testbed:} it allows controlled injection of missing context,
+noise, and group-specific degradation without sensitive patient data.
+\textit{Existing quantum environment extended:} reusing a grounded,
+threat-aware routing environment preserves the domain-realistic missing-context
+conditions empirically observed in iCMAB performance. \textit{MAB / CMAB /
+iCMAB spectrum:} each level directly operationalizes the core
+question---\textit{does recovering missing routing context reduce disparities, or are
+additional fairness mechanisms still required?}
 
+\subsection{Connecting Decisions to the Domain Model}
+Each design decision maps directly to a phase in
+Figure~\ref{fig:domain_model}(a), determining what that phase must do and why.
 
-\section{Related Work}
-Table~\ref{tab:overview} gives a compact map of the works reviewed and how they support
-the proposed project.
+\textsc{Phase~1 (Environment)} is shaped by the simulation-first clinical
+testbed and the quantum environment extension. The simulation introduces
+missing and group-unequal context as a controlled variable, making
+\textsc{Phase~1} a research instrument, not just a data source. The
+quantum extension means \textsc{Phase~1} inherits domain-realistic
+conditions---link success rates, entanglement scarcity, threat
+signals---thereby reproducing the same missing-context failure mode without adding a new testbed.
 
-\begin{table*}[t]
-\caption{High-level overview of related works reviewed in this survey.}
+\textsc{Phase~2 (Context Observation)} is shaped by the MAB/CMAB/iCMAB
+spectrum. Each level defines how much context reaches the policy: none,
+structured but potentially incomplete, or actively recovered despite noise
+and missingness. \textsc{Phase~2} is the experimental variable and the locus
+of the root cause; spanning three levels directly measures how much routing
+disparity is explained by missing context alone.
+
+\textsc{Phase~3 (Routing Decision)} is shaped by the bandit choice. Because
+both environments return only the outcome of the chosen route---never the
+counterfactual---the policy must be a bandit policy. Full RL would require
+transition-model information that does not exist. The bandit formulation is
+the only structurally honest choice given what \textsc{Phase~4} can return.
+
+\textsc{Phase~4 (Evaluation and Mitigation)} justifies the entire design.
+Logging utility and fairness at every step produces a per-step disparity
+trajectory, making it possible to pinpoint exactly when missing context
+causes disparities to emerge, persist, or resolve under mitigation. The
+domain model in Figure~\ref{fig:domain_model}(a) is the organizational
+structure that determined every design choice from \textsc{Phase~1} through
+\textsc{Phase~4}.
+
+%% ─────────────────────────────────────────────────────────────
+\section{Implementation and Evaluation Plan}
+%% ─────────────────────────────────────────────────────────────
+
+Both testbeds expose the same policy interface and are driven by the modular
+six-layer pipeline shown in Figure~\ref{fig:domain_model}(b), so MAB, CMAB,
+and iCMAB methods are evaluated under a shared logging and analysis pipeline.
+The clinical simulation models test ordering, retesting, and escalation under
+deliberately introduced missing and group-unequal context; the quantum
+environment reproduces the domain-realistic context missingness that drives
+the empirically observed iCMAB advantage. The reward layer tracks accuracy,
+cost, success rate, and latency; the fairness layer tracks clinical
+false-negative and delayed-escalation gaps and quantum service-equity gaps
+across flow groups. Experiments use explicit configurations, fixed random
+seeds, and per-step metric logging; at least one fairness mitigation
+mechanism is evaluated to enable comparison among policies that ignore,
+partially use, or actively recover missing context.
+
+%% ─────────────────────────────────────────────────────────────
+\section{Research Contribution}
+%% ─────────────────────────────────────────────────────────────
+
+This work makes three contributions. First, it identifies routing and missing
+context as the shared structural ground between clinical and quantum domains,
+and constructs a unified fairness-aware sequential decision framework---
+visualized in Figure~\ref{fig:domain_model}---for evaluating both under
+comparable conditions. Second, it provides a systematic MAB/CMAB/iCMAB
+comparison with respect to routing fairness, directly measuring how much
+disparity is explained by missing context and how much requires additional
+mitigation. Third, by connecting a domain of immediate human health impact to
+an emerging technology through their shared missing-context failure mode, the
+findings serve both as an evaluation of current systems and a foundation for
+next-generation quantum-enabled infrastructures, where fair and
+high-performing routing are understood as the same problem.
+
+\begin{thebibliography}{9}\setlength{\itemsep}{0em}
+\bibitem{garcia2025equitable_bioinformatics}
+Garcia, P.~Z. Equitable Bioinformatics: Enhancing Diagnostic
+Decision-Making through {RNA} and Biomarker Data. Course paper
+(ISTE~780 Phase~4), Rochester Institute of Technology, 2025.
+\bibitem{garcia2026threat_aware_quantum_routing}
+Garcia, P.~Z. Threat-Aware Evaluation of Quantum Entanglement Routing
+and Qubit Allocation via Hybrid Contextual Bandits. Unpublished
+manuscript, Rochester Institute of Technology, 2026.
+\end{thebibliography}
+
+%% ─── Figure at end — does not count toward two-page limit ───
+\clearpage
+\begin{figure*}[!t]
 \centering
-\small
-\begin{tabular}{p{0.28\textwidth} p{0.68\textwidth}}
-\toprule
-Category & Representative works \\
-\midrule
-Primary project testbeds (two prior works)
-  & Equitable bioinformatics (clinical diagnostic motivation) \cite{garcia2025equitable_bioinformatics};
-    threat-aware quantum routing bandit evaluation \cite{garcia2026threat_aware_quantum_routing} \\
-Bandit foundations (exploration--exploitation basics)
-  & UCB analysis \cite{auer2002finite};
-    Thompson sampling tutorial \cite{russo2018tutorial};
-    bandit textbook \cite{lattimore2020bandit} \\
-Contextual/linear bandits (side information + evaluation)
-  & Epoch-Greedy \cite{langford2007epoch};
-    contextual bandits in practice \cite{li2010contextual};
-    linear bandits \cite{abbasi2011linear};
-    scalable CB \cite{agarwal2014taming};
-    offline evaluation \cite{dudik2011doubly} \\
-Shift / limited context (missingness + non-stationarity)
-  & Non-stationary UCB \cite{garivier2008ucb};
-    non-stationary rewards \cite{besbes2014stochastic};
-    restricted context \cite{bouneffouf2017context};
-    unobserved contexts \cite{park2022efficient} \\
-Fairness (definitions + constraints in sequential learning)
-  & Equality of opportunity \cite{hardt2016equality};
-    fairness in bandits \cite{joseph2016fairness};
-    fairness in RL \cite{jabbari2017fairness};
-    offline fairness guarantees \cite{metevier2019offline};
-    fair contextual MABs \cite{chen2020fair};
-    clinical bias case study \cite{obermeyer2019dissecting} \\
-Quantum networking (routing under uncertainty + resource scarcity)
-  & Quantum internet vision \cite{wehner2018quantum};
-    entanglement routing \cite{pant2019routing};
-    optimal quantum routing \cite{caleffi2017optimal} \\
-\bottomrule
-\end{tabular}
-\label{tab:overview}
-\end{table*}
+\resizebox{0.97\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\scriptsize,
+  box/.style={draw, rounded corners=4pt, align=center,
+              text width=1.75cm, minimum height=0.78cm,
+              inner sep=3pt, text=white, font=\scriptsize\bfseries},
+  phase1/.style={box, fill=phase1blue},
+  phase2/.style={box, fill=phase2green},
+  phase3/.style={box, fill=phase3orange},
+  phase4/.style={box, fill=phase4purple},
+  arr/.style={-Stealth, thick, gray!60},
+  lbl/.style={font=\scriptsize\bfseries, align=center}
+]
+\node[phase1] (clin)  {Clinical\\Routing};
+\node[phase1, below=0.5cm of clin]  (quant) {Quantum\\Routing};
+%% double border marks this as the zoomed node
+\node[phase1, right=0.65cm of clin, yshift=-0.9cm,
+      double, double distance=1.5pt] (env) {Environment /\\Testbed};
+\node[phase2, right=0.65cm of env]  (ctx) {Observed\\Context};
+\node[phase2, above=0.55cm of ctx]  (deg) {Missing / Noisy /\\Delayed Context};
+\node[phase3, right=0.65cm of ctx]  (pol) {Policy Family\\MAB / CMAB / iCMAB};
+\node[phase3, right=0.65cm of pol]  (act) {Routing\\Action};
+\node[phase4, below=0.55cm of act]  (fb)  {Partial Feedback\\and Reward};
+\node[phase4, right=0.65cm of act]  (log) {Utility + Fairness\\Logger};
+\node[phase4, below=0.55cm of log]  (mit) {Mitigation +\\Comparison Loop};
 
-\subsection{Primary project testbeds (two prior works)}
-\label{sec:related_testbeds}
+\draw[arr] (clin)--(env); \draw[arr] (quant)--(env);
+\draw[arr] (env)--(ctx);  \draw[arr] (deg)--(ctx);
+\draw[arr] (ctx)--(pol);  \draw[arr] (pol)--(act);
+\draw[arr] (act)--(fb);   \draw[arr] (act)--(log);
+\draw[arr] (fb)--(log);   \draw[arr] (log)--(mit);
 
-\subsubsection{Equitable bioinformatics for diagnostic-relevant fairness auditing}
-Garcia~\cite{garcia2025equitable_bioinformatics} presents a fairness-audit and
-mitigation framework (EQUITAS) for diagnostic-relevant bioinformatics pipelines, using RNA
-secondary-structure prediction as a case study. The work fine-tunes an Enhanced Nussinov
-dynamic-programming model with Optuna-driven hyperparameter search and evaluates it alongside
-five baselines on a curated dataset of 20 RNA sequences spanning multiple RNA types and
-compositional bins, reporting both performance and fairness metrics across protected attributes
-such as sequence type, GC-content bins, and length bins. Post-processing calibration and
-fairness-aware dataset augmentation are used to correct disparate-impact violations, achieving
-80\% rule compliance across algorithms. A limitation for the proposed project is that this
-study is largely an offline, static evaluation rather than an online sequential decision problem
-with bandit feedback; it motivates clinical-domain fairness metrics and context-quality concerns
-but does not model exploration--exploitation or time-evolving disparities.
+\begin{pgfonlayer}{background}
+  \node[inner sep=8pt,
+        fit=(clin)(quant)(env)(ctx)(deg)(pol)(act)(fb)(log)(mit)] (all) {};
+  \node[inner sep=5pt, fit=(clin)(quant)(env)] (bg1) {};
+  \node[inner sep=5pt, fit=(ctx)(deg)]         (bg2) {};
+  \node[inner sep=5pt, fit=(pol)(act)]         (bg3) {};
+  \node[inner sep=5pt, fit=(fb)(log)(mit)]     (bg4) {};
+  \fill[phase1blue!15,   rounded corners=6pt]
+      (bg1.west |- all.north) rectangle (bg1.east |- all.south);
+  \fill[phase2green!15,  rounded corners=6pt]
+      (bg2.west |- all.north) rectangle (bg2.east |- all.south);
+  \fill[phase3orange!15, rounded corners=6pt]
+      (bg3.west |- all.north) rectangle (bg3.east |- all.south);
+  \fill[phase4purple!15, rounded corners=6pt]
+      (bg4.west |- all.north) rectangle (bg4.east |- all.south);
+\end{pgfonlayer}
 
-\subsubsection{Threat-aware quantum routing via hybrid contextual bandits}
-Garcia~\cite{garcia2026threat_aware_quantum_routing} evaluates contextual, adversarial,
-and hybrid bandit algorithms for joint quantum entanglement routing and resource allocation
-under non-stationary and adversarial conditions. The study compares 13 algorithms across
-multiple threat scenarios and reports that pursuit--neural hybrid variants provide robust
-performance under strategic attacks; it further validates robustness trends via cross-testbed
-evaluation across external quantum-network simulators. This work grounds the quantum-network
-routing testbed used in the proposed project by providing domain-realistic uncertainty, resource
-constraints, and adversarial shifts. A limitation for the proposed project is that robustness is
-the primary focus; explicit outcome-based fairness/service equity monitoring is not central and
-will be added in the shared evaluation framework.
-
-\begin{figure}[t]
-\tiny
-\centering
-\resizebox{0.9\columnwidth}{!}{%
-    \begin{tikzpicture}[
-      node distance=0.5cm,
-      block/.style={rectangle, draw, fill=white, text width=5.0cm, text centered, rounded corners, minimum height=0.1cm, line width=0.5pt},
-      layer/.style={rectangle, draw, fill=white, text width=5.0cm, text centered, minimum height=0.1cm, line width=0.5pt, font=\small},
-      arrow/.style={-Stealth, line width=0.6pt},
-      lab/.style={font=\scriptsize}
-    ]
-
-    \node[layer, fill=allocpurple!18, draw=allocpurple] (alloc) {\textbf{1. ALLOCATOR}};
-    \node[block, below=0.1cm of alloc, font=\scriptsize] (alloccontent) {
-      \textbf{Strategies:} Fixed, Thompson, DynamicUCB, Random
-    };
-
-    \node[layer, fill=gray!18, draw=gray, below=0.4cm of alloccontent] (config) {\textbf{2. CONFIGURATION}};
-		    \node[block, below=0.1cm of config, font=\scriptsize] (configcontent) {
-		      Topology: 4 nodes, 4 paths
-		      Scenarios: 5 noise/threat regimes
-		      Algorithms: contextual, adversarial, and hybrid bandits
-		      Capacity: replay type ($T_b$ vs.\ $T$), scale $s\in\{1,1.5,2\}$\\
-		      Seeds: 3--10 runs
-		    };
-
-	    \node[layer, fill=blue!18, draw=blue, below=0.4cm of configcontent] (evaluator) {\textbf{3. EVALUATOR}};
-	    \node[block, below=0.1cm of evaluator, font=\scriptsize] (evalcontent) {
-	      Orchestrates runs
-	      Captures full layered run state
-	    };
-	    \node[block, below=0.1cm of evalcontent, font=\scriptsize, fill=envgreen!10, draw=envgreen] (env) {
-	      \textbf{Environment (noise/threat):}
-	      $Y_t(r,\mathbf{x}) \sim \mathrm{Bernoulli}\!\big(h_r(\mathbf{x}) \cdot A_t(r)\big)$
-	      None, Stochastic, Markov, Adaptive, OnlineAdaptive
-	    };
-
-	    \node[layer, fill=blue!10, draw=blue!60, below=0.4cm of env] (runner) {\textbf{4. RUNNER}};
-	    \node[block, below=0.1cm of runner, font=\scriptsize] (runnercontent) {
-	      Batch execution
-	      Parallel runs
-	      Per-scenario/per-seed Oracle + disparity tracking
-	      Applies the allocator to distribute qubits across paths
-	    };
-
-	    \node[layer, fill=blue!10, draw=blue!60, below=0.4cm of runnercontent] (model) {\textbf{5. MODEL}};
-	    \node[block, below=0.1cm of model, font=\scriptsize, fill=networkblue!10, draw=networkblue] (net) {
-	      \textbf{Quantum routing domain:}
-	      4 paths, 35-qubit capacity
-	    };
-		    \node[block, below=0.05cm of net, font=\scriptsize, fill=algorange!10, draw=algorange] (algo) {
-		      \textbf{Algorithms:}
-		      Contextual bandits (CMAB/iCMAB)
-		      Adversarial (EXP3-family)
-		      Hybrid pursuit--neural variants
-		      Structure: EXP3 group + neural/pursuit-based arm selection
-		    };
-
-	    \node[layer, fill=orange!18, draw=orange, below=0.4cm of algo] (visualizer) {\textbf{6. VISUALIZER}};
-	    \node[block, below=0.1cm of visualizer, font=\scriptsize] (viscontent) {
-	      Utility \& fairness curves
-	      Utility \& fairness summaries
-	      Scenario ranking
-	      Heatmaps
-	      Winner highlighting
-	    };
-
-    \draw[arrow] (alloccontent.south) -- (config.north);
-    \draw[arrow] (configcontent.south) -- (evaluator.north);
-    \draw[arrow] (env.south) -- (runner.north);
-    \draw[arrow] (runnercontent.south) -- (model.north);
-    \draw[arrow] (algo.south) -- (visualizer.north);
-
-    \draw[arrow, dashed, bend left=20] (config.east) to node[lab, right] {config} (evaluator.east);
-    \draw[arrow, dashed, bend left=15] (config.east) to (runner.east);
-    \draw[arrow, dashed, bend left=20] (config.east) to (model.east);
-    \draw[arrow, dashed, bend left=25] (config.east) to (visualizer.east);
-
-    \draw[arrow, dashed, bend left=20] (model.west) to node[left, lab, align=center] {per-run\\results} (runner.west);
-    \draw[arrow, dashed, bend left=20] (runner.west) to node[left, lab, align=center] {aggregated\\logs} (evaluator.west);
-    \draw[arrow, dashed, bend right=40] (evaluator.west) to node[left, lab, align=center] {summaries\\+\\plots} (visualizer.west);
-    \end{tikzpicture}
+\node[lbl, text=phase1blue,   below=0.15cm of bg1] {\textbf{Phase 1}\\Environment};
+\node[lbl, text=phase2green,  below=0.15cm of bg2] {\textbf{Phase 2}\\Context};
+\node[lbl, text=phase3orange, below=0.15cm of bg3] {\textbf{Phase 3}\\Decision};
+\node[lbl, text=phase4purple, below=0.15cm of bg4] {\textbf{Phase 4}\\Evaluation};
+\end{tikzpicture}%
 }
-\vspace{-0.45cm}
-\caption{\footnotesize Modular framework for quantum routing evaluation, following the evaluation
-stack described in \cite{garcia2026threat_aware_quantum_routing}. The evaluation stack separates allocator,
-configuration, evaluator, runner, model, and visualizer concerns to support systematic
-ablation under consistent capacity and threat semantics, with full logged run state captured for downstream utility and fairness analysis.}
-\label{fig:quantum_framework}
-\end{figure}
 
-\paragraph{Algorithmic framework (modular evaluation stack).}
-The quantum-routing testbed in \cite{garcia2026threat_aware_quantum_routing} uses the layered
-evaluation architecture shown in Figure~\ref{fig:quantum_framework}. At a high level, an
-\emph{allocator} specifies a resource-distribution rule, a shared \emph{configuration} fixes
-topology/scenarios/capacity semantics, an \emph{evaluator} orchestrates runs and logging, a
-\emph{runner} executes batched scenarios under fixed seeds, a \emph{model} implements the
-routing policy (bandit learner + network), and a \emph{visualizer} aggregates results into
-plots and winner summaries. This modular structure is reused in the proposed work so that
-fairness/service equity monitoring and mitigation can be computed and applied from the same
-logged run state, under identical experimental controls.
-Having grounded the two experimental testbeds, the remainder of this section surveys the
-algorithmic and fairness literature needed to design and evaluate a shared fairness-aware contextual bandit
-framework across both domains.
+\vspace{0.2em}
+{\small\textbf{(a)} Shared domain model.}
+\vspace{0.5em}
 
+%% ── Zoom-in bridge arrow ──────────────────────────────────────
+\noindent\hspace{0.03\textwidth}%
+\begin{tikzpicture}[baseline=-0.5ex, font=\scriptsize]
+  \draw[-Stealth, thick, phase1blue!80, dashed] (0,0) -- (1.1,0);
+  \node[right=1.15cm, font=\scriptsize\bfseries, text=phase1blue]
+    at (0,0) {Operational expansion of the \textbf{testbed / evaluation pipeline interface}};
+\end{tikzpicture}
+\vspace{0.4em}
 
-\subsection{Bandit foundations and core algorithms}
+%% ── (b) Pipeline zoom-in — horizontal, phase1blue!15 background ──
+\resizebox{0.97\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\scriptsize,
+  mod/.style={rectangle, draw=phase1blue, rounded corners=4pt, align=center,
+              text width=2.6cm, minimum height=0.72cm,
+              inner sep=4pt, font=\scriptsize\bfseries,
+              fill=phase1blue!30},
+  det/.style={rectangle, draw=phase1blue!40, rounded corners=3pt, align=center,
+              text width=2.6cm, inner sep=4pt, font=\scriptsize, fill=white},
+  det2/.style={det, fill=phase2green!15,  draw=phase2green!55},
+  det3/.style={det, fill=phase3orange!12, draw=phase3orange!55},
+  det4/.style={det, fill=phase4purple!12, draw=phase4purple!55},
+  arr/.style={-Stealth, thick, phase1blue!70},
+  darr/.style={-Stealth, dashed, phase1blue!40},
+  lbl/.style={font=\tiny, align=center, text=phase1blue!60}
+]
 
-\subsubsection{Upper confidence bound (UCB) analysis}
-Auer et al.~\cite{auer2002finite} provide a foundational finite-time regret analysis for
-multi-armed bandits and introduce UCB-style algorithms that choose actions using optimistic
-confidence bounds, achieving gap-dependent regret logarithmic in $T$ under stochastic
-assumptions (see Eq.~\ref{eq:regret}). A limitation for the proposed work is that standard
-UCB assumes stationarity and does not incorporate context or group-based fairness constraints;
-extensions are required for distribution shift, heterogeneous contexts, and explicit disparity
-monitoring over time.
+\node[mod] (A) {1.~ALLOCATOR};
+\node[det, below=0.15cm of A] (Ad)
+  {Fixed / Thompson\\DynamicUCB / Random};
 
-\subsubsection{Thompson sampling}
-Russo et al.~\cite{russo2018tutorial} survey Thompson sampling as a Bayesian approach to
-exploration--exploitation, highlighting strong empirical performance and the conceptual
-simplicity of sampling from a posterior over rewards. Thompson sampling is attractive for the
-proposed project as a baseline in both domains because it adapts to uncertainty naturally and
-often performs well under limited feedback. However, typical implementations focus on
-utility/regret and do not provide fairness guarantees; when context is limited or
-systematically noisy for some groups, posterior updates can encode these measurement
-inequities unless the model explicitly accounts for them.
+\node[mod, right=0.5cm of A] (C) {2.~CONFIG};
+\node[det, below=0.15cm of C] (Cd)
+  {Domain: clinical\\or quantum\\Topology, scenarios,\\algo family, seeds};
 
-\subsubsection{Bandit textbook perspective}
-Lattimore and Szepesv\'{a}ri~\cite{lattimore2020bandit} provide a comprehensive reference on
-bandit algorithms (stochastic, adversarial, contextual, linear), including proof techniques
-and practical design choices. This text grounds algorithm selection and ablation design for
-the proposed project. A practical limitation is that textbook settings generally assume
-correctly observed context and utility-centric objectives; fairness-aware objectives and
-missingness mechanisms must be layered on top.
+\node[mod, right=0.5cm of C] (E) {3.~EVALUATOR};
+\node[det, below=0.15cm of E] (Ed)
+  {Orchestrates runs\\captures layered state};
+\node[det2, below=0.1cm of Ed] (Env)
+  {\textbf{Env. (Phase~2):}\\missing / noisy /\\delayed context};
 
+\node[mod, right=0.5cm of E] (R) {4.~RUNNER};
+\node[det, below=0.15cm of R] (Rd)
+  {Batch + parallel\\per-seed Oracle\\disparity tracking\\allocator dispatch};
 
-\subsection{Contextual and linear bandits in practice}
+\node[mod, right=0.5cm of R] (M) {5.~MODEL};
+\node[det, below=0.15cm of M] (Md)
+  {\textbf{Domain (Ph.~1):}\\clinical sim or\\quantum network\\(4 paths, 35-qubits)};
+\node[det3, below=0.1cm of Md] (Alg)
+  {\textbf{Policy (Ph.~3):}\\MAB / CMAB / iCMAB\\EXP3 / hybrid};
 
-\subsubsection{Epoch-Greedy contextual bandits}
-Langford and Zhang~\cite{langford2007epoch} introduce the Epoch-Greedy algorithm, one of the
-first contextual bandit algorithms with provable regret bounds. Their approach interleaves
-exploration epochs (uniform arm selection for reward estimation) with exploitation epochs
-(applying the current best policy), and shows that any supervised learning oracle can serve
-as the reward estimator. This motivates the use of offline regression oracles within online
-bandit policies---a strategy relevant to the iCMAB-style informed policy in the proposed
-project. A limitation is the dependence on epoch length, which is often unknown in practice.
+\node[mod, right=0.5cm of M] (V) {6.~VISUALIZER};
+\node[det4, below=0.15cm of V] (Vd)
+  {\textbf{Output (Ph.~4):}\\utility \& fairness\\curves, disparity\\trajectories,\\heatmaps};
 
-\subsubsection{Contextual bandits for personalization}
-Li et al.~\cite{li2010contextual} demonstrate contextual bandits for news recommendation
-using LinUCB (Eq.~\ref{eq:linucb}), showing how context enables personalized decisions while
-balancing exploration and exploitation in a real deployment. The key limitation in the
-proposed setting is that context can be limited and systematically lower-quality for some
-populations, leading to performance disparities if policies are optimized only for average
-reward.
+\draw[arr] (A)--(C); \draw[arr] (C)--(E);
+\draw[arr] (E)--(R); \draw[arr] (R)--(M); \draw[arr] (M)--(V);
 
-\subsubsection{Linear stochastic bandits}
-Abbasi-Yadkori et al.~\cite{abbasi2011linear} analyze linear stochastic bandits and provide
-improved confidence ellipsoids for the unknown parameter vector $\boldsymbol{\theta}$,
-achieving regret bounds that scale as $\tilde{O}(d\sqrt{T})$ under standard stochastic
-assumptions. Linear contextual bandits are a key baseline for the proposed work because they
-are simple, interpretable, and offer a clean place to inject missingness-handling and
-fairness-aware penalties. A limitation is the linear modeling assumption: if the relationship
-between context and outcome differs across groups or shifts over time, the model can underfit
-and hide subgroup-specific error spikes.
+\draw[darr] (C.north) to[bend left=30] node[lbl,above=1pt]{config} (E.north);
+\draw[darr] (C.north) to[bend left=22] (R.north);
+\draw[darr] (C.north) to[bend left=16] (M.north);
+\draw[darr] (C.north) to[bend left=12] (V.north);
 
-\subsubsection{Scalable contextual bandits}
-Agarwal et al.~\cite{agarwal2014taming} propose a computationally efficient reduction-based
-approach to contextual bandits that makes it practical to use rich policy classes. This is
-relevant to the proposed project as a template for scaling beyond simple linear models while
-keeping training tractable. However, the work primarily optimizes reward and assumes
-representative context; fairness auditing under group-dependent context quality requires
-additional monitoring and constraints.
+\draw[darr] (M.south) to[bend left=20]
+  node[lbl,below=1pt]{per-run results} (R.south);
+\draw[darr] (R.south) to[bend left=20]
+  node[lbl,below=1pt]{agg. logs} (E.south);
+\draw[darr] (E.south) to[bend right=35]
+  node[lbl,below=1pt]{summaries} (V.south);
 
-\subsubsection{Offline evaluation with bandit feedback}
-Dud\'{i}k et al.~\cite{dudik2011doubly} develop doubly robust estimators for policy
-evaluation and learning from bandit feedback, combining direct reward modeling with
-inverse-propensity weighting. This is useful for the proposed project because it supports
-evaluation and comparison of policies under partial feedback. A limitation is that estimator
-validity depends on correct propensities and sufficient support in logged data; if groups
-have different action distributions or context missingness rates, variance and bias can differ
-by group, complicating fairness assessment.
+\begin{pgfonlayer}{background}
+  \node[inner sep=14pt, rounded corners=8pt,
+        fill=phase1blue!15, draw=phase1blue!60, line width=1pt,
+        fit=(A)(Ad)(C)(Cd)(E)(Ed)(Env)(R)(Rd)(M)(Md)(Alg)(V)(Vd)] (bbox) {};
+\end{pgfonlayer}
 
+%% Panel label pinned to top-left of the bounding box
+\node[anchor=north west, inner sep=5pt,
+      font=\scriptsize\bfseries, text=phase1blue]
+  at (bbox.north west)
+  {Fig.~1(b) \textbf{---} Phase~1--4 Modular Evaluation Framework};
 
-\subsection{Distribution shift and limited context}
+\end{tikzpicture}%
+}
 
-\subsubsection{Non-stationary bandits: UCB with change detection}
-Garivier and Moulines~\cite{garivier2008ucb} study UCB-style policies for non-stationary
-bandit problems, motivating mechanisms such as discounting or sliding windows to adapt to
-reward changes. This is relevant to both domains: patient mix and operational processes can
-change, and network load and link conditions can vary over time. The limitation for the
-proposed work is that non-stationary regret does not directly capture fairness; even if a
-policy adapts quickly in aggregate, it may exhibit persistent group disparities if context
-quality differs systematically across groups.
-
-\subsubsection{Non-stationary rewards and variation budgets}
-Besbes et al.~\cite{besbes2014stochastic} establish minimax-optimal rates for regret in
-non-stationary bandit problems where arm means change subject to a total variation budget,
-and propose a sliding-window UCB variant. A key finding is that ignoring non-stationarity
-can lead to linear regret. The proposed project incorporates distribution shift as a
-first-class experimental variable, testing bandit policies under both gradual and abrupt
-shifts across both testbeds.
-
-\subsubsection{Restricted context in contextual bandits}
-Bouneffouf et al.~\cite{bouneffouf2017context} consider contextual bandits when only a
-subset of context features can be observed at decision time, directly aligned with the
-proposed project's focus on limited context or measurement noise. The limitation is that
-restricted-context selection is typically optimized for reward; extending the selection
-mechanism to also reduce group disparities is not standard and is a key innovation
-opportunity.
-
-\subsubsection{Bandits with unobserved contexts}
-Park and Faradonbeh~\cite{park2022efficient} address bandit control when contexts are
-unobserved, proposing algorithms that learn to act effectively despite latent context.
-This motivates algorithm designs that remain robust when the observed context is limited
-or unreliable. A limitation is that fairness considerations are not central: if latent-context
-recovery quality differs across groups due to unequal measurement, fairness risks persist
-without explicit disparity tracking and mitigation.
-
-
-\subsection{Fairness: definitions and fairness in bandit learning}
-
-\subsubsection{Equality of opportunity and error-based fairness}
-Hardt et al.~\cite{hardt2016equality} formalize equality of opportunity and related
-group-based fairness criteria (Eq.~\ref{eq:eqopp}) in supervised learning, emphasizing that
-fairness can be defined in terms of error rates conditioned on true labels (e.g., equalizing
-false negative rates across groups). These definitions provide a clear measurement target for
-the clinical domain, where false-negative disparities have high stakes. A limitation for the
-proposed project is that supervised-learning fairness is typically evaluated post-hoc on
-static predictors; sequential decision-making adds partial feedback and time dynamics, so
-disparities should be measured as a function of time and policy behavior.
-
-\subsubsection{Fairness in classic and contextual bandits}
-Joseph et al.~\cite{joseph2016fairness} study fairness constraints in bandit learning and
-analyze how fairness requirements change achievable regret. This work is central to the
-proposed project because it directly links bandit exploration policies to fairness constraints
-and highlights that naive utility optimization can be incompatible with fairness goals.
-A limitation is that many fairness formulations in bandits rely on simplified assumptions;
-the proposed project must operationalize group definitions and disparity metrics differently
-for diagnostics (error gaps) and quantum routing (service equity).
-
-\subsubsection{Fairness in reinforcement learning}
-Jabbari et al.~\cite{jabbari2017fairness} study fairness in reinforcement learning, requiring
-that a policy never takes an action that is unfair to any individual in expectation, and
-provide algorithms with polynomial sample complexity. The key challenge they identify is that
-fairness constraints can slow learning when group-specific feedback is sparse---directly
-relevant to the clinical diagnostics domain, where some patient groups may have systematically
-fewer observations, making it harder to estimate group-wise error rates accurately.
-
-\subsubsection{Offline contextual bandits with high-probability fairness}
-Metevier et al.~\cite{metevier2019offline} propose a method for offline contextual bandits
-that provides high-probability guarantees that a deployed policy satisfies user-specified
-fairness constraints, using importance-weighted estimators and Seldonian optimization.
-A significant limitation is the offline setting assumption: the algorithm requires a fixed
-logged dataset and does not address online fairness under distribution shift. The proposed
-project extends this direction to the online setting, where fairness constraints must be
-maintained continuously as the policy learns from streaming data.
-
-\subsubsection{Fair contextual multi-armed bandits}
-Chen et al.~\cite{chen2020fair} develop algorithms for fair contextual MABs that satisfy
-group fairness constraints (parity in arm-selection rates across groups) while maintaining
-sublinear regret, and characterize the utility--fairness tradeoff as a function of group
-distribution imbalance. This is the most directly related prior work to the proposed project.
-A key limitation is that their fairness criterion focuses on arm-selection parity rather than
-outcome parity (e.g., FNR/FPR gaps), which may not capture the clinically or operationally
-relevant disparities. The proposed project uses outcome-based fairness metrics that are more
-directly interpretable in clinical and service equity contexts, and extends the evaluation to
-distribution shift and cross-domain transfer.
-
-\subsubsection{Clinical bias case study motivating fairness audits}
-Obermeyer et al.~\cite{obermeyer2019dissecting} analyze a widely used health-risk prediction
-system and show how proxy targets can encode racial bias, producing systematic under-allocation
-of care for Black patients at the same predicted risk. This motivates the proposed project's
-emphasis on fairness auditing and on monitoring subgroup-specific errors rather than relying
-on aggregate metrics. A limitation is that this work addresses static prediction/triage rather
-than sequential decision policies; however, the mechanism is relevant: optimizing a proxy
-objective under biased measurements can yield persistent disparities unless explicitly
-corrected.
-
-
-\subsection{Quantum networking and routing as a second testbed}
-
-\subsubsection{Quantum internet: vision and engineering constraints}
-Wehner et al.~\cite{wehner2018quantum} describe the vision for a quantum internet and outline
-key engineering challenges, including entanglement generation, storage, and networking
-protocols. This work provides domain background and motivates why routing decisions in quantum
-networks face uncertainty and resource scarcity. A limitation is that fairness is not a
-primary focus; the proposed project extends this domain by explicitly considering service
-equity across user/flow groups when learning routing policies under uncertainty.
-
-\subsubsection{Routing entanglement in the quantum internet}
-Pant et al.~\cite{pant2019routing} develop methods for routing entanglement in quantum
-networks, addressing how to select paths and manage entanglement distribution under
-probabilistic link success. This motivates a concrete quantum routing decision process
-suitable as a second testbed. The limitation for the proposed project is that routing work
-is typically evaluated on throughput/fidelity metrics without group-based disparity
-monitoring; the proposed work adds explicit service equity tracking using a shared
-fairness-aware contextual bandit evaluation stack.
-
-\subsubsection{Optimal routing for quantum networks}
-Caleffi~\cite{caleffi2017optimal} formulates quantum path selection as an optimization over
-link fidelity, decoherence time, and entanglement generation rate, showing that shortest-path
-routing significantly underperforms optimal routing due to the stochastic nature of link
-success. A limitation is the assumption of a static network with known link statistics; in
-practice, link quality varies dynamically. The proposed project extends the routing problem
-to an online learning setting using contextual bandits, where link-quality context is observed
-but statistics are unknown and shift over time.
-
-
-\section{Conclusion}
-Prior work provides strong foundations for multi-armed bandits, contextual and linear
-bandits, and evaluation under bandit feedback, as well as clear fairness definitions and
-initial work on fairness constraints in bandit learning. However, a gap remains at the
-intersection of: i) limited context or measurement noise, ii) time-varying conditions, and
-iii) explicit, time-evolving disparity monitoring and mitigation in sequential decision
-systems.
-
-The proposed project differentiates itself by building a reusable framework that evaluates
-fairness-aware bandit methods under controllable limited-context mechanisms and distribution
-shift, tracks group disparities over time, and studies both clinical diagnostic workflows and
-quantum-network routing within the same decision-making framework. While
-Chen et al.~\cite{chen2020fair} address fair contextual MABs and Joseph
-et al.~\cite{joseph2016fairness} address fairness in bandit learning, no existing work, to the
-best of current knowledge, jointly evaluates outcome-based disparity metrics under
-distribution shift while also testing cross-domain transfer across these two settings. In
-particular, \cite{garcia2025equitable_bioinformatics,garcia2026threat_aware_quantum_routing}
-serve as the two primary experimental foundations for the project’s two-domain design.
-
-This framing matters because it treats fairness not as a post-hoc audit added after
-optimization, but as part of the design and evaluation of sequential decision systems under
-uncertainty, partial observability, and resource constraints.
-
-\bibliographystyle{IEEEtran}
-\bibliography{survey-references}
+\caption{%
+  \textbf{(a)}~Shared domain model organized into four color-coded phases.
+  \textcolor{phase1blue}{\textbf{Phase~1 (blue) --- Environment / Input:}}
+    Clinical and quantum routing workflows feed into a shared testbed interface,
+    each with domain-realistic missing-context conditions.
+  \textcolor{phase2green}{\textbf{Phase~2 (green) --- Context Observation:}}
+    The root cause of routing unfairness in both domains---missing, noisy, or
+    excluded context---is concentrated here and is the primary experimental variable.
+  \textcolor{phase3orange}{\textbf{Phase~3 (orange) --- Routing Decision:}}
+    A policy from the selected method family (MAB, CMAB, or iCMAB) selects a
+    routing action under whatever context Phase~2 delivers.
+  \textcolor{phase4purple}{\textbf{Phase~4 (purple) --- Evaluation and Mitigation:}}
+    Utility and fairness are logged per step; per-step disparity trajectories
+    reveal exactly when missing context causes disparities to emerge or resolve.
+  \textbf{(b)}~Operational expansion of the shared testbed and evaluation pipeline,
+detailing the six-layer modular framework used to execute both domains.
+  \textbf{Layer~2 (Configuration)} is the domain switch: it selects clinical simulation
+    or quantum network, along with topology, scenario, algorithm family, and seeds,
+    making the same pipeline run both domains without modification.
+  Dashed arrows show configuration broadcast (above) and result aggregation (below).}
+\label{fig:domain_model}
+\end{figure*}
 
 \end{document}
