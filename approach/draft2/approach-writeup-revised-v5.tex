@@ -60,11 +60,10 @@ success and scarcity; standard policies underperform because they ignore,
 misuse, or lose the context that would guide fair allocation. In clinical
 settings, diagnostic and treatment resources are routed among patients under
 uncertainty and partial information; tools calibrated on non-representative
-populations are blind to the context of those they exclude. In both cases,
-the groups whose context is missing absorb the worst outcomes---and the
-degradation is not merely an equity concern but a direct performance failure.
-This shared root cause makes the two domains structurally comparable and
-motivates a unified evaluation framework.
+populations are blind to the context of those they exclude. 
+In both cases, the groups whose context is missing absorb the worst outcomes---and the
+degradation is a direct performance failure. This shared root cause makes the two
+domains structurally comparable and motivates a unified evaluation framework.
 
 The contribution is a reproducible bandit-method framework spanning three
 context-richness levels---non-contextual MABs, contextual CMABs, and
@@ -91,9 +90,8 @@ routing context systematically under-resources certain subgroups, producing
 higher false-negative rates, delayed escalation, and inferior care. A
 compounding failure reveals a second dimension: diagnostic protocols built
 from non-representative control groups calibrated thresholds against an
-incomplete population, rendering certain groups---including Black and minority
-communities---structurally invisible to the instrument. The result is missing
-context at the point of decision, amplifying risk for the very groups already
+incomplete population, rendering certain groups structurally invisible to the instrument. 
+The result is missing context at the point of decision, amplifying risk for the very groups already
 bearing the highest burden.
 
 \subsection{Quantum Routing Workflow}
@@ -103,16 +101,15 @@ under noisy, stale, or partial context. Standard MABs ignore context
 entirely; CMABs use it but remain vulnerable to noise and missingness.
 Empirical testing reveals that iCMABs consistently outperform both---because
 they recover and correctly weight context the other methods miss or misuse.
-This is not a coincidence; it is the same structural problem. Missing context
-in the routing policy produces the same outcome as missing context in the
-clinical instrument: the groups whose information is least represented absorb
-the worst outcomes.
+This is the same structural problem. Missing context
+in the routing policy produces the same outcome as in the clinical instrument: 
+the groups whose information is least represented absorb the worst outcomes.
 
 %% ─────────────────────────────────────────────────────────────
 \section{Shared Domain Model}
 %% ─────────────────────────────────────────────────────────────
 
-The shared domain model (Figure~\ref{fig:domain_model}) organizes the
+The shared domain model (Figure~\ref{fig:domain_model}(a)) organizes the
 routing-decision process into four phases---
 \textcolor{phase1blue}{\textbf{Environment}} (blue),
 \textcolor{phase2green}{\textbf{Context Observation}} (green),
@@ -123,12 +120,10 @@ a routing action is a diagnostic decision in the clinical domain and a
 path-selection decision in the quantum domain; fairness is measured as
 outcome disparity across patient or network flow groups.
 
-The COVID-19 pandemic provides a clear real-world example of this model in
-practice. Diagnostic tests---scarce, unevenly routed, and delayed---failed
-the communities bearing the highest risk, producing measurably worse
-infection, hospitalization, and mortality rates among Black, Latino, and
-other minority groups. This confirms that unfair routing is a performance
-failure, not only an equity concern.
+The COVID-19 pandemic provides a clear real-world example of this routing
+problem in practice. Diagnostic tests were scarce, unevenly routed, and delayed, 
+producing measurably worse outcomes for Black, Latino, and other minority 
+groups---confirming that unfair routing is a performance failure, not only an equity concern.
 
 What unifies this framework at a deeper level is that both domains share
 not only the routing structure, but the root cause of failure: missing
@@ -136,10 +131,10 @@ context. In clinical settings, excluded populations are invisible to the
 instrument. In quantum routing, iCMABs outperform MABs and CMABs not due to
 complexity, but because they recover context the other methods discard. The
 underperforming groups in both cases are those whose context was never
-properly captured. \textit{Phase~2 is therefore not a passive observation
-step; it is where the root cause of routing unfairness lives}---and the
-primary phase this framework is designed to interrogate. \textit{Phase~4} then
-detects, logs, and mitigates the downstream consequences before they compound.
+properly captured. \textit{Phase~2 is therefore where the root cause of routing 
+unfairness lives}---and the primary phase this framework is designed to interrogate. 
+\textit{Phase~4}, operationally expanded in Figure~\ref{fig:domain_model}(b),
+then detects, logs, and mitigates the downstream consequences before they compound.
 
 %% ─────────────────────────────────────────────────────────────
 \section{Design Rationale and Novelty}
@@ -149,13 +144,13 @@ detects, logs, and mitigates the downstream consequences before they compound.
 To our knowledge, prior work has not evaluated fairness-aware sequential
 routing under a unified bandit framework spanning clinical and quantum
 domains, nor identified missing context as the shared structural root cause
-of routing unfairness across both. Clinical bandit research optimizes
+of routing unfairness across both domains. Clinical bandit research optimizes
 treatment decisions without examining how missing population context degrades
 routing equity; quantum routing research maximizes throughput without
 connecting context missingness to service-equity disparities. Studying them
-together produces findings that improve today's clinical systems and inform 
-routing in tomorrow's quantum-enabled infrastructures where fairness is itself 
-a performance criterion
+together produces findings that improve today's clinical systems and inform
+routing in tomorrow's quantum-enabled infrastructures where fairness is itself
+a performance criterion.
 
 \subsection{Why This Approach Is Stronger Than Simpler Alternatives}
 Single-domain approaches cannot verify whether missing context drives routing
@@ -180,44 +175,46 @@ question---\textit{does recovering missing routing context reduce disparities, o
 additional fairness mechanisms still required?}
 
 \subsection{Connecting Decisions to the Domain Model}
-Each design decision corresponds to a deliberate choice about what a specific
-phase must do and why.
+Each design decision maps directly to a phase in
+Figure~\ref{fig:domain_model}(a), determining what that phase must do and why.
 
 \textsc{Phase~1 (Environment)} is shaped by the simulation-first clinical
 testbed and the quantum environment extension. The simulation introduces
-missing and group-unequal context as a controlled variable, making \textsc{Phase~1}
-a research instrument rather than just a data source. The quantum extension
-means \textsc{Phase~1} inherits domain-realistic conditions---link success rates,
-entanglement scarcity, threat signals, reproducing the same
-missing-context failure mode without creating a testbed.
+missing and group-unequal context as a controlled variable, making
+\textsc{Phase~1} a research instrument, not just a data source. The
+quantum extension means \textsc{Phase~1} inherits domain-realistic
+conditions---link success rates, entanglement scarcity, threat
+signals---thereby reproducing the same missing-context failure mode without adding a new testbed.
 
 \textsc{Phase~2 (Context Observation)} is shaped by the MAB/CMAB/iCMAB
 spectrum. Each level defines how much context reaches the policy: none,
 structured but potentially incomplete, or actively recovered despite noise
-and missingness. \textsc{Phase~2} is the experimental variable and the locus of the
-root cause; spanning three levels helps directly measure how much of the routing 
+and missingness. \textsc{Phase~2} is the experimental variable and the locus
+of the root cause; spanning three levels directly measures how much routing
 disparity is explained by missing context alone.
 
 \textsc{Phase~3 (Routing Decision)} is shaped by the bandit choice. Because
 both environments return only the outcome of the chosen route---never the
 counterfactual---the policy must be a bandit policy. Full RL would require
 transition-model information that does not exist. The bandit formulation is
-the only structurally honest choice given what \textit{Phase~4} can return.
+the only structurally honest choice given what \textsc{Phase~4} can return.
 
 \textsc{Phase~4 (Evaluation and Mitigation)} justifies the entire design.
 Logging utility and fairness at every step produces a per-step disparity
 trajectory, making it possible to pinpoint exactly when missing context
 causes disparities to emerge, persist, or resolve under mitigation. The
-domain model is the organizational structure that determined every design
-choice from \textit{Phase~1} through \textsc{Phase~4}.
+domain model in Figure~\ref{fig:domain_model}(a) is the organizational
+structure that determined every design choice from \textsc{Phase~1} through
+\textsc{Phase~4}.
 
 %% ─────────────────────────────────────────────────────────────
 \section{Implementation and Evaluation Plan}
 %% ─────────────────────────────────────────────────────────────
 
-Both testbeds expose the same policy interface, so MAB, CMAB, and iCMAB
-methods are evaluated under a shared logging and analysis pipeline. The
-clinical simulation models test ordering, retesting, and escalation under
+Both testbeds expose the same policy interface and are driven by the modular
+six-layer pipeline shown in Figure~\ref{fig:domain_model}(b), so MAB, CMAB,
+and iCMAB methods are evaluated under a shared logging and analysis pipeline.
+The clinical simulation models test ordering, retesting, and escalation under
 deliberately introduced missing and group-unequal context; the quantum
 environment reproduces the domain-realistic context missingness that drives
 the empirically observed iCMAB advantage. The reward layer tracks accuracy,
@@ -234,24 +231,24 @@ partially use, or actively recover missing context.
 
 This work makes three contributions. First, it identifies routing and missing
 context as the shared structural ground between clinical and quantum domains,
-and constructs a unified fairness-aware sequential decision framework for
-evaluating both under identical conditions. Second, it provides a systematic
-MAB/CMAB/iCMAB comparison with respect to routing fairness, directly
-measuring how much disparity is explained by missing context and how much
-requires additional mitigation. Third, by connecting a domain of immediate
-human health impact to an emerging technology through their shared
-missing-context failure mode. The findings serve both as an evaluation of
-current systems and a foundation for next-generation quantum-enabled 
-infrastructures, where fair and high-performing routing are understood as the 
-same problem.
+and constructs a unified fairness-aware sequential decision framework---
+visualized in Figure~\ref{fig:domain_model}---for evaluating both under
+comparable conditions. Second, it provides a systematic MAB/CMAB/iCMAB
+comparison with respect to routing fairness, directly measuring how much
+disparity is explained by missing context and how much requires additional
+mitigation. Third, by connecting a domain of immediate human health impact to
+an emerging technology through their shared missing-context failure mode, the
+findings serve both as an evaluation of current systems and a foundation for
+next-generation quantum-enabled infrastructures, where fair and
+high-performing routing are understood as the same problem.
 
 \begin{thebibliography}{9}\setlength{\itemsep}{0em}
 \bibitem{garcia2025equitable_bioinformatics}
-Garcia, P. Z. Equitable Bioinformatics: Enhancing Diagnostic
+Garcia, P.~Z. Equitable Bioinformatics: Enhancing Diagnostic
 Decision-Making through {RNA} and Biomarker Data. Course paper
 (ISTE~780 Phase~4), Rochester Institute of Technology, 2025.
 \bibitem{garcia2026threat_aware_quantum_routing}
-Garcia, P. Z. Threat-Aware Evaluation of Quantum Entanglement Routing
+Garcia, P.~Z. Threat-Aware Evaluation of Quantum Entanglement Routing
 and Qubit Allocation via Hybrid Contextual Bandits. Unpublished
 manuscript, Rochester Institute of Technology, 2026.
 \end{thebibliography}
@@ -325,7 +322,7 @@ manuscript, Rochester Institute of Technology, 2026.
 \begin{tikzpicture}[baseline=-0.5ex, font=\scriptsize]
   \draw[-Stealth, thick, phase1blue!80, dashed] (0,0) -- (1.1,0);
   \node[right=1.15cm, font=\scriptsize\bfseries, text=phase1blue]
-    at (0,0) {Zoom-in on \textbf{Environment / Testbed} node};
+    at (0,0) {Operational expansion of the \textbf{testbed / evaluation pipeline interface}};
 \end{tikzpicture}
 \vspace{0.4em}
 
@@ -419,8 +416,8 @@ manuscript, Rochester Institute of Technology, 2026.
   \textcolor{phase4purple}{\textbf{Phase~4 (purple) --- Evaluation and Mitigation:}}
     Utility and fairness are logged per step; per-step disparity trajectories
     reveal exactly when missing context causes disparities to emerge or resolve.
-  \textbf{(b)}~Zoom-in on the double-bordered \textcolor{phase1blue}{\textbf{Environment / Testbed}}
-    node, detailing the six-layer modular pipeline.
+  \textbf{(b)}~Operational expansion of the shared testbed and evaluation pipeline,
+detailing the six-layer modular framework used to execute both domains.
   \textbf{Layer~2 (Configuration)} is the domain switch: it selects clinical simulation
     or quantum network, along with topology, scenario, algorithm family, and seeds,
     making the same pipeline run both domains without modification.
