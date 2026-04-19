@@ -1,46 +1,116 @@
-% architecture_diagram.tex
-\begin{tikzpicture}[font=\sffamily\small, >=Latex,
-  phase/.style={rectangle, draw, rounded corners, minimum height=0.70cm, text width=2.45cm, align=center, line width=0.5pt, font=\sffamily\scriptsize\bfseries},
-  stage/.style={rectangle, draw=black, rounded corners, minimum height=1.45cm, text width=2.65cm, align=center, line width=0.5pt},
-  qobj/.style={rectangle, draw=quantumteal!70, rounded corners, minimum height=1.0cm, text width=2.65cm, align=center, fill=quantumteal!8, line width=0.65pt, font=\sffamily\tiny\itshape},
-  support/.style={rectangle, draw=black, rounded corners, minimum height=0.72cm, text width=3.0cm, align=center, fill=gray!10, line width=0.45pt, font=\sffamily\scriptsize},
-  store/.style={rectangle, draw=black, rounded corners, minimum height=0.85cm, text width=4.0cm, align=center, fill=gray!8, line width=0.45pt, font=\sffamily\scriptsize},
-  datalake/.style={rectangle, draw=quantumteal!80, rounded corners=6pt, minimum height=1.05cm, text width=5.0cm, align=center, fill=quantumteal!12, line width=0.8pt, font=\sffamily\scriptsize},
-  flow/.style={->, line width=0.80pt}, ctrl/.style={->, dashed, gray, line width=0.55pt}, crispalign/.style={->, dotted, gray!65, line width=0.55pt},
-  inherit/.style={->>, double=quantumteal!30, draw=quantumteal!70, double distance=1.2pt, line width=0.55pt}]
-\node[font=\sffamily\tiny\itshape, gray] at (-2.5, 7.2) {CRISP-DM:};
-\node[phase, fill=phase1blue!18]   (ph1) at ( 0.0, 7.2) {Data\\Understanding};
-\node[phase, fill=phase1blue!18]   (ph2) at ( 3.1, 7.2) {Data\\Understanding};
-\node[phase, fill=phase2green!18]  (ph3) at ( 6.2, 7.2) {Data\\Preparation};
-\node[phase, fill=phase2green!18]  (ph4) at ( 9.3, 7.2) {Data\\Understanding};
-\node[phase, fill=phase3orange!18] (ph5) at (12.4, 7.2) {Modeling};
-\node[phase, fill=phase3orange!18] (ph6) at (15.5, 7.2) {Evaluation};
-\node[phase, fill=phase4purple!18] (ph7) at (18.6, 7.2) {Deployment};
-\node[support, fill=phase1blue!12]   (config) at ( 0.0, 5.4) {\textbf{Configuration}\\seed $\cdot$ split $\cdot$ bias\\fairness threshold};
-\node[support, fill=phase2green!12]  (cli)    at ( 9.3, 5.4) {\textbf{CLI Interface}\\per-stage commands\\\texttt{run-all / merge-check}};
-\node[support, fill=phase4purple!12] (tests)  at (18.6, 5.4) {\textbf{Validation Layer}\\unit tests $+$ smoke\\\textbf{CI push gate}};
-\node[stage, fill=phase1blue!15]   (s1) at ( 0.0, 3.1) {\textbf{1. Data}\\\textbf{Collection}\\GDrive data lake\\\scriptsize\texttt{raw\_records.json}};
-\node[stage, fill=phase1blue!15]   (s2) at ( 3.1, 3.1) {\textbf{2. Data}\\\textbf{Cleaning}\\evaluator contract\\\scriptsize\texttt{clean\_records.json}};
-\node[stage, fill=phase2green!15]  (s3) at ( 6.2, 3.1) {\textbf{3. Data}\\\textbf{Preparation}\\state\_analysis split\\\scriptsize\texttt{train/test .json}};
-\node[stage, fill=phase2green!15]  (s4) at ( 9.3, 3.1) {\textbf{4. Exploration}\\\textbf{/ Visualization}\\conditions summary\\\scriptsize\texttt{.csv + .svg}};
-\node[stage, fill=phase3orange!15] (s5) at (12.4, 3.1) {\textbf{5. Data Mining}\\experiment runner\\\scriptsize\texttt{predictions.json}};
-\node[stage, fill=phase3orange!15] (s6) at (15.5, 3.1) {\textbf{6. Evaluation}\\efficiency + fairness\\\scriptsize\texttt{evaluation.json}};
-\node[stage, fill=phase4purple!15] (s7) at (18.6, 3.1) {\textbf{7. Postprocessing}\\tables + charts\\\scriptsize\texttt{.csv + .svg + .md}};
-\draw[flow] (s1) -- (s2); \draw[flow] (s2) -- (s3); \draw[flow] (s3) -- (s4); \draw[flow] (s4) -- (s5); \draw[flow] (s5) -- (s6); \draw[flow] (s6) -- (s7);
-\node[font=\sffamily\tiny\itshape, quantumteal!80] at (-2.5, 1.1) {Quantum\\object:};
-\node[qobj] (q1) at ( 0.0, 1.1) {GoogleDriveBackupManager\\build\_registry()\\get\_latest\_state()};
-\node[qobj] (q2) at ( 3.1, 1.1) {MultiRunEvaluator\\_infer\_models\_from\_state()\\_\_eq\_\_ contract};
-\node[qobj] (q3) at ( 6.2, 1.1) {state\_analysis\\scenarios\_stats\\train/test split};
-\node[qobj] (q4) at ( 9.3, 1.1) {state\_analysis\\display\_experiment\\\_conditions()};
-\node[qobj] (q5) at (12.4, 1.1) {QuantumExperimentRunner\\run\_experiment()\\reward traces};
-\node[qobj] (q6) at (15.5, 1.1) {MultiRunEvaluator\\calculate\_scenario\\\_winner()};
-\node[qobj] (q7) at (18.6, 1.1) {visualizer.py\\final charts\\+ CSV export};
-\draw[inherit] (s1.south) -- (q1.north); \draw[inherit] (s2.south) -- (q2.north); \draw[inherit] (s3.south) -- (q3.north); \draw[inherit] (s4.south) -- (q4.north); \draw[inherit] (s5.south) -- (q5.north); \draw[inherit] (s6.south) -- (q6.north); \draw[inherit] (s7.south) -- (q7.north);
-\node[datalake] (lake) at (0.0, -0.70) {\textbf{Quantum Data Lake (Google Shared Drive)}\\\texttt{quantum\_data\_lake/\{component\}/day\_YYYYMMDD/}\\\scriptsize folder ID: \texttt{12mZyGQHD\_\_G54g2yCYIyWfXydhO3DxIt}};
-\draw[flow, quantumteal!70] (lake.north) -- (q1.south);
-\node[store] (manifest) at (14.0, -0.70) {\textbf{Pipeline Manifest}\\config copy $\cdot$ stage artifact paths\\run provenance (mirrors \texttt{backup\_registry.json})};
-\draw[flow]  (s7.south) |- (manifest.east);
-\draw[ctrl]  (s1.south) ++(0,-0.15) -- ++(0,-0.45) -| (manifest.west);
-\draw[ctrl] (config.south) -- (s1.north); \draw[ctrl] (cli.south) -- (s4.north); \draw[ctrl] (tests.south) -- (s7.north);
-\draw[crispalign] (ph1.south) -- (s1.north); \draw[crispalign] (ph2.south) -- (s2.north); \draw[crispalign] (ph3.south) -- (s3.north); \draw[crispalign] (ph4.south) -- (s4.north); \draw[crispalign] (ph5.south) -- (s5.north); \draw[crispalign] (ph6.south) -- (s6.north); \draw[crispalign] (ph7.south) -- (s7.north);
+% architecture_diagram.tex — improved (draft1)
+% Drop-in replacement; \input{architecture_diagram.tex} in the report unchanged.
+% Requires: tikz with libraries positioning, arrows.meta, fit, backgrounds
+% Colors phase1blue, phase2green, phase3orange, phase4purple must be defined
+% in the parent document (already defined in architecture_report.tex).
+
+\begin{tikzpicture}[
+  font=\sffamily\small,
+  >=Latex,
+  phase/.style={
+    rectangle, draw, rounded corners,
+    minimum height=0.75cm, text width=2.55cm, align=center,
+    line width=0.5pt, font=\sffamily\scriptsize\bfseries
+  },
+  stage/.style={
+    rectangle, draw=black, rounded corners,
+    minimum height=1.3cm, text width=2.75cm, align=center,
+    line width=0.5pt
+  },
+  support/.style={
+    rectangle, draw=black, rounded corners,
+    minimum height=0.75cm, text width=3.2cm, align=center,
+    fill=gray!10, line width=0.45pt, font=\sffamily\scriptsize
+  },
+  store/.style={
+    rectangle, draw=black, rounded corners,
+    minimum height=0.85cm, text width=3.6cm, align=center,
+    fill=gray!8, line width=0.45pt, font=\sffamily\scriptsize
+  },
+  arrow/.style={->, line width=0.75pt},
+  ctrl/.style={->, dashed, gray, line width=0.55pt},
+  phase2stage/.style={->, dotted, line width=0.55pt, gray!70}
+]
+
+%% ── Row 0: CRISP-DM phases ──────────────────────────────────────────────────
+\node[font=\sffamily\scriptsize\itshape, gray] at (-2.4, 5.6) {CRISP-DM:};
+\node[phase, fill=phase1blue!18]   (ph-du)  at (0,    5.6) {Data\\Understanding};
+\node[phase, fill=phase1blue!18]   (ph-du2) at (3.2,  5.6) {Data\\Understanding};
+\node[phase, fill=phase2green!18]  (ph-dp)  at (6.4,  5.6) {Data\\Preparation};
+\node[phase, fill=phase2green!18]  (ph-du3) at (9.6,  5.6) {Data\\Understanding};
+\node[phase, fill=phase3orange!18] (ph-mod) at (12.8, 5.6) {Modeling};
+\node[phase, fill=phase3orange!18] (ph-ev)  at (16.0, 5.6) {Evaluation};
+\node[phase, fill=phase4purple!18] (ph-dep) at (19.2, 5.6) {Deployment};
+
+%% ── Row 1: Support / control layer ─────────────────────────────────────────
+\node[support, fill=phase1blue!12]   (config) at (0,    3.6)
+  {\textbf{Configuration}\\seed $\cdot$ split $\cdot$ bias\\fairness threshold};
+\node[support, fill=phase2green!12]  (cli)    at (9.6,  3.6)
+  {\textbf{CLI Interface}\\one command per stage\\\texttt{run-all}, \texttt{merge-check}};
+\node[support, fill=phase4purple!12] (tests)  at (19.2, 3.6)
+  {\textbf{Validation Layer}\\unit tests $\cdot$ smoke run\\CI merge gate};
+
+%% ── Row 2: CRISP+ML pipeline stages ────────────────────────────────────────
+\node[stage, fill=phase1blue!15]   (collect)  at (0,    1.4)
+  {\textbf{1.~Data}\\\textbf{Collection}\\synthetic dataset\\\scriptsize raw JSON};
+\node[stage, fill=phase1blue!15]   (clean)    at (3.2,  1.4)
+  {\textbf{2.~Data}\\\textbf{Cleaning}\\schema $\cdot$ remove invalids\\\scriptsize clean JSON};
+\node[stage, fill=phase2green!15]  (prepare)  at (6.4,  1.4)
+  {\textbf{3.~Data}\\\textbf{Preparation}\\det.\ train/test split\\\scriptsize train+test JSON};
+\node[stage, fill=phase2green!15]  (explore)  at (9.6,  1.4)
+  {\textbf{4.~Exploration}\\\textbf{/ Visualization}\\group + completeness\\\scriptsize CSV + SVG};
+\node[stage, fill=phase3orange!15] (mine)     at (12.8, 1.4)
+  {\textbf{5.~Data Mining}\\lightweight model\\\scriptsize predictions JSON};
+\node[stage, fill=phase3orange!15] (evaluate) at (16.0, 1.4)
+  {\textbf{6.~Evaluation}\\utility + fairness\\\scriptsize metrics JSON};
+\node[stage, fill=phase4purple!15] (post)     at (19.2, 1.4)
+  {\textbf{7.~Results}\\\textbf{Postprocessing}\\final tables + SVG\\\scriptsize CSV + figure};
+
+%% ── Row 3: Manifest ─────────────────────────────────────────────────────────
+\node[store] (manifest) at (9.6, -0.6)
+  {\textbf{Pipeline Manifest}\\config copy $\cdot$ stage outputs\\summary metadata};
+
+%% ── Sequential pipeline flow ────────────────────────────────────────────────
+\draw[arrow] (collect)  -- (clean);
+\draw[arrow] (clean)    -- (prepare);
+\draw[arrow] (prepare)  -- (explore);
+\draw[arrow] (explore)  -- (mine);
+\draw[arrow] (mine)     -- (evaluate);
+\draw[arrow] (evaluate) -- (post);
+
+%% ── Stages → Manifest ───────────────────────────────────────────────────────
+\draw[arrow] (post.south) |- (manifest.east);
+\draw[ctrl]  (collect.south) -- ++(0,-0.4) -| (manifest.west);
+
+%% ── Control layer → pipeline ────────────────────────────────────────────────
+\draw[ctrl] (config.south) -- (collect.north);
+\draw[ctrl] (cli.south)    -- (explore.north);
+\draw[ctrl] (tests.south)  -- (post.north);
+
+%% ── CRISP-DM phase → stage ──────────────────────────────────────────────────
+\draw[phase2stage] (ph-du.south)  -- (collect.north);
+\draw[phase2stage] (ph-du2.south) -- (clean.north);
+\draw[phase2stage] (ph-dp.south)  -- (prepare.north);
+\draw[phase2stage] (ph-du3.south) -- (explore.north);
+\draw[phase2stage] (ph-mod.south) -- (mine.north);
+\draw[phase2stage] (ph-ev.south)  -- (evaluate.north);
+\draw[phase2stage] (ph-dep.south) -- (post.north);
+
+%% ── Storage contract note ───────────────────────────────────────────────────
+\node[font=\scriptsize\itshape, align=center, gray] at (9.6, -1.65) {
+  Each stage writes deterministic artifacts under
+  \texttt{results/fast\_review/<nn\_stage\_name>/}
+};
+
+%% ── Color legend ────────────────────────────────────────────────────────────
+\node[stage, fill=phase1blue!15,   text width=2.0cm, minimum height=0.45cm,
+      font=\sffamily\tiny] (leg1) at (-3.2, 1.8)  {Data Understanding};
+\node[stage, fill=phase2green!15,  text width=2.0cm, minimum height=0.45cm,
+      font=\sffamily\tiny] (leg2) at (-3.2, 1.1)  {Data Preparation};
+\node[stage, fill=phase3orange!15, text width=2.0cm, minimum height=0.45cm,
+      font=\sffamily\tiny] (leg3) at (-3.2, 0.4)  {Modeling / Eval.};
+\node[stage, fill=phase4purple!15, text width=2.0cm, minimum height=0.45cm,
+      font=\sffamily\tiny] (leg4) at (-3.2, -0.3) {Deployment};
+\node[font=\sffamily\tiny\itshape, gray] at (-3.2, -0.85) {CRISP-DM color key};
+
 \end{tikzpicture}
