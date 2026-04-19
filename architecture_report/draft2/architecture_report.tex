@@ -17,9 +17,9 @@
 \definecolor{phase3orange}{RGB}{230,126,34}
 \definecolor{phase4purple}{RGB}{155,89,182}
 
-\title{{\LARGE\textbf{Architecture of a Reproducible CRISP-DM-Aligned Review Pipeline}}\\
-{\Large\textit{Fairness-Aware Data Science Code Review Infrastructure}}\\
-{\large\texttt{(Architecture Writeup)}}}
+\title{{\LARGE\textbf{Draft 2: Architecture of a Push-Validated CRISP-DM Review Pipeline}}\\
+{\Large\textit{Fairness-Aware Data Science Review Infrastructure}}\\
+{\large\texttt{DSCI 601 Architecture Writeup}}}
 
 \author{%
 \begin{minipage}{0.48\textwidth}
@@ -35,11 +35,10 @@ Rochester Institute of Technology (RIT)\\
 \hfill
 \begin{minipage}{0.48\textwidth}
 \begin{center}
-{\bf Dr. Daniel Krutz, Travis Desell}\\
+{\bf DSCI 601 Project Context}\\
 \begin{small}
-Department of Software Engineering, Data Science\\
-RIT Research Advisors\\
-{\it dxkvse@g.rit.edu, tjdvse@g.rit.edu}
+Architecture deliverable aligned with the code-review,
+reproducibility, and research-writing expectations of the project
 \end{small}
 \end{center}
 \end{minipage}%
@@ -48,228 +47,221 @@ RIT Research Advisors\\
 \begin{document}
 \maketitle
 
-%% ─────────────────────────────────────────────────────────────
+\begin{abstract}
+This draft presents the repository as a push-validated CRISP-DM review system
+rather than as a small generic machine-learning pipeline. The architecture is
+organized around four interacting concerns: repository events that introduce new
+work, control mechanisms that orchestrate and validate that work, CRISP-DM
+phases realized as executable stages, and an artifact layer that produces the
+review evidence used in merge decisions. This framing is important because the
+project is evaluated not only on whether it runs, but on whether new work can be
+checked reproducibly as it is pushed. The resulting architecture emphasizes
+methodological traceability, deterministic execution, reviewer-visible
+artifacts, and a merge-check path that links local validation to continuous
+integration.
+\end{abstract}
+
 \section{Architecture Overview}
-%% ─────────────────────────────────────────────────────────────
 
-This architecture writeup documents the implementation repository prepared for
-the DSCI 601 code review assignment. The repository is intentionally designed as
-a small, deterministic, reviewer-safe system whose stages can be executed
-independently, inspected locally, and validated through the same merge-check
-path used in continuous integration. The design goal is therefore not raw model
-complexity. It is reproducible evidence that the repository satisfies the
-assignment's expectations for separable execution, visible intermediate
-artifacts, and test-backed reviewability.
+This architecture writeup should be read as the operational companion to the
+project's earlier approach diagram. The earlier approach artifact explains the
+project's conceptual logic and research direction. The architecture presented
+here explains how that logic is realized as a repository that checks new work as
+it is pushed, runs the same review path locally and in CI, and exposes
+sufficient evidence for another party to inspect or challenge the result.
 
-Methodologically, the repository should be described as a
-\textit{CRISP-DM-aligned} implementation rather than as a generic
-``CRISP+ML'' pipeline. CRISP-DM provides the conceptual lifecycle, while the
-repository decomposes that lifecycle into seven executable review stages that
-match the code review deliverable. In that mapping, business understanding is
-represented by the configuration, fairness objective, and reviewer-facing merge
-criteria; data understanding is operationalized through data collection and data
-exploration; data preparation is deliberately split into cleaning and
-preparation so those responsibilities remain reviewable; modeling is represented
-by the data-mining stage; evaluation remains explicit; and deployment is
-represented by results postprocessing, artifact publication, and manifest-based
-reproducibility.
+That distinction matters. A project can have a sound conceptual method and still
+be architecturally weak if its software does not preserve stage boundaries,
+artifact lineage, or reproducible review. The goal of this draft is therefore
+not to redescribe the project in broad terms, but to show how the repository
+embeds CRISP-DM into a concrete review workflow.
 
-The architecture therefore has two simultaneous logics. At the conceptual
-level, it follows the CRISP-DM lifecycle. At the implementation level, it
-exposes seven narrow stage boundaries so a reviewer can run, test, and inspect
-each step independently. This dual framing is the central architectural claim of
-the repository: it is not a loose collection of scripts, but a reproducible
-pipeline whose methodological phases, software interfaces, and output artifacts
-are intentionally aligned.
+The repository should be described as \textit{CRISP-DM-aligned}. CRISP-DM gives
+the project its methodological spine, while the software decomposes that spine
+into executable review stages that a reviewer can run independently or
+end-to-end. In practical terms, business understanding appears in the form of
+review goals, fairness thresholds, and merge criteria; data understanding is
+realized through collection and exploration; data preparation is split into
+cleaning and preparation; modeling is realized by the mining stage; evaluation
+remains explicit; and deployment is represented by reviewer-facing outputs,
+manifest generation, and merge-readiness checks.
 
-\begin{table}[t]
+The architecture therefore has a dual obligation. It must preserve the research
+logic of the project, and it must preserve the software logic needed for review.
+A weak draft can satisfy one while missing the other. This draft is designed to
+keep both visible at once.
+
+\section{Design Principles}
+
+The architecture is governed by four design principles.
+
+\textbf{Methodological traceability.} The repository should remain legible in
+CRISP-DM terms even when one conceptual phase is implemented through more than
+one executable stage.
+
+\textbf{Deterministic reviewability.} A reviewer should be able to rerun a
+compact configuration and obtain the same structure of outputs without depending
+on hidden state.
+
+\textbf{Artifact-centered evidence.} The value of the run lies not only in a
+final number or figure, but in the chain of intermediate artifacts that justify
+a merge decision.
+
+\textbf{Separation of concerns.} Repository events, orchestration, validation,
+stage execution, and evidence publication should be visible as separate
+responsibilities rather than hidden inside a monolithic script.
+
+\section{System Architecture}
+
+Figure~\ref{fig:architecture_draft2} presents the architecture as a system with
+four interacting layers: an event layer, a control and review layer, a CRISP-DM
+execution layer, and an artifact and provenance layer.
+
+\begin{figure*}[!t]
 \centering
-\caption{Mapping from CRISP-DM phases to executable review stages in the repository.}
-\label{tab:crispdm_mapping}
-\begin{tabular}{p{3.0cm} p{4.5cm}}
+\resizebox{0.99\textwidth}{!}{\input{architecture_diagram.tex}}
+\caption{Draft 2 architecture for the push-validated CRISP-DM review pipeline.
+Repository events trigger a reproducible review path; orchestration and
+validation control execution; CRISP-DM phases structure the pipeline; and the
+resulting artifacts provide the evidence used in review and merge decisions.}
+\label{fig:architecture_draft2}
+\end{figure*}
+
+\subsection{Event Layer}
+The left side of the architecture represents the point at which work enters the
+system. In this project, that entry point is not just a human pressing run on a
+single script. New work arrives through repository pushes, pull requests,
+configuration changes, and explicit developer or reviewer commands such as
+\texttt{run-all} and \texttt{merge-check}. The event layer therefore answers a
+basic architectural question: when does the repository become active as a review
+system?
+
+The answer is that a change is treated as a request for validation. In a local
+workflow that request is handled by the command-line interface. In a shared
+workflow the same request is mirrored by CI. This is why the architecture must
+be described in push-validated terms rather than as a static pipeline drawing.
+
+\subsection{Control and Review Layer}
+The control layer translates repository events into a structured execution plan.
+It includes configuration loading, command routing, stage ordering,
+reproducibility controls, test invocation, and merge policy. This layer is the
+software realization of project governance: it defines what should run, under
+what settings, and what must be true before work is considered review-ready.
+
+Two paths coexist in this layer.
+
+\textbf{Execution path.} The pipeline runs its ordered stages and records their
+outputs in a manifest.
+
+\textbf{Validation path.} Tests and merge checks confirm that the execution path
+produced structurally correct outputs and that the repository remains healthy.
+
+That separation is essential. A project can execute without being reviewable,
+but it cannot be reviewable unless validation is architected explicitly.
+
+\subsection{CRISP-DM Execution Layer}
+The middle of the architecture is the CRISP-DM execution layer. The repository
+realizes the conceptual phases through reviewable software boundaries, as shown
+in Table~\ref{tab:crisp_mapping}.
+
+\begin{table}[!t]
+\centering
+\caption{Mapping from CRISP-DM phases to executable repository stages}
+\label{tab:crisp_mapping}
+\begin{tabular}{p{2.6cm}p{4.6cm}}
 \toprule
 \textbf{CRISP-DM phase} & \textbf{Repository realization} \\
 \midrule
-Business Understanding & configuration, fairness threshold, reviewer merge criteria \\
-Data Understanding & data collection, data exploration / visualization \\
-Data Preparation & data cleaning, data preparation \\
-Modeling & data mining \\
-Evaluation & evaluation \\
-Deployment & results postprocessing, final artifacts, manifest, merge-check path \\
+Business Understanding & review objective, fairness threshold, acceptance criteria, configuration \\
+Data Understanding & data collection and data exploration / visualization \\
+Data Preparation & data cleaning and data preparation \\
+Modeling & data mining stage \\
+Evaluation & metric computation and fairness checks \\
+Deployment & results postprocessing, tables, figures, manifest, merge evidence \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-%% ─────────────────────────────────────────────────────────────
-\section{System Architecture}
-%% ─────────────────────────────────────────────────────────────
+This explicit mapping is one of the main strengths of the architecture. CRISP-DM
+is not invoked as a label only. It is translated into code paths that can be run
+and inspected. Some conceptual phases expand into multiple stages because
+reviewability benefits from finer separation. Data understanding, for example,
+remains split between collection and exploration so a reviewer can inspect both
+what enters the system and what was learned about it before modeling begins.
 
-Figure~\ref{fig:architecture} presents the system as three coupled views. The
-top layer contains the cross-cutting control mechanisms: configuration,
-command-line orchestration, and validation. The middle layer contains the seven
-executable repository stages that implement the review workflow. The bottom
-layer contains the artifact and provenance model through which each stage writes
-inspectable outputs and the pipeline records the final manifest. This framing is
-important because the architecture is being evaluated not only as software
-structure, but as a reviewer-facing reproducibility contract.
+Likewise, deployment is interpreted in the context of this deliverable. Here it
+does not primarily mean production serving. It means publishing reviewer-facing
+evidence: processed outputs, figures, tables, manifests, and merge-ready proof
+that the pipeline executed correctly.
 
-\begin{figure*}[!t]
-\centering
-\resizebox{0.98\textwidth}{!}{\input{architecture_diagram.tex}}
-\caption{CRISP-DM-aligned architecture of the reviewer-safe pipeline. The figure
-distinguishes cross-cutting control mechanisms from the seven executable review
-stages and the shared artifact/provenance layer. Together these elements make
-the workflow deterministic, stage-testable, and merge-checkable.}
-\label{fig:architecture}
-\end{figure*}
+\subsection{Artifact and Provenance Layer}
+The bottom of the architecture collects the products that matter to a reviewer:
+configuration snapshots, raw and prepared data, predictions, metrics, summary
+tables, figures, and the final manifest. These outputs are not accidental side
+effects. They are the objects through which the repository becomes auditable.
 
-\subsection{Configuration Layer}
-The configuration layer defines the parameters controlling each run. In the
-implementation repository, a typed configuration object is loaded from a single
-JSON file. The configuration records the random seed, record counts,
-train/test split, invalid-record frequency, missingness frequency, bias level,
-fairness threshold, and output directory.
+The architecture therefore treats artifacts as first-class entities. Each phase
+produces evidence, and that evidence can be followed forward into the final
+merge decision. This gives the repository a research-quality property that the
+previous draft failed to show clearly: the architecture is not only about
+execution order, but about provenance.
 
-This layer separates experiment settings from stage logic. A reviewer can
-change the run size, seed, or output location without modifying source code.
-This design also supports reproducibility: the same configuration and seed
-produce the same stage artifacts.
+\section{Component View}
 
-\subsection{Stage Layer}
-Each lifecycle step is implemented as its own concrete class under a shared
-\texttt{PipelineStage} interface. This is not merely an object-oriented style
-choice. It is the mechanism that preserves review boundaries. Each stage owns a
-narrow responsibility, a concrete input contract, a concrete output contract,
-and a corresponding testing surface. The architecture therefore maps
-methodology to software in a form that another party can validate both
-stage-by-stage and end-to-end.
+The main architectural components can be summarized as follows.
 
-\begin{itemize}
-    \item \textbf{Data Collection:} \texttt{DataCollectionStage} generates a
-    tiny synthetic dataset with the fairness-relevant fields used by the
-    project narrative: group membership, labels, feature values, and
-    controlled missingness.
-    \item \textbf{Data Cleaning:} \texttt{DataCleaningStage} validates schema,
-    removes intentionally invalid examples, and writes clean records. This
-    stage is kept separate so preprocessing is not hidden inside downstream
-    modeling logic.
-    \item \textbf{Data Preparation:} \texttt{DataPreparationStage} converts
-    clean records into deterministic train/test artifacts. The split is
-    configuration-driven so reviewers can reproduce it exactly.
-    \item \textbf{Data Exploration / Visualization:}
-    \texttt{DataExplorationStage} writes lightweight summaries of dataset
-    size, group balance, and feature completeness before modeling.
-    \item \textbf{Data Mining:} \texttt{DataMiningStage} runs the lightweight
-    model or experiment step and writes predictions. This stage is
-    intentionally small so the review workflow remains fast.
-    \item \textbf{Evaluation:} \texttt{EvaluationStage} computes utility and
-    fairness-oriented metrics from predictions, including group-aware summary
-    values required by the project.
-    \item \textbf{Results Postprocessing / Visualization:}
-    \texttt{ResultsPostprocessingStage} converts evaluation outputs into final
-    reviewer-facing CSV and SVG artifacts.
-\end{itemize}
+\textbf{Repository interface.} This includes the repository events, the CLI,
+and the reviewer-facing commands that trigger execution.
 
-The implementation treats these classes as true pipeline stages rather than as
-loosely connected helper functions. Each stage has an explicit input contract,
-an explicit output contract, and tests that verify the expected artifact exists
-and has the expected structure.
+\textbf{Configuration subsystem.} This defines deterministic run parameters such
+as seed, split ratio, threshold values, missingness controls, and output paths.
 
-\subsection{Context and Orchestration Layer}
-The orchestration layer connects stages without tightly coupling their
-implementations. A shared pipeline context carries metadata, artifact paths, and
-stage results across the run. The \texttt{ReviewPipeline} object builds the
-ordered stage list and executes it either end-to-end or until a named stopping
-point.
+\textbf{Pipeline stages.} These implement the numbered transformations that
+realize the CRISP-DM lifecycle in executable form.
 
-After execution, the orchestrator writes a manifest file containing the active
-configuration, stage outputs, and stage summaries. This manifest is the
-reproducibility record for a run: it identifies what was executed, where
-artifacts were written, and what each stage reported.
+\textbf{Validation subsystem.} This includes unit tests, smoke checks,
+merge-check execution, and CI mirroring.
 
-The same orchestrator supports both normal execution and review execution.
-Individual commands can stop at a stage for debugging, while the full
-\texttt{run-all} path executes the entire chain. This design makes the repo
-usable by both a developer checking one phase and a reviewer checking the whole
-submission.
+\textbf{Artifact and provenance subsystem.} This writes stage outputs and the
+final manifest so every run leaves an inspectable record.
 
-\subsection{Interface Layer}
-The user-facing interface is a command-line module with one command for each
-required stage plus two orchestration commands: \texttt{run-all} and
-\texttt{merge-check}. The command-line interface is part of the architecture
-because it makes the repository reviewable as software rather than as a single
-notebook. Reviewers can execute a single stage, rerun the full workflow, or
-perform the same merge validation path used by the repository.
+The architectural claim is not simply that these components exist. It is that
+they are visible as separate responsibilities. That visibility is what makes the
+repository understandable under review.
 
-The \texttt{merge-check} command is the local quality gate. It runs the quick
-pipeline and the unit tests so submitted changes can be checked before merging.
-The remote CI workflow mirrors this path, making local and pull-request
-validation consistent.
+\section{Why this Draft Improves the Previous Version}
 
-%% ─────────────────────────────────────────────────────────────
-\section{Framework and Component Choices}
-%% ─────────────────────────────────────────────────────────────
+The earlier draft was weak because it drew a compact stage sketch where a true
+system architecture was needed. That choice made the work look smaller and less
+coherent than it actually is. More importantly, it blurred the relationship
+between CRISP-DM, repository validation, and merge-readiness.
 
-The implementation intentionally uses a minimal technical stack. The pipeline
-is written with standard-library Python and a small package structure, with
-\texttt{requirements.txt} as the reviewer-facing installation path. This choice
-reduces environmental friction and avoids requiring a heavy machine-learning
-stack for a code review assignment.
+This draft corrects that in three ways.
 
-JSON is used for configuration, records, predictions, evaluation summaries, and
-manifests because it is human-readable, easy to validate, and supported without
-third-party libraries. CSV is used for summary tables because it is familiar to
-reviewers and easy to inspect. SVG is used for lightweight charts because it
-provides visual output without requiring plotting dependencies.
+\textbf{First, it restores system scale.} The diagram now shows repository
+triggers, orchestration, CRISP-DM execution, evidence generation, and merge
+decision flow in one architecture.
 
-These choices prioritize reproducibility, transparency, and short setup time
-over raw performance. That tradeoff is appropriate for this deliverable: the
-goal is not to train a large model, but to demonstrate that the project has a
-clean architecture, separable code paths, tests, and a reliable validation
-workflow.
+\textbf{Second, it reconnects the architecture to the project's broader
+approach narrative.} The architecture is presented as the operational
+realization of the earlier conceptual diagram rather than as an unrelated
+artifact.
 
-%% ─────────────────────────────────────────────────────────────
-\section{Data Storage and Reproducibility}
-%% ─────────────────────────────────────────────────────────────
+\textbf{Third, it foregrounds reviewability.} The repository is described as a
+system for checking work as it is pushed, not merely as a sequence of data
+processing steps.
 
-All artifacts are written beneath a stable output root defined by the active
-configuration. Within that root, each stage writes to its own numbered
-directory. This output design makes the workflow easy to inspect: every phase
-leaves visible artifacts, intermediate outputs can be reused, and reviewers can
-verify stage behavior without rerunning the entire system. The major artifacts
-are raw records, clean records, prepared train/test splits, exploration
-summaries, predictions, evaluation metrics, final tables, SVG figures, and the
-pipeline manifest.
-
-The output layout answers three practical questions: what configuration
-produced this run, what each stage wrote, and what final metrics or figures
-were generated. The final manifest connects those answers into a single
-provenance record. Because the repository uses deterministic configuration and
-fixed seeds, another party can reproduce the same artifacts by running the same
-commands.
-
-The expected recreation path is straightforward: create a fresh Python
-environment, install from \texttt{requirements.txt}, run the full pipeline with
-\texttt{configs/fast\_review.json}, inspect the generated results directory,
-and run \texttt{merge-check}. This reproduces the reviewer-safe workflow, its
-stage artifacts, and its validation checks.
-
-%% ─────────────────────────────────────────────────────────────
 \section{Conclusion}
-%% ─────────────────────────────────────────────────────────────
 
-The architecture emphasizes methodological clarity, determinism, and
-inspectability. Its main contribution is not algorithmic novelty, but the clean
-translation of a CRISP-DM-aligned workflow into a reviewable software artifact
-with explicit stage boundaries, reproducible outputs, and a merge-validation
-path. That is the level at which the repository should be judged, and it is the
-level at which this architecture writeup should present it.
+A strong architecture writeup should show how methodological intent, executable
+stages, artifact generation, and review decisions fit together. That is the
+central purpose of this draft.
 
-The resulting design is appropriate for the DSCI 601 code review assignment
-because it lets another party install, run, inspect, and validate the repository
-without hidden dependencies or opaque execution paths. It also provides a
-stronger foundation for future work by ensuring that the methodology narrative,
-the implementation structure, and the reviewer-facing deliverables all describe
-the same system.
+The repository should therefore be understood as a push-validated CRISP-DM
+system whose main promise is reproducible review. New work enters through
+repository events, passes through orchestration and validation, is processed by
+explicit CRISP-DM phases realized as software stages, and produces evidence that
+supports a merge decision. That framing better represents the work of the
+project and is more appropriate for a research-quality architecture deliverable.
 
 \end{document}
