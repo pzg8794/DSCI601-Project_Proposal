@@ -17,9 +17,9 @@
 \definecolor{phase3orange}{RGB}{230,126,34}
 \definecolor{phase4purple}{RGB}{155,89,182}
 
-\title{{\LARGE\textbf{Draft 2: Architecture of a Push-Validated CRISP-DM Review Pipeline}}\\
-{\Large\textit{Inherited Quantum-Storage and Analysis Architecture}}\\
-{\large\texttt{DSCI 601 Architecture Writeup}}}
+\title{{\LARGE\textbf{Architecture of a Reproducible CRISP-DM Review Pipeline}}\\
+{\Large\textit{Inherited Quantum-Storage, Notebook, and Validation Workflow}}\\
+{\large\texttt{DSCI 601 Architecture Report}}}
 
 \author{%
 \begin{minipage}{0.48\textwidth}\begin{center}
@@ -43,154 +43,328 @@ reproducibility, and inherited quantum-project tooling
 \begin{document}
 \maketitle
 
-\begin{abstract}
-This draft presents the repository as a push-validated CRISP-DM review system
-that inherits core storage and analysis behavior from the related quantum
-project rather than reimplementing every stage from scratch. The architecture is
-organized around four interacting concerns: repository events that introduce new
-work, control mechanisms that orchestrate and validate that work, CRISP-DM
-phases realized through inherited quantum objects, and an artifact layer that
-produces the review evidence used in merge decisions. In the current design,
-data collection is tied to shared-drive quantum storage, cleaning and evaluation
-are centered on the \texttt{evaluator} object, and preparation as well as mining
-are concentrated in \texttt{state\_analysis}. The resulting architecture is
-meant to show not only that the repository runs, but that work can be checked
-reproducibly as it is pushed.
-\end{abstract}
-
 \section{Architecture Overview}
-This writeup should be read as the operational companion to the project's
-earlier approach diagram. The earlier approach artifact explains the conceptual
-logic of the work. The architecture presented here explains how that logic is
-implemented as a repository that checks new work as it is pushed, reuses the
-same inherited quantum-project storage and analysis path, and exposes enough
-artifacts for another party to review the result critically.
 
-That distinction matters. A project can have a plausible conceptual method and
-still be architecturally weak if its software does not preserve stage
-boundaries, inherited responsibilities, or review evidence. The goal of this
-draft is therefore not to redescribe the project in broad terms, but to show how
-CRISP-DM is realized through concrete objects and reviewable execution paths.
+This report describes the architecture of the DSCI~601 review repository as a
+reproducible CRISP-DM-aligned system built on top of the existing
+\texttt{quantum\_project} infrastructure. The purpose of this document is not
+only to describe the code layout. It is to provide enough architectural,
+workflow, and execution detail for another party to recreate the system,
+understand how each stage works, and replicate the presented results.
 
-The repository should be described as \textit{CRISP-DM-aligned}. CRISP-DM gives
-the project its methodological backbone, while the software decomposes that
-backbone into reviewable execution points. In the present implementation,
-business understanding appears in project objectives, fairness thresholds,
-acceptance criteria, and merge policy. Data understanding begins by collecting
-from the shared-drive quantum data storage inherited from the quantum project,
-and continues through analysis-oriented exploration. Data preparation is not a
-standalone ad hoc script layer: cleaning is primarily the responsibility of the
-\texttt{evaluator} object, while preparation is concentrated in
-\texttt{state\_analysis}. Modeling or data mining is likewise handled through
-\texttt{state\_analysis}. Evaluation returns to \texttt{evaluator}. Deployment,
-in the context of this assignment, means reviewer-facing postprocessing,
-manifest generation, and merge-ready evidence.
+That last point is essential. In this project, replication is not an optional
+appendix to the architecture. The same inherited workflow that produces the
+research artifacts in \texttt{quantum\_project} also determines how this
+repository should be run and reviewed. The relevant execution paths already
+exist in the upstream project: shared-drive notebooks for interactive use,
+local installation for development and debugging, and GCP-backed scripts for
+larger-scale runs. This report therefore treats replication as part of the
+architecture itself rather than as a separate convenience feature.
 
-\section{Design Principles}
-The architecture is governed by four design principles: methodological
-traceability, deterministic reviewability, artifact-centered evidence, and an
-inheritance-aware separation of concerns between repository events,
-orchestration, validation, storage access, evaluation logic, state analysis, and
-evidence publication.
+The system is organized around four interacting concerns: high-level CRISP-DM
+context, a control layer that governs execution and validation, an inherited
+execution pipeline that processes data and produces results, and an artifact
+layer that preserves provenance and reviewer-visible evidence. The resulting
+architecture is designed to keep the code clean and executable under review
+while also preserving a path for result replication through notebooks and the
+shared data lake.
 
-\section{System Architecture}
-The architecture can be understood as a system with four interacting layers: a
-high-level CRISP-DM context layer, a control and review layer, an executable
-validation pipeline, and an artifact and provenance layer. Because the diagram
-contains dense labels and reviewer-facing detail, the full figure is placed on a
-dedicated landscape page at the end of this document so it can remain large and
-legible.
+\section{Recreating the System and Replicating Results}
 
-\subsection{Event Layer}
-The left side of the architecture represents the point at which work enters the
-system. New work arrives through repository pushes, pull requests,
-configuration changes, and explicit developer or reviewer commands such as
-\texttt{run-all} and \texttt{merge-check}. A change is treated as a request for
-validation, locally through the CLI and remotely through CI.
-
-\subsection{Control and Review Layer}
-The control layer translates repository events into a structured execution plan.
-It includes configuration loading, command routing, stage ordering,
-reproducibility controls, test invocation, and merge policy. Two paths coexist
-here: an execution path that runs ordered responsibilities and records outputs,
-and a validation path that confirms structural correctness and repository
-health.
-
-\subsection{CRISP-DM Execution Layer}
-The middle of the architecture is the CRISP-DM execution layer. The repository
-realizes the conceptual phases through inherited and project-specific software
-boundaries, as shown in Table~\ref{tab:crisp_mapping}.
+To satisfy the project requirement that another party be able to recreate the
+software and replicate the presented results, the architecture must support
+three execution paths rather than one.
 
 \begin{table}[!t]
 \centering
-\caption{Mapping from CRISP-DM phases to executable repository responsibilities}
-\label{tab:crisp_mapping}
-\begin{tabular}{p{2.6cm}p{4.6cm}}
+\caption{Supported execution and replication paths inherited from the quantum project}
+\label{tab:paths}
+\begin{tabular}{p{1.8cm}p{2.8cm}p{2.7cm}}
 \toprule
-\textbf{CRISP-DM phase} & \textbf{Repository realization} \\
+\textbf{Path} & \textbf{How it is started} & \textbf{Purpose} \\
 \midrule
-Business Understanding & review objective, fairness threshold, acceptance criteria, configuration \\
-Data Understanding & shared-drive quantum storage collection + exploratory state analysis \\
-Data Preparation & evaluator-based cleaning + state\_analysis preparation \\
-Modeling & state\_analysis mining / feature and state logic \\
-Evaluation & evaluator metrics and fairness checks \\
-Deployment & postprocessing, figures, manifest, merge evidence \\
+Colab / shared notebook & open shared notebook, mount Drive, run notebook cells & fastest replication of presented results \\
+Local installation & clone repo, create virtual environment, install dependencies, run scripts or notebooks & development and reproducible local validation \\
+GCP VM / batch path & startup script plus batch runner scripts & large runs, longer experiments, remote replication \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-This explicit mapping is one of the strengths of the architecture. CRISP-DM is
-not invoked as a label only. It is translated into code paths and object
-responsibilities that can be run and inspected. Data understanding begins with
-collection from the quantum data storage layer, which behaves as a datalake-like
-shared-drive backend. Data preparation is intentionally split by responsibility:
-cleaning belongs to \texttt{evaluator}, while preparation and mining are carried
-by \texttt{state\_analysis}. Evaluation returns to \texttt{evaluator},
-preserving one clear place for metric computation and quality judgment.
+The notebook path is especially important for this deliverable because it is the
+most direct way for another party to reproduce the reported behavior. In the
+upstream project, a user can open the shared-drive notebooks such as
+\texttt{Quantum\_MAB\_Research\_Sandbox(PROD).ipynb} or the advanced
+\texttt{H-MABs\_Eval-...} notebook, mount Google Drive, install dependencies,
+and execute the evaluator-backed workflow directly. This means the presented
+results are not tied to a private local machine. They can be regenerated from
+shared notebooks against the same shared data lake.
 
-\subsection{Artifact and Provenance Layer}
-The bottom of the architecture collects the products that matter to a reviewer:
-configuration snapshots, shared-drive data references, cleaned and prepared
-state artifacts, mined outputs, evaluation summaries, figures, and the final
-manifest. These outputs are the objects through which the repository becomes
-auditable.
+The local path is still required, because a reviewer or developer must be able
+to install the software, run tests, and inspect outputs without relying only on
+Colab. The inherited setup pattern is straightforward: clone the repository,
+create a Python virtual environment, install \texttt{requirements.txt}, and run
+a smoke or validation script. The GCP path extends the same architecture to a
+remote environment for larger or longer runs, using startup and batch scripts
+that preserve the same data and artifact conventions.
 
-\section{Component View}
-The main architectural components can be summarized as repository interface,
-configuration subsystem, quantum storage access path, evaluator object,
-state-analysis object, validation subsystem, and artifact/provenance subsystem.
-The key claim is not just that these components exist, but that their
-responsibilities are visible and coherent under review.
+The consequence for the current report is simple: the architecture must explain
+not only what each stage does, but also how users run the stages, where outputs
+are written, how results are interpreted, and how those results are shared.
 
-\section{Why this Draft Improves the Previous Version}
-The earlier draft was weak because it drew a compact stage sketch where a true
-system architecture was needed, and because it represented several phases as if
-they were generic standalone stage classes. This draft restores system scale,
-reconnects the architecture to the project's broader approach narrative, and
-foregrounds the inherited software structure of the repository.
+\section{System Architecture}
+
+Figure~\ref{fig:architecture_draft2} presents the architecture as a technical
+summary of that workflow. The figure should be read from left to right and from
+top to bottom.
+
+At the highest level, Business Understanding and Data Understanding remain
+architectural context rather than unit-test stages. They define the objectives,
+constraints, data expectations, and fairness interpretation of the project. The
+executable system begins beneath that layer. The control layer receives
+repository events or user entry paths, applies configuration and validation
+rules, and drives the actual execution stages. The execution layer performs
+collection, cleaning, preparation and exploration, mining, evaluation, and
+review delivery. The artifacts layer captures what each stage produces so that a
+reviewer can inspect provenance rather than trusting a black-box run.
+
+Because the figure is dense and is not counted against the narrative page limit,
+it is placed on its own landscape page at the end of the report. That choice is
+intentional. The architecture diagram is meant to be legible enough to function
+as a technical workflow diagram rather than a decorative sketch.
+
+\section{Detailed Description of Each Stage}
+
+\subsection{Business Understanding}
+Business Understanding is represented at the highest architectural level, not as
+part of the Git-based validation pipeline itself. It defines the project
+objective, the review criteria, and the interpretation of acceptable outputs.
+In practice, this stage determines what counts as success, which fairness or
+quality conditions matter, and what evidence has to exist before work is
+considered review-ready.
+
+This stage also defines the replication target. The architecture is not merely
+supposed to rerun arbitrary code. It is supposed to rerun the code in a way that
+reproduces the same classes of notebook outputs, evaluator summaries, plots, and
+saved state expected by the inherited research workflow.
+
+\subsection{Data Understanding}
+Data Understanding is likewise represented as a high-level layer rather than a
+CI gate. It characterizes the data source, the state semantics, and the way the
+shared-drive storage is organized. In the inherited quantum workflow, the data
+lake is a shared Google Drive structure under \texttt{quantum\_data\_lake/}
+with day-partitioned directories and component-specific subpaths. This matters
+architecturally because the current repository is not inventing a synthetic file
+system of its own. It is depending on a real upstream storage convention.
+
+Data Understanding also includes knowledge of what the saved evaluator and
+framework states mean. This is one reason \texttt{state\_analysis.py} matters:
+it is not an isolated convenience script. It consumes evaluator-produced
+structures and assumes a particular contract between saved state and analysis
+logic.
+
+\subsection{Data Collection Stage}
+The first executable stage in the pipeline is Data Collection, and this stage is
+missing if the architecture begins only at preparation. In the inherited
+workflow, collection means retrieving the relevant saved state or experiment
+artifacts from the shared-drive data lake. This is implemented through the
+backup-manager and registry logic inherited from the quantum project.
+
+At the component level, this stage relies on the backup-management path that
+uses objects such as \texttt{LocalBackupManager} and
+\texttt{GoogleDriveBackupManager}. Their role is to resolve the appropriate
+storage root, build a registry of available state, and retrieve the latest or
+matching saved artifacts. Architecturally, that means collection is not just
+``read a file.'' It is registry-based source resolution against a shared-drive
+backend.
+
+The output of this stage is a set of retrieved source references and raw or
+saved experiment state that can be inspected downstream. For replication, this
+is critical: another party must be able to locate the same upstream state and
+start from the same source layer.
+
+\subsection{Data Cleaning Stage}
+The Data Cleaning stage is handled through evaluator-owned logic rather than by
+a separate ad hoc cleaning script. This is why the report identifies the
+\texttt{evaluator} object as central. Cleaning in this architecture means
+validating whether retrieved state is structurally compatible, whether schema and
+contract assumptions hold, and whether invalid or mismatched state should be
+removed from the downstream path.
+
+In the inherited quantum workflow, evaluator logic is already responsible for
+checking scenario structure, model compatibility, and summary validity. The
+architecture therefore reuses that responsibility instead of duplicating it.
+This gives the cleaning stage a concrete owner and keeps quality validation near
+the same object that later computes evaluation summaries.
+
+The output of this stage is a cleaned and validated state representation,
+rather than merely a loosely filtered file set. That distinction matters for
+replication, because users must know that the architecture is not only copying
+raw state forward; it is normalizing it into a usable contract for the later
+analysis stages.
+
+\subsection{Data Preparation and Exploration Stage}
+The next stage combines preparation and exploration because both are centered on
+\texttt{state\_analysis} and related inherited analytical routines. Preparation
+in this architecture means transforming the cleaned evaluator state into a form
+that can be used for stage-specific analysis or notebook reproduction.
+Exploration means summarizing the available scenarios, runs, and intermediate
+statistics so the user can understand what has been loaded before downstream
+mining or comparison begins.
+
+At the component level, this stage relies on \texttt{state\_analysis} to consume
+evaluator summaries and produce flattened or scenario-oriented structures. This
+is also the point where the architecture must respect the upstream contract:
+\texttt{state\_analysis.py} does not replace evaluator summaries; it consumes
+and restructures them. The architecture is stronger when that boundary is made
+explicit.
+
+The outputs of this stage include prepared tables, scenario summaries, and any
+intermediate analysis artifacts that make notebook-based replication and
+reviewer inspection easier.
+
+\subsection{Modeling and Mining Stage}
+The Modeling or Mining stage remains present even though this repository is not
+trying to be a large standalone training framework. In the inherited system,
+mining corresponds to the analytical or experiment-running logic that produces
+predictions, traces, or derived state. Depending on the path a user takes, this
+may be driven through notebooks or through the upstream experiment-runner path.
+
+Architecturally, this stage is the point where prepared data become substantive
+results rather than only organized state. It remains important to describe it,
+even when the computational heavy lifting is inherited from upstream code,
+because this is the stage where replication produces the core outputs that later
+figures and summaries are built from.
+
+\subsection{Evaluation Stage}
+Evaluation is again evaluator-owned. The evaluator computes metrics, summarizes
+scenario-level results, and determines winner-style comparisons or performance
+summaries. This is one of the strongest inherited design choices because it
+keeps the logic for judgment close to the object responsible for maintaining the
+state contract.
+
+For the current project, this stage should be read as the formal quality and
+fairness summary stage. It is the place where utility-oriented performance,
+scenario-level comparison, and fairness-aware evidence become explicit outputs.
+This stage is also central for replication because it defines what users should
+expect to see when they rerun the notebooks or scripts: not only raw outputs,
+but comparable and interpretable summary metrics.
+
+\subsection{Review Delivery and Replication Outputs}
+The final stage is more than deployment in the narrow software-engineering
+sense. In this architecture it includes figure generation, exported tables,
+notebook-visible outputs, saved manifests, and shared results that can be viewed
+by collaborators or reviewers.
+
+This is also where the requirement to replicate the presented results is
+satisfied operationally. The notebooks, visualizer path, framework-state
+outputs, model-state outputs, and shared-drive exports are all part of the
+review-delivery stage. They are what allow another party to interpret and share
+what the system produced.
+
+The outputs of this stage therefore include figures, tables, notebooks that can
+be rerun, and a manifest or equivalent provenance record that ties the run
+together.
+
+\section{User Workflow: Setup, Run, Interpret, and Share}
+
+\subsection{Setup and Installation}
+A user can interact with the system through three supported paths.
+
+\textbf{Notebook path.} The user opens the shared-drive notebook, mounts Google
+Drive, installs dependencies in the notebook environment, and runs the relevant
+cells. This is the fastest path for reproducing reported results because the
+notebooks already point at the same shared infrastructure.
+
+\textbf{Local path.} The user clones the repository, creates a virtual
+environment, installs dependencies from \texttt{requirements.txt}, and runs a
+smoke or validation script. This is the best path for development, debugging,
+and repository review.
+
+\textbf{GCP path.} The user provisions or enters a VM, runs the startup script,
+and then uses the batch or dynamic runner scripts for longer experiments. This
+path is appropriate when notebook-scale execution is insufficient.
+
+\subsection{How the User Runs the System}
+Once setup is complete, the user chooses a stage or full workflow. In the local
+path, that usually means running the quick test or full validation script. In
+the notebook path, it means configuring an experiment in the notebook and
+executing the evaluator-backed workflow. In the GCP path, it means invoking the
+startup and batch scripts and allowing the run to complete remotely.
+
+The important architectural point is that these paths do not lead to different
+systems. They are different entry points into the same inherited execution
+structure. That is why the diagram includes notebooks and scripted runs as entry
+paths rather than pretending the CLI is the only legitimate interface.
+
+\subsection{How the User Interprets Results}
+The user interprets results through the same artifact conventions used by the
+upstream project. Framework-state and model-state outputs are written under the
+shared data lake, often in day-partitioned directories. Notebooks and visualizer
+logic then consume those results to generate plots, scenario comparisons, and
+summaries.
+
+This means interpretation is not an afterthought. It is architected into the
+workflow: results are written in a way that can be loaded by notebooks,
+visualizers, and downstream analysis scripts. Another party can therefore not
+only rerun the workflow but also inspect how the outputs should be read.
+
+\subsection{How the User Shares Results}
+Because the data lake is shared-drive based, a completed run can be made visible
+to collaborators without inventing a second export pipeline. Results written to
+\texttt{quantum\_data\_lake/}, including framework state, model state, tables,
+and figures, are already placed in a common location that supports team
+inspection and notebook-based reanalysis.
+
+From an architectural perspective, this is a major strength. Sharing is built
+into the storage model itself rather than being deferred to manual file copying.
+That directly supports the project requirement that another party be able to
+recreate and replicate the work.
+
+\section{Why This Version Better Satisfies the Requirements}
+
+The current version improves over the earlier draft in four important ways.
+
+First, it removes the paper-style abstract and keeps the document aligned with a
+course architecture report rather than a research paper submission.
+
+Second, it explicitly addresses recreation and replication. The report now
+explains how another party installs or accesses the system, how they run it, how
+they interpret outputs, and how they share results.
+
+Third, it explains the diagram in detail. Each stage now has a concrete role,
+concrete inherited components, and concrete outputs rather than only a generic
+label.
+
+Fourth, it corrects the pipeline description itself. Data Collection is now a
+real execution stage in the architecture rather than being collapsed into a
+source box or omitted entirely.
 
 \section{Conclusion}
-A strong architecture writeup should show how methodological intent, inherited
-software responsibilities, artifact generation, and review decisions fit
-together. The repository should therefore be understood as a push-validated
-CRISP-DM system whose main promise is reproducible review. New work enters
-through repository events, passes through orchestration and validation, is
-processed by explicit CRISP-DM responsibilities realized through the quantum
-storage path, \texttt{evaluator}, and \texttt{state\_analysis}, and produces
-evidence that supports a merge decision.
+
+A strong architecture report for this project must do more than show a diagram.
+It must make clear how the inherited quantum tooling, the shared-drive data
+lake, the evaluator and state-analysis path, the notebooks, the local scripts,
+and the validation workflow fit together into one reproducible system.
+
+This version therefore frames the repository as a CRISP-DM-aligned review and
+replication pipeline. Another party can recreate the software through local or
+GCP setup, replicate the presented results through the shared notebooks and data
+lake, understand each stage through the detailed architectural description, and
+inspect the resulting artifacts through the shared output structure. That is the
+level of detail the assignment requires.
 
 \clearpage
 \begin{landscape}
 \thispagestyle{plain}
 \begin{figure}[p]
 \centering
-\resizebox{0.96\linewidth}{!}{\input{architecture_diagram.tex}}
-\caption{Draft 2 architecture for the push-validated CRISP-DM review pipeline.
-Business Understanding and Data Understanding remain architectural context at
-the highest level, while the executable Git validation pipeline begins with the
-clean code path. The control layer triggers and validates execution, the
-execution layer transforms inherited inputs into reviewer-facing outputs, and
-the artifacts layer provides the evidence used in merge decisions.}
+\resizebox{0.98\linewidth}{!}{\input{architecture_diagram.tex}}
+\caption{Architecture of the inherited CRISP-DM review and replication pipeline.
+Business Understanding and Data Understanding remain architectural context,
+while the executable workflow starts with collection from the shared-drive
+source layer. Users may enter through CLI, notebooks, local scripts, Colab, or
+GCP. The same inherited stages then produce reviewer-visible evidence,
+replication outputs, and shared results.}
 \label{fig:architecture_draft2}
 \end{figure}
 \end{landscape}
