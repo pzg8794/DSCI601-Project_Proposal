@@ -28,6 +28,10 @@ _minted*
 !ethics_fairness_report/ethics_fairness_report.pdf
 !approach/approach-writeup.pdf
 !proposal/proposal.pdf
+!approach_report/approach-writeup.pdf
+!proposal_report/proposal.pdf
+!proposal_report/revised-proposal-report/revised-project-proposal.pdf
+!survey_report/survey-related-work.pdf
 !presentation/DSCI601_Project_Proposal_Presentation_2026_beamer.pdf
 
 # Shareable-only repo view (keep working materials local)
@@ -50,6 +54,15 @@ approach/draft2/
 # Approach internal notes (keep only the final deliverables)
 approach/*.md
 !approach/CHANGES.md
+
+# Shareable report folders (track only final deliverables and canonical sources)
+approach_report/draft/
+approach_report/draft2/
+approach_report/*.md
+!approach_report/CHANGES.md
+proposal_report/*.md
+proposal_report/revised-proposal-report/.DS_Store
+survey_report/*.md
 
 # OS/editor junk
 .DS_Store
