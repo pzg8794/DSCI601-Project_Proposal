@@ -18,7 +18,7 @@
 \definecolor{phase4purple}{RGB}{155,89,182}
 
 \title{{\LARGE\textbf{Draft 2: Architecture of a Push-Validated CRISP-DM Review Pipeline}}\\
-{\Large\textit{Fairness-Aware Data Science Review Infrastructure}}\\
+{\Large\textit{Inherited Quantum-Storage and Analysis Architecture}}\\
 {\large\texttt{DSCI 601 Architecture Writeup}}}
 
 \author{%
@@ -37,8 +37,8 @@ Rochester Institute of Technology (RIT)\\
 \begin{center}
 {\bf DSCI 601 Project Context}\\
 \begin{small}
-Architecture deliverable aligned with the code-review,
-reproducibility, and research-writing expectations of the project
+Architecture deliverable aligned with code review,
+reproducibility, and inherited quantum-project tooling
 \end{small}
 \end{center}
 \end{minipage}%
@@ -49,55 +49,60 @@ reproducibility, and research-writing expectations of the project
 
 \begin{abstract}
 This draft presents the repository as a push-validated CRISP-DM review system
-rather than as a small generic machine-learning pipeline. The architecture is
+that inherits core storage and analysis behavior from the related quantum
+project rather than reimplementing every stage from scratch. The architecture is
 organized around four interacting concerns: repository events that introduce new
 work, control mechanisms that orchestrate and validate that work, CRISP-DM
-phases realized as executable stages, and an artifact layer that produces the
-review evidence used in merge decisions. This framing is important because the
-project is evaluated not only on whether it runs, but on whether new work can be
-checked reproducibly as it is pushed. The resulting architecture emphasizes
-methodological traceability, deterministic execution, reviewer-visible
-artifacts, and a merge-check path that links local validation to continuous
-integration.
+phases realized through inherited quantum objects, and an artifact layer that
+produces the review evidence used in merge decisions. In the current design,
+data collection is tied to shared-drive quantum storage, cleaning and evaluation
+are centered on the \texttt{evaluator} object, and preparation as well as mining
+are concentrated in \texttt{state\_analysis}. The resulting architecture is
+meant to show not only that the repository runs, but that work can be checked
+reproducibly as it is pushed.
 \end{abstract}
 
 \section{Architecture Overview}
 
-This architecture writeup should be read as the operational companion to the
-project's earlier approach diagram. The earlier approach artifact explains the
-project's conceptual logic and research direction. The architecture presented
-here explains how that logic is realized as a repository that checks new work as
-it is pushed, runs the same review path locally and in CI, and exposes
-sufficient evidence for another party to inspect or challenge the result.
+This writeup should be read as the operational companion to the project's
+earlier approach diagram. The earlier approach artifact explains the conceptual
+logic of the work. The architecture presented here explains how that logic is
+implemented as a repository that checks new work as it is pushed, reuses the
+same inherited quantum-project storage and analysis path, and exposes enough
+artifacts for another party to review the result critically.
 
-That distinction matters. A project can have a sound conceptual method and still
-be architecturally weak if its software does not preserve stage boundaries,
-artifact lineage, or reproducible review. The goal of this draft is therefore
-not to redescribe the project in broad terms, but to show how the repository
-embeds CRISP-DM into a concrete review workflow.
+That distinction matters. A project can have a plausible conceptual method and
+still be architecturally weak if its software does not preserve stage
+boundaries, inherited responsibilities, or review evidence. The goal of this
+draft is therefore not to redescribe the project in broad terms, but to show how
+CRISP-DM is realized through concrete objects and reviewable execution paths.
 
 The repository should be described as \textit{CRISP-DM-aligned}. CRISP-DM gives
-the project its methodological spine, while the software decomposes that spine
-into executable review stages that a reviewer can run independently or
-end-to-end. In practical terms, business understanding appears in the form of
-review goals, fairness thresholds, and merge criteria; data understanding is
-realized through collection and exploration; data preparation is split into
-cleaning and preparation; modeling is realized by the mining stage; evaluation
-remains explicit; and deployment is represented by reviewer-facing outputs,
-manifest generation, and merge-readiness checks.
+the project its methodological backbone, while the software decomposes that
+backbone into reviewable execution points. In the present implementation,
+business understanding appears in project objectives, fairness thresholds,
+acceptance criteria, and merge policy. Data understanding begins by collecting
+from the shared-drive quantum data storage inherited from the quantum project,
+and continues through analysis-oriented exploration. Data preparation is not a
+standalone ad hoc script layer: cleaning is primarily the responsibility of the
+\texttt{evaluator} object, while preparation is concentrated in
+\texttt{state\_analysis}. Modeling or data mining is likewise handled through
+\texttt{state\_analysis}. Evaluation returns to \texttt{evaluator}. Deployment,
+in the context of this assignment, means reviewer-facing postprocessing,
+manifest generation, and merge-ready evidence.
 
 The architecture therefore has a dual obligation. It must preserve the research
-logic of the project, and it must preserve the software logic needed for review.
-A weak draft can satisfy one while missing the other. This draft is designed to
-keep both visible at once.
+logic of the project, and it must preserve the inherited software logic on which
+that project already depends. A weak draft can satisfy one while missing the
+other. This draft is designed to keep both visible at once.
 
 \section{Design Principles}
 
 The architecture is governed by four design principles.
 
 \textbf{Methodological traceability.} The repository should remain legible in
-CRISP-DM terms even when one conceptual phase is implemented through more than
-one executable stage.
+CRISP-DM terms even when one conceptual phase is implemented through inherited
+objects rather than newly written stage classes.
 
 \textbf{Deterministic reviewability.} A reviewer should be able to rerun a
 compact configuration and obtain the same structure of outputs without depending
@@ -107,9 +112,10 @@ on hidden state.
 final number or figure, but in the chain of intermediate artifacts that justify
 a merge decision.
 
-\textbf{Separation of concerns.} Repository events, orchestration, validation,
-stage execution, and evidence publication should be visible as separate
-responsibilities rather than hidden inside a monolithic script.
+\textbf{Inheritance-aware separation of concerns.} Repository events,
+orchestration, validation, storage access, evaluation logic, state analysis, and
+evidence publication should be visible as separate responsibilities rather than
+collapsed into one generic pipeline box.
 
 \section{System Architecture}
 
@@ -122,15 +128,16 @@ execution layer, and an artifact and provenance layer.
 \resizebox{0.99\textwidth}{!}{\input{architecture_diagram.tex}}
 \caption{Draft 2 architecture for the push-validated CRISP-DM review pipeline.
 Repository events trigger a reproducible review path; orchestration and
-validation control execution; CRISP-DM phases structure the pipeline; and the
-resulting artifacts provide the evidence used in review and merge decisions.}
+validation control execution; inherited quantum-project objects realize the
+CRISP-DM phases; and the resulting artifacts provide the evidence used in review
+and merge decisions.}
 \label{fig:architecture_draft2}
 \end{figure*}
 
 \subsection{Event Layer}
 The left side of the architecture represents the point at which work enters the
-system. In this project, that entry point is not just a human pressing run on a
-single script. New work arrives through repository pushes, pull requests,
+system. In this project, that entry point is not simply a human pressing run on
+a single script. New work arrives through repository pushes, pull requests,
 configuration changes, and explicit developer or reviewer commands such as
 \texttt{run-all} and \texttt{merge-check}. The event layer therefore answers a
 basic architectural question: when does the repository become active as a review
@@ -144,14 +151,15 @@ be described in push-validated terms rather than as a static pipeline drawing.
 \subsection{Control and Review Layer}
 The control layer translates repository events into a structured execution plan.
 It includes configuration loading, command routing, stage ordering,
-reproducibility controls, test invocation, and merge policy. This layer is the
-software realization of project governance: it defines what should run, under
-what settings, and what must be true before work is considered review-ready.
+reproducibility controls, test invocation, and merge policy. In this project it
+also includes the inheritance path borrowed from the quantum project: the review
+pipeline is not built in isolation, but layered on top of established storage
+and analysis conventions.
 
 Two paths coexist in this layer.
 
-\textbf{Execution path.} The pipeline runs its ordered stages and records their
-outputs in a manifest.
+\textbf{Execution path.} The pipeline runs its ordered responsibilities and
+records outputs in a manifest.
 
 \textbf{Validation path.} Tests and merge checks confirm that the execution path
 produced structurally correct outputs and that the repository remains healthy.
@@ -161,63 +169,81 @@ but it cannot be reviewable unless validation is architected explicitly.
 
 \subsection{CRISP-DM Execution Layer}
 The middle of the architecture is the CRISP-DM execution layer. The repository
-realizes the conceptual phases through reviewable software boundaries, as shown
-in Table~\ref{tab:crisp_mapping}.
+realizes the conceptual phases through inherited and project-specific software
+boundaries, as shown in Table~\ref{tab:crisp_mapping}.
 
 \begin{table}[!t]
 \centering
-\caption{Mapping from CRISP-DM phases to executable repository stages}
+\caption{Mapping from CRISP-DM phases to executable repository responsibilities}
 \label{tab:crisp_mapping}
 \begin{tabular}{p{2.6cm}p{4.6cm}}
 \toprule
 \textbf{CRISP-DM phase} & \textbf{Repository realization} \\
 \midrule
 Business Understanding & review objective, fairness threshold, acceptance criteria, configuration \\
-Data Understanding & data collection and data exploration / visualization \\
-Data Preparation & data cleaning and data preparation \\
-Modeling & data mining stage \\
-Evaluation & metric computation and fairness checks \\
-Deployment & results postprocessing, tables, figures, manifest, merge evidence \\
+Data Understanding & shared-drive quantum storage collection + exploratory state analysis \\
+Data Preparation & evaluator-based cleaning + state\_analysis preparation \\
+Modeling & state\_analysis mining / feature and state logic \\
+Evaluation & evaluator metrics and fairness checks \\
+Deployment & postprocessing, figures, manifest, merge evidence \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-This explicit mapping is one of the main strengths of the architecture. CRISP-DM
-is not invoked as a label only. It is translated into code paths that can be run
-and inspected. Some conceptual phases expand into multiple stages because
-reviewability benefits from finer separation. Data understanding, for example,
-remains split between collection and exploration so a reviewer can inspect both
-what enters the system and what was learned about it before modeling begins.
+This explicit mapping is one of the strengths of the architecture. CRISP-DM is
+not invoked as a label only. It is translated into code paths and object
+responsibilities that can be run and inspected. The mapping also corrects a
+major weakness of the earlier draft: it no longer implies that every stage is a
+repo-local abstraction. Instead, it acknowledges that the project inherits key
+behavior from the quantum code path.
 
-Likewise, deployment is interpreted in the context of this deliverable. Here it
-does not primarily mean production serving. It means publishing reviewer-facing
-evidence: processed outputs, figures, tables, manifests, and merge-ready proof
-that the pipeline executed correctly.
+Data understanding begins with collection from the quantum data storage layer,
+which behaves as a datalake-like shared-drive backend. This is architecturally
+important because collection is no longer a synthetic placeholder; it is a real
+integration concern. Exploration remains close to \texttt{state\_analysis},
+which makes that object part of both understanding and downstream preparation.
+
+Data preparation is intentionally split by responsibility. Cleaning belongs to
+\texttt{evaluator}, which already owns the logic for determining whether states
+or outputs satisfy validity expectations. Preparation then moves into
+\texttt{state\_analysis}, where the cleaned data are structured for downstream
+analysis. Modeling or data mining is also centered on \texttt{state\_analysis},
+which is appropriate because the same object already mediates state-level
+interpretation and analytical transformation. Evaluation returns to
+\texttt{evaluator}, preserving one clear place for metric computation and
+quality judgment.
 
 \subsection{Artifact and Provenance Layer}
 The bottom of the architecture collects the products that matter to a reviewer:
-configuration snapshots, raw and prepared data, predictions, metrics, summary
-tables, figures, and the final manifest. These outputs are not accidental side
-effects. They are the objects through which the repository becomes auditable.
+configuration snapshots, shared-drive data references, cleaned and prepared
+state artifacts, mined outputs, evaluation summaries, figures, and the final
+manifest. These outputs are not accidental side effects. They are the objects
+through which the repository becomes auditable.
 
 The architecture therefore treats artifacts as first-class entities. Each phase
 produces evidence, and that evidence can be followed forward into the final
 merge decision. This gives the repository a research-quality property that the
-previous draft failed to show clearly: the architecture is not only about
-execution order, but about provenance.
+earlier draft failed to show clearly: the architecture is not only about
+execution order, but about provenance across inherited tools.
 
 \section{Component View}
 
 The main architectural components can be summarized as follows.
 
-\textbf{Repository interface.} This includes the repository events, the CLI,
-and the reviewer-facing commands that trigger execution.
+\textbf{Repository interface.} This includes repository events, the CLI, and
+reviewer-facing commands such as \texttt{run-all} and \texttt{merge-check}.
 
 \textbf{Configuration subsystem.} This defines deterministic run parameters such
-as seed, split ratio, threshold values, missingness controls, and output paths.
+as thresholds, seeds, output paths, and review rules.
 
-\textbf{Pipeline stages.} These implement the numbered transformations that
-realize the CRISP-DM lifecycle in executable form.
+\textbf{Quantum storage access path.} This inherited path is responsible for
+collecting data from the shared-drive quantum storage layer.
+
+\textbf{Evaluator object.} This is the central object for cleaning and
+ evaluation responsibilities.
+
+\textbf{State analysis object.} This object carries exploration, preparation,
+and mining responsibilities.
 
 \textbf{Validation subsystem.} This includes unit tests, smoke checks,
 merge-check execution, and CI mirroring.
@@ -226,42 +252,44 @@ merge-check execution, and CI mirroring.
 final manifest so every run leaves an inspectable record.
 
 The architectural claim is not simply that these components exist. It is that
-they are visible as separate responsibilities. That visibility is what makes the
-repository understandable under review.
+their responsibilities are visible and coherent. That visibility is what makes
+the repository understandable under review.
 
 \section{Why this Draft Improves the Previous Version}
 
 The earlier draft was weak because it drew a compact stage sketch where a true
-system architecture was needed. That choice made the work look smaller and less
-coherent than it actually is. More importantly, it blurred the relationship
-between CRISP-DM, repository validation, and merge-readiness.
+system architecture was needed, and because it represented several phases as if
+they were generic standalone stage classes. That made the work look smaller,
+less grounded, and less connected to the actual inherited code path than it
+really is.
 
 This draft corrects that in three ways.
 
 \textbf{First, it restores system scale.} The diagram now shows repository
-triggers, orchestration, CRISP-DM execution, evidence generation, and merge
-decision flow in one architecture.
+triggers, orchestration, CRISP-DM execution, inherited object responsibilities,
+evidence generation, and merge decision flow in one architecture.
 
 \textbf{Second, it reconnects the architecture to the project's broader
 approach narrative.} The architecture is presented as the operational
 realization of the earlier conceptual diagram rather than as an unrelated
 artifact.
 
-\textbf{Third, it foregrounds reviewability.} The repository is described as a
-system for checking work as it is pushed, not merely as a sequence of data
-processing steps.
+\textbf{Third, it foregrounds inherited software structure.} The repository is
+described as a system that reuses quantum-project storage and object logic,
+rather than pretending everything is implemented from scratch locally.
 
 \section{Conclusion}
 
-A strong architecture writeup should show how methodological intent, executable
-stages, artifact generation, and review decisions fit together. That is the
-central purpose of this draft.
+A strong architecture writeup should show how methodological intent, inherited
+software responsibilities, artifact generation, and review decisions fit
+together. That is the central purpose of this draft.
 
 The repository should therefore be understood as a push-validated CRISP-DM
 system whose main promise is reproducible review. New work enters through
 repository events, passes through orchestration and validation, is processed by
-explicit CRISP-DM phases realized as software stages, and produces evidence that
-supports a merge decision. That framing better represents the work of the
+explicit CRISP-DM responsibilities realized through the quantum storage path,
+\texttt{evaluator}, and \texttt{state\_analysis}, and produces evidence that
+supports a merge decision. That framing better represents the actual work of the
 project and is more appropriate for a research-quality architecture deliverable.
 
 \end{document}
