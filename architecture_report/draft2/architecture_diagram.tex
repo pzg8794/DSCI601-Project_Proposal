@@ -1,120 +1,109 @@
-% Revised architecture diagram for the DSCI601 architecture report.
-% This version fixes the broken stage flow, makes the cross-cutting layers
-% explicit, and frames the repository as a CRISP-DM-aligned review pipeline.
+% Research-style architecture diagram for the DSCI601 draft2 package.
+% This version treats the repository as a push-validated CRISP-DM review system
+% rather than as a small standalone stage sketch.
 
 \begin{tikzpicture}[
   font=\sffamily,
   >=Latex,
-  support/.style={
-    rectangle,
-    draw=black,
-    rounded corners,
-    minimum height=0.95cm,
-    text width=3.2cm,
-    align=center,
-    fill=gray!10,
-    line width=0.45pt
-  },
-  stage/.style={
-    rectangle,
-    draw=black,
-    rounded corners,
-    minimum height=1.2cm,
-    text width=2.25cm,
-    align=center,
-    line width=0.45pt
-  },
-  store/.style={
-    rectangle,
-    draw=black,
-    rounded corners,
-    minimum height=1.0cm,
-    text width=12.8cm,
-    align=center,
-    fill=gray!8,
-    line width=0.45pt
-  },
-  framebox/.style={
-    rectangle,
-    draw=black!45,
-    rounded corners,
-    inner sep=8pt,
-    line width=0.4pt
-  },
-  arrow/.style={->, line width=0.75pt},
-  dashedarrow/.style={->, dashed, line width=0.6pt},
-  note/.style={font=\scriptsize, align=center}
+  layerbox/.style={rectangle, draw=black!50, rounded corners, inner sep=8pt, line width=0.45pt},
+  event/.style={rectangle, draw=black, rounded corners, minimum height=1.05cm, text width=3.2cm, align=center, fill=gray!10, line width=0.5pt},
+  control/.style={rectangle, draw=black, rounded corners, minimum height=1.15cm, text width=3.5cm, align=center, fill=gray!8, line width=0.5pt},
+  phase/.style={rectangle, draw=black, rounded corners, minimum height=1.55cm, text width=2.85cm, align=center, line width=0.55pt},
+  artifact/.style={rectangle, draw=black, rounded corners, minimum height=1.00cm, text width=2.8cm, align=center, fill=gray!6, line width=0.45pt},
+  decision/.style={rectangle, draw=black, rounded corners, minimum height=1.20cm, text width=3.2cm, align=center, fill=gray!12, line width=0.55pt},
+  flow/.style={->, line width=0.8pt},
+  trace/.style={->, dashed, line width=0.65pt},
+  lab/.style={font=\scriptsize, align=center}
 ]
 
-% ─────────────────────────────────────────────────────────────
-% Support / control layer
-% ─────────────────────────────────────────────────────────────
-\node[support, fill=phase1blue!12] (config) at (2.7, 2.2)
-  {\textbf{Configuration}\\seed, split, missingness,\\fairness threshold};
+% ------------------------------------------------------------------
+% Event layer
+% ------------------------------------------------------------------
+\node[event] (push) at (0.0, 4.8)
+  {\textbf{Repository events}\\push, pull request,\\changed pipeline code};
+\node[event] (cmd) at (0.0, 2.9)
+  {\textbf{Developer / reviewer entry points}\\stage commands,\\\texttt{run-all}, \texttt{merge-check}};
+\node[layerbox, fit=(push)(cmd), label={[font=\small]above:Event layer}] (eventframe) {};
 
-\node[support, fill=phase2green!12] (cli) at (8.1, 2.2)
-  {\textbf{CLI Interface}\\stage commands,\\\texttt{run-all}, \texttt{merge-check}};
+% ------------------------------------------------------------------
+% Control layer
+% ------------------------------------------------------------------
+\node[control, fill=phase1blue!12] (policy) at (4.2, 4.8)
+  {\textbf{Review policy \& configuration}\\seed, split, missingness,\\fairness threshold, acceptance rules};
+\node[control, fill=phase2green!12] (orch) at (8.6, 4.8)
+  {\textbf{Orchestration \& CLI}\\\texttt{ReviewPipeline}, stage ordering,\\manifest writing, stopping points};
+\node[control, fill=phase4purple!12] (val) at (13.0, 4.8)
+  {\textbf{Validation path}\\unit tests, smoke checks,\\CI mirror of local merge-check};
+\node[decision] (gate) at (17.5, 4.8)
+  {\textbf{Merge / review decision}\\accept, revise, or reject\\based on run evidence};
+\node[layerbox, fit=(policy)(gate), label={[font=\small]above:Control and review layer}] (controlframe) {};
 
-\node[support, fill=phase4purple!12] (tests) at (13.5, 2.2)
-  {\textbf{Validation Layer}\\unit tests, smoke run,\\CI merge gate};
+% ------------------------------------------------------------------
+% CRISP-DM execution layer
+% ------------------------------------------------------------------
+\node[phase, fill=phase1blue!16] (bu) at (1.0, 1.2)
+  {\textbf{Business}\\\textbf{Understanding}\\\scriptsize fairness objective\\\scriptsize merge criteria};
+\node[phase, fill=phase1blue!16] (du) at (4.4, 1.2)
+  {\textbf{Data}\\\textbf{Understanding}\\\scriptsize collection +\\\scriptsize exploration};
+\node[phase, fill=phase2green!16] (dp) at (7.8, 1.2)
+  {\textbf{Data}\\\textbf{Preparation}\\\scriptsize cleaning +\\\scriptsize preparation};
+\node[phase, fill=phase3orange!16] (model) at (11.2, 1.2)
+  {\textbf{Modeling}\\\scriptsize data mining\\\scriptsize stage};
+\node[phase, fill=phase3orange!16] (eval) at (14.6, 1.2)
+  {\textbf{Evaluation}\\\scriptsize utility + fairness\\\scriptsize checks};
+\node[phase, fill=phase4purple!16] (deploy) at (18.0, 1.2)
+  {\textbf{Deployment /}\\\textbf{Review delivery}\\\scriptsize postprocess + manifest\\\scriptsize reviewer outputs};
+\node[layerbox, fit=(bu)(deploy), label={[font=\small]above:CRISP-DM execution layer}] (phaseframe) {};
 
-% ─────────────────────────────────────────────────────────────
-% Executable stage layer
-% ─────────────────────────────────────────────────────────────
-\node[stage, fill=phase1blue!16] (collect) at (0.0, 0)
-  {\textbf{1. Data}\\\textbf{Collection}\\\scriptsize raw JSON};
+% ------------------------------------------------------------------
+% Artifact layer
+% ------------------------------------------------------------------
+\node[artifact] (a0) at (1.0, -1.4)
+  {config snapshot\\review policy};
+\node[artifact] (a1) at (4.4, -1.4)
+  {raw records\\EDA summaries};
+\node[artifact] (a2) at (7.8, -1.4)
+  {clean records\\train/test artifacts};
+\node[artifact] (a3) at (11.2, -1.4)
+  {predictions\\run outputs};
+\node[artifact] (a4) at (14.6, -1.4)
+  {metrics\\fairness evidence};
+\node[artifact] (a5) at (18.0, -1.4)
+  {tables, figures,\\\texttt{pipeline\_manifest.json}};
+\node[layerbox, fit=(a0)(a5), label={[font=\small]above:Artifact and provenance layer}] (artifactframe) {};
 
-\node[stage, fill=phase1blue!16] (clean) at (2.7, 0)
-  {\textbf{2. Data}\\\textbf{Cleaning}\\\scriptsize clean JSON};
+% ------------------------------------------------------------------
+% Main flow
+% ------------------------------------------------------------------
+\draw[flow] (push.east) -- (policy.west);
+\draw[flow] (cmd.east) -- (orch.west);
+\draw[flow] (policy.east) -- (orch.west);
+\draw[flow] (orch.east) -- (val.west);
+\draw[flow] (orch.south) -- ++(0,-0.8) -| (bu.north);
+\draw[flow] (bu.east) -- (du.west);
+\draw[flow] (du.east) -- (dp.west);
+\draw[flow] (dp.east) -- (model.west);
+\draw[flow] (model.east) -- (eval.west);
+\draw[flow] (eval.east) -- (deploy.west);
+\draw[flow] (deploy.north) -- ++(0,0.9) -| (gate.south);
+\draw[trace] (val.east) -- (gate.west);
 
-\node[stage, fill=phase2green!16] (prepare) at (5.4, 0)
-  {\textbf{3. Data}\\\textbf{Preparation}\\\scriptsize train/test JSON};
+% Artifact traces
+\draw[trace] (bu.south) -- (a0.north);
+\draw[trace] (du.south) -- (a1.north);
+\draw[trace] (dp.south) -- (a2.north);
+\draw[trace] (model.south) -- (a3.north);
+\draw[trace] (eval.south) -- (a4.north);
+\draw[trace] (deploy.south) -- (a5.north);
 
-\node[stage, fill=phase2green!16] (explore) at (8.1, 0)
-  {\textbf{4. Exploration}\\\textbf{/ Visualization}\\\scriptsize summaries};
+% Cross-cutting validation / reproducibility traces
+\draw[trace] (policy.south) -- ++(0,-0.5) -| (phaseframe.north west);
+\draw[trace] (val.south) -- ++(0,-0.5) -| (phaseframe.north east);
+\draw[trace] (artifactframe.north) -- ++(0,0.45) -| (gate.south);
 
-\node[stage, fill=phase3orange!16] (mine) at (10.8, 0)
-  {\textbf{5. Data}\\\textbf{Mining}\\\scriptsize predictions};
-
-\node[stage, fill=phase3orange!16] (evaluate) at (13.5, 0)
-  {\textbf{6. Evaluation}\\\scriptsize utility + fairness\\\scriptsize metrics};
-
-\node[stage, fill=phase4purple!16] (post) at (16.2, 0)
-  {\textbf{7. Results}\\\textbf{Postprocessing}\\\scriptsize CSV + SVG};
-
-% Stage flow
-\draw[arrow] (collect) -- (clean);
-\draw[arrow] (clean) -- (prepare);
-\draw[arrow] (prepare) -- (explore);
-\draw[arrow] (explore) -- (mine);
-\draw[arrow] (mine) -- (evaluate);
-\draw[arrow] (evaluate) -- (post);
-
-% Framing box for executable pipeline
-\node[framebox, fit=(collect)(post), label={[font=\small]above:Executable review pipeline (CRISP-DM-aligned)}] (pipelineframe) {};
-
-% Cross-cutting control arrows
-\draw[dashedarrow] (config.south) -- (pipelineframe.north west);
-\draw[dashedarrow] (cli.south) -- (pipelineframe.north);
-\draw[dashedarrow] (tests.south) -- (pipelineframe.north east);
-
-% ─────────────────────────────────────────────────────────────
-% Artifact / provenance layer
-% ─────────────────────────────────────────────────────────────
-\node[store] (storage) at (8.1, -2.2)
-  {\textbf{Artifact and provenance layer}\\
-   numbered stage outputs under \texttt{results/fast\_review/} \quad + \quad
-   \texttt{pipeline\_manifest.json} recording configuration, stage outputs, and summaries};
-
-\draw[dashedarrow] (pipelineframe.south) -- (storage.north);
-
-% Mapping note
-\node[note] at (8.1, -3.55)
-  {\textbf{CRISP-DM mapping:} business understanding = configuration + fairness goals;
-   data understanding = collection + exploration;
-   data preparation = cleaning + preparation;
-   modeling = mining;
-   evaluation = evaluation;
-   deployment = postprocessing + manifest + merge validation.};
+% Bottom note
+\node[lab] at (9.5, -3.3)
+ {\textbf{Operational interpretation:} repository work is checked as it is pushed; CRISP-DM phases structure execution;\
+  artifacts provide reviewer-visible evidence; and the merge gate depends on both validation results and provenance.};
 
 \end{tikzpicture}
