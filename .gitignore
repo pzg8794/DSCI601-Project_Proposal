@@ -25,6 +25,7 @@ _minted*
 *.pdf
 !main.pdf
 !architecture_report/main.pdf
+!architecture_report/architecture_report.pdf
 !ethics_fairness_report/ethics_fairness_report.pdf
 !approach/approach-writeup.pdf
 !proposal/proposal.pdf
