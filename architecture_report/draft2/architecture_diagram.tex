@@ -1,116 +1,80 @@
-% Research-style architecture diagram for the DSCI601 draft2 package.
-% This version keeps Business Understanding and Data Understanding as
-% high-level architectural context, but separates them from the executable
-% Git-based validation pipeline.
-
 \begin{tikzpicture}[
-  font=\sffamily,
-  >=Latex,
-  layerband/.style={rectangle, rounded corners, inner sep=10pt, line width=0.45pt, draw=black!35},
-  event/.style={rectangle, draw=black, rounded corners, minimum height=1.05cm, text width=3.35cm, align=center, fill=gray!8, line width=0.5pt},
-  control/.style={rectangle, draw=black, rounded corners, minimum height=1.15cm, text width=3.65cm, align=center, line width=0.5pt},
-  context/.style={rectangle, draw=black, rounded corners, minimum height=1.35cm, text width=4.2cm, align=center, line width=0.55pt},
-  stage/.style={rectangle, draw=black, rounded corners, minimum height=1.55cm, text width=3.25cm, align=center, line width=0.55pt},
-  sourcebox/.style={rectangle, draw=black, rounded corners, minimum height=1.15cm, text width=3.1cm, align=center, fill=gray!6, line width=0.5pt},
-  artifact/.style={rectangle, draw=black, rounded corners, minimum height=1.00cm, text width=3.0cm, align=center, line width=0.45pt},
-  decision/.style={rectangle, draw=black, rounded corners, minimum height=1.20cm, text width=3.2cm, align=center, fill=gray!12, line width=0.55pt},
-  flow/.style={->, line width=0.8pt},
-  trace/.style={->, dashed, line width=0.65pt},
-  lab/.style={font=\scriptsize, align=center}
-]
+font=\sffamily\small,>=Latex,
+layerband/.style={rectangle,rounded corners,inner sep=12pt,line width=0.5pt,draw=black!35},
+event/.style={rectangle,draw=black,rounded corners,minimum height=1.15cm,text width=4.1cm,align=center,fill=gray!8,line width=0.55pt},
+control/.style={rectangle,draw=black,rounded corners,minimum height=1.25cm,text width=4.35cm,align=center,line width=0.55pt},
+context/.style={rectangle,draw=black,rounded corners,minimum height=1.45cm,text width=5.1cm,align=center,line width=0.6pt},
+stage/.style={rectangle,draw=black,rounded corners,minimum height=1.7cm,text width=4.15cm,align=center,line width=0.6pt},
+sourcebox/.style={rectangle,draw=black,rounded corners,minimum height=1.2cm,text width=3.9cm,align=center,fill=gray!6,line width=0.55pt},
+artifact/.style={rectangle,draw=black,rounded corners,minimum height=1.1cm,text width=3.8cm,align=center,line width=0.5pt},
+decision/.style={rectangle,draw=black,rounded corners,minimum height=1.25cm,text width=4.0cm,align=center,fill=gray!12,line width=0.6pt},
+flow/.style={->,line width=0.9pt},trace/.style={->,dashed,line width=0.7pt},lab/.style={font=\scriptsize,align=center}]
 
-% ------------------------------------------------------------------
-% High-level CRISP-DM context (not the Git validation pipeline)
-% ------------------------------------------------------------------
-\node[context, fill=phase1blue!16] (bu) at (6.2, 6.2)
-  {\textbf{Business Understanding}\\\scriptsize project objectives, fairness constraints,\\\scriptsize acceptance criteria, architectural scope};
-\node[context, fill=phase1blue!16] (du) at (15.4, 6.2)
-  {\textbf{Data Understanding}\\\scriptsize quantum shared-drive storage, data semantics,\\\scriptsize exploratory framing and data expectations};
+\node[context,fill=phase1blue!16] (bu) at (7.4,6.5)
+{\textbf{Business Understanding}\\\scriptsize project objectives, fairness constraints,\\\scriptsize acceptance criteria, architectural scope};
+\node[context,fill=phase1blue!16] (du) at (22.2,6.5)
+{\textbf{Data Understanding}\\\scriptsize quantum shared-drive storage, data semantics,\\\scriptsize exploratory framing and data expectations};
 
-% ------------------------------------------------------------------
-% Control layer
-% ------------------------------------------------------------------
-\node[event] (push) at (0.8, 4.0)
-  {\textbf{Repository events}\\push, pull request,\\changed analysis code};
-\node[event] (cmd) at (5.0, 4.0)
-  {\textbf{Developer / reviewer}\\stage commands,\\\texttt{run-all}, \texttt{merge-check}};
-\node[control, fill=phase2green!16] (policy) at (9.6, 4.0)
-  {\textbf{Control policy}\\thresholds, seeds, run rules,\\merge and fairness criteria};
-\node[control, fill=phase2green!16] (orch) at (14.2, 4.0)
-  {\textbf{Orchestration path}\\CLI ordering, inherited conventions,\\manifest and execution control};
-\node[control, fill=phase2green!16] (val) at (18.8, 4.0)
-  {\textbf{Validation layer}\\unit tests, smoke checks,\\CI mirror of local merge-check};
-\node[decision] (gate) at (23.4, 4.0)
-  {\textbf{Merge decision}\\accept, revise, or reject\\based on executable evidence};
+\node[event] (push) at (1.1,4.0)
+{\textbf{Repository events}\\push, pull request,\\changed analysis code};
+\node[event] (cmd) at (7.0,4.0)
+{\textbf{Developer / reviewer}\\stage commands,\\\texttt{run-all}, \texttt{merge-check}};
+\node[control,fill=phase2green!16] (policy) at (13.4,4.0)
+{\textbf{Control policy}\\thresholds, seeds, run rules,\\merge and fairness criteria};
+\node[control,fill=phase2green!16] (orch) at (19.8,4.0)
+{\textbf{Orchestration path}\\CLI ordering, inherited conventions,\\manifest and execution control};
+\node[control,fill=phase2green!16] (val) at (26.2,4.0)
+{\textbf{Validation layer}\\unit tests, smoke checks,\\CI mirror of local merge-check};
+\node[decision] (gate) at (32.6,4.0)
+{\textbf{Merge decision}\\accept, revise, or reject\\based on executable evidence};
 
-% ------------------------------------------------------------------
-% External source and executable validation pipeline
-% ------------------------------------------------------------------
-\node[sourcebox] (source) at (0.8, 1.3)
-  {\textbf{External inherited source}\\quantum shared-drive storage\\\scriptsize not a CI stage};
-\node[stage, fill=phase3orange!16] (prep) at (7.2, 1.3)
-  {\textbf{Data Preparation}\\\scriptsize evaluator cleaning\\\scriptsize + state\_analysis preparation};
-\node[stage, fill=phase3orange!16] (model) at (12.6, 1.3)
-  {\textbf{Modeling / Mining}\\\scriptsize state\_analysis\\\scriptsize mining and feature logic};
-\node[stage, fill=phase3orange!16] (eval) at (18.0, 1.3)
-  {\textbf{Evaluation}\\\scriptsize evaluator metrics\\\scriptsize and fairness checks};
-\node[stage, fill=phase3orange!16] (deploy) at (23.4, 1.3)
-  {\textbf{Review Delivery}\\\scriptsize postprocess, figures,\\\scriptsize manifest, reviewer outputs};
+\node[sourcebox] (source) at (1.1,1.0)
+{\textbf{External inherited source}\\quantum shared-drive storage\\\scriptsize not a CI stage};
+\node[stage,fill=phase3orange!16] (prep) at (10.2,1.0)
+{\textbf{Data Preparation}\\\scriptsize evaluator cleaning\\\scriptsize + state\_analysis preparation};
+\node[stage,fill=phase3orange!16] (model) at (17.8,1.0)
+{\textbf{Modeling / Mining}\\\scriptsize state\_analysis\\\scriptsize mining and feature logic};
+\node[stage,fill=phase3orange!16] (eval) at (25.4,1.0)
+{\textbf{Evaluation}\\\scriptsize evaluator metrics\\\scriptsize and fairness checks};
+\node[stage,fill=phase3orange!16] (deploy) at (33.0,1.0)
+{\textbf{Review Delivery}\\\scriptsize postprocess, figures,\\\scriptsize manifest, reviewer outputs};
 
-% ------------------------------------------------------------------
-% Artifact layer
-% ------------------------------------------------------------------
-\node[artifact, fill=phase4purple!12] (a0) at (0.8, -1.35)
-  {source refs\\shared-drive links};
-\node[artifact, fill=phase4purple!12] (a1) at (7.2, -1.35)
-  {cleaned states\\prepared inputs};
-\node[artifact, fill=phase4purple!12] (a2) at (12.6, -1.35)
-  {mined outputs\\prediction artifacts};
-\node[artifact, fill=phase4purple!12] (a3) at (18.0, -1.35)
-  {utility / fairness\\evaluation evidence};
-\node[artifact, fill=phase4purple!12] (a4) at (23.4, -1.35)
-  {tables, figures,\\\texttt{pipeline\_manifest.json}};
+\node[artifact,fill=phase4purple!12] (a0) at (1.1,-2.1) {source refs\\shared-drive links};
+\node[artifact,fill=phase4purple!12] (a1) at (10.2,-2.1) {cleaned states\\prepared inputs};
+\node[artifact,fill=phase4purple!12] (a2) at (17.8,-2.1) {mined outputs\\prediction artifacts};
+\node[artifact,fill=phase4purple!12] (a3) at (25.4,-2.1) {utility / fairness\\evaluation evidence};
+\node[artifact,fill=phase4purple!12] (a4) at (33.0,-2.1) {tables, figures,\\\texttt{pipeline\_manifest.json}};
 
-% ------------------------------------------------------------------
-% Main executable flow
-% ------------------------------------------------------------------
 \draw[flow] (push.east) -- (policy.west);
 \draw[flow] (cmd.east) -- (orch.west);
 \draw[flow] (policy.east) -- (orch.west);
 \draw[flow] (orch.east) -- (val.west);
 \draw[flow] (val.east) -- (gate.west);
-\draw[flow] (orch.south) -- ++(0,-0.7) -| (prep.north);
+\draw[flow] (orch.south) -- ++(0,-0.85) -| (prep.north);
 \draw[flow] (source.east) -- (prep.west);
 \draw[flow] (prep.east) -- (model.west);
 \draw[flow] (model.east) -- (eval.west);
 \draw[flow] (eval.east) -- (deploy.west);
-\draw[flow] (deploy.north) -- ++(0,0.8) -| (gate.south);
+\draw[flow] (deploy.north) -- ++(0,0.95) -| (gate.south);
 
-% Context-to-pipeline traces
-\draw[trace] (bu.south) -- ++(0,-0.55) -| (policy.north);
-\draw[trace] (du.south) -- ++(0,-0.55) -| (source.north);
-\draw[trace] (du.south) -- ++(0,-0.55) -| (prep.north);
+\draw[trace] (bu.south) -- ++(0,-0.7) -| (policy.north);
+\draw[trace] (du.south) -- ++(0,-0.7) -| (source.north);
+\draw[trace] (du.south) -- ++(0,-0.7) -| (prep.north);
 
-% Artifact traces
 \draw[trace] (source.south) -- (a0.north);
 \draw[trace] (prep.south) -- (a1.north);
 \draw[trace] (model.south) -- (a2.north);
 \draw[trace] (eval.south) -- (a3.north);
 \draw[trace] (deploy.south) -- (a4.north);
-\draw[trace] (a4.north) -- ++(0,0.45) -| (gate.south);
+\draw[trace] (a4.north) -- ++(0,0.6) -| (gate.south);
 
-% Color-coded layer bands
 \begin{scope}[on background layer]
-  \node[layerband, fill=phase1blue!8, fit=(bu)(du), label={[font=\small, text=phase1blue!80!black]above:High-level CRISP-DM context (architectural framing, not the Git validation pipeline)}] {};
-  \node[layerband, fill=phase2green!8, fit=(push)(gate), label={[font=\small, text=phase2green!60!black]above:Control Layer}] {};
-  \node[layerband, fill=phase3orange!8, fit=(prep)(deploy), label={[font=\small, text=phase3orange!70!black]above:Execution Layer (clean and executable Git pipeline)}] {};
-  \node[layerband, fill=phase4purple!8, fit=(a0)(a4), label={[font=\small, text=phase4purple!75!black]above:Artifacts Layer}] {};
+\node[layerband,fill=phase1blue!8,fit=(bu)(du),label={[font=\small,text=phase1blue!80!black]above:High-level CRISP-DM context (architectural framing, not the Git validation pipeline)}] {};
+\node[layerband,fill=phase2green!8,fit=(push)(gate),label={[font=\small,text=phase2green!60!black]above:Control Layer}] {};
+\node[layerband,fill=phase3orange!8,fit=(prep)(deploy),label={[font=\small,text=phase3orange!70!black]above:Execution Layer (clean and executable Git pipeline)}] {};
+\node[layerband,fill=phase4purple!8,fit=(a0)(a4),label={[font=\small,text=phase4purple!75!black]above:Artifacts Layer}] {};
 \end{scope}
 
-% Bottom note
-\node[lab] at (12.1, -3.25)
- {\textbf{Interpretation:} Business Understanding and Data Understanding remain part of the architecture at the highest level,\
-  but the Git validation pipeline begins with executable code paths only. The control layer triggers and validates the pipeline,\
-  the execution layer keeps the code clean and runnable, and the artifacts layer provides merge evidence.};
-
+\node[lab] at (17.0,-4.35)
+{\textbf{Interpretation:} Business Understanding and Data Understanding remain part of the architecture at the highest level, but the Git validation pipeline begins with executable code paths only. The control layer triggers and validates the pipeline, the execution layer keeps the code clean and runnable, and the artifacts layer provides merge evidence.};
 \end{tikzpicture}
