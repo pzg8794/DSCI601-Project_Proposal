@@ -1,178 +1,193 @@
-\documentclass[11pt]{article}
+\documentclass{IEEEtran}
 
-\usepackage[margin=1in]{geometry}
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage{lmodern}
-\usepackage{microtype}
+\usepackage{cite}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{url}
 \usepackage{graphicx}
 \usepackage{booktabs}
-\usepackage{enumitem}
-\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage[table]{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta}
+\usetikzlibrary{positioning,arrows.meta,fit,backgrounds}
+\usepackage[hidelinks]{hyperref}
 
-\title{Architecture Writeup\\[0.3em]
-\large DSCI 601 -- Applied Data Science I}
-\author{Piter Z. Garcia}
-\date{April 18, 2026}
+\definecolor{phase1blue}{RGB}{52,152,219}
+\definecolor{phase2green}{RGB}{46,204,113}
+\definecolor{phase3orange}{RGB}{230,126,34}
+\definecolor{phase4purple}{RGB}{155,89,182}
+
+\title{{\LARGE\textbf{Architecture for a Reproducible CRISP+ML Review Pipeline}}\\
+{\Large\textit{Fairness-Aware Data Science Code Review Infrastructure}}\\
+{\large\texttt{(Architecture Writeup)}}}
+
+\author{%
+\begin{minipage}{0.48\textwidth}
+\begin{center}
+{\bf Piter Z. Garcia}\\
+\begin{small}
+MS Data Science / Decision-Making \& Algorithmic Fairness\\
+Rochester Institute of Technology (RIT)\\
+{\it pizg8794@g.rit.edu}
+\end{small}
+\end{center}
+\end{minipage}
+\hfill
+\begin{minipage}{0.48\textwidth}
+\begin{center}
+{\bf Dr. Daniel Krutz, Travis Desell}\\
+\begin{small}
+Department of Software Engineering, Data Science\\
+RIT Research Advisors\\
+{\it dxkvse@g.rit.edu, tjdvse@g.rit.edu}
+\end{small}
+\end{center}
+\end{minipage}%
+}
 
 \begin{document}
 \maketitle
 
-\section{Overview}
-This architecture writeup describes the implementation of the code review repository
-used for the DSCI 601 assignment. The repository is organized as a small,
-reproducible \emph{Hybrid CRISP+ML} pipeline that mirrors a real machine-learning
-workflow while remaining fast enough for reviewers to install, run, test, and
-inspect locally. The main design goal was to create a reviewer-safe system with
-clear stage boundaries, deterministic behavior, and enough implementation detail
-that another party could recreate the workflow and reproduce the same outputs.
+%% ─────────────────────────────────────────────────────────────
+\section{Architecture Overview}
+%% ─────────────────────────────────────────────────────────────
 
-The system is structured around seven explicit lifecycle stages:
-\begin{enumerate}[leftmargin=1.5em]
-    \item Data Collection
-    \item Data Cleaning
-    \item Data Preparation
-    \item Data Exploration / Visualization
-    \item Data Mining
-    \item Evaluation
-    \item Results Postprocessing / Visualization
-\end{enumerate}
-These stages were chosen so the implementation matches both a recognized
-methodology and the assignment requirements, which ask for separable runnable code
-for data handling, modeling, exploration, and postprocessing.
+This architecture writeup describes the implementation of the code review
+repository used for the DSCI 601 assignment. The repository is organized as a
+small, reproducible \textit{Hybrid CRISP+ML} pipeline that mirrors a real
+machine-learning workflow while remaining fast enough for reviewers to install,
+run, test, and inspect locally. The main design goal is to provide a
+reviewer-safe system with clear stage boundaries, deterministic behavior, and
+enough implementation detail that another party can recreate the workflow and
+reproduce the same outputs.
 
-\section{Architecture and Layer Interactions}
-Figure~\ref{fig:architecture} shows the overall system structure. The software is
-organized into four main layers: configuration, stage execution, orchestration,
-and outputs.
+The system is structured around seven explicit lifecycle stages: data
+collection, data cleaning, data preparation, data exploration and
+visualization, data mining, evaluation, and results postprocessing and
+visualization. These stages were chosen so that the implementation follows a
+recognized methodology while also satisfying the code review assignment's
+requirement for separable runnable code paths.
 
-\begin{figure}[h]
+%% ─────────────────────────────────────────────────────────────
+\section{System Architecture}
+%% ─────────────────────────────────────────────────────────────
+
+Figure~\ref{fig:architecture} shows the overall system structure. The software
+is organized into four main layers: configuration, stage execution,
+orchestration, and output storage. The architecture is intentionally small, but
+the same layer boundaries can scale to larger fairness-aware experiments.
+
+\begin{figure}[t]
 \centering
-\resizebox{\textwidth}{!}{\input{architecture_diagram.tex}}
+\resizebox{\columnwidth}{!}{\input{architecture_diagram.tex}}
 \caption{Architecture of the reviewer-safe CRISP+ML pipeline.}
 \label{fig:architecture}
 \end{figure}
 
 \subsection{Configuration Layer}
-The configuration layer defines the parameters that control the entire run. In the
-implementation repository, this is handled by a typed configuration object loaded
-from a single JSON file. The configuration stores the random seed, record counts,
+The configuration layer defines the parameters controlling each run. In the
+implementation repository, a typed configuration object is loaded from a single
+JSON file. The configuration records the random seed, record counts,
 train/test split, invalid-record frequency, missingness frequency, bias level,
 fairness threshold, and output directory.
 
-This layer was separated from the stage logic for two reasons. First, it keeps
-experiments reproducible: the same configuration and seed lead to the same output
-artifacts. Second, it makes the system easy to inspect and modify without changing
-source code. A reviewer can understand the workflow by reading one config file
-instead of tracing hard-coded constants across the repository.
+This layer separates experiment settings from stage logic. A reviewer can
+change the run size, seed, or output location without modifying source code.
+This design also supports reproducibility: the same configuration and seed
+produce the same stage artifacts.
 
 \subsection{Stage Layer}
 Each lifecycle step is implemented as its own concrete class under a shared
-\texttt{PipelineStage} interface. This makes the code strongly object-oriented and
-keeps stage responsibilities narrow. The stage implementations behave as follows:
+\texttt{PipelineStage} interface. The concrete classes are:
+\texttt{DataCollectionStage}, \texttt{DataCleaningStage},
+\texttt{DataPreparationStage}, \texttt{DataExplorationStage},
+\texttt{DataMiningStage}, \texttt{EvaluationStage}, and
+\texttt{ResultsPostprocessingStage}. This keeps the implementation
+object-oriented and gives every phase a narrow, testable responsibility.
 
-\begin{itemize}[leftmargin=1.5em]
-    \item \textbf{Data Collection} generates a small synthetic dataset that
-    preserves fairness-relevant structure such as group membership, label, and
-    feature availability.
-    \item \textbf{Data Cleaning} validates records, removes intentionally corrupted
-    examples, and standardizes the remaining schema.
-    \item \textbf{Data Preparation} converts cleaned records into model-ready train
-    and test artifacts.
-    \item \textbf{Data Exploration} creates lightweight summaries of dataset size,
-    group distribution, and feature completeness.
-    \item \textbf{Data Mining} runs the minimal modeling step on the prepared
-    dataset and writes predictions.
-    \item \textbf{Evaluation} computes utility and fairness-oriented metrics from
-    predictions.
-    \item \textbf{Results Postprocessing} turns evaluation summaries into reviewer-
-    friendly output tables and simple figures.
-\end{itemize}
-
-Every stage reads only the artifacts it needs, writes to its own dedicated output
-directory, and returns a structured result object containing artifact paths and
-summary metadata. This design keeps the stages testable in isolation and reduces
-the risk of hidden side effects between steps.
+The data collection stage generates a tiny synthetic dataset preserving
+fairness-relevant structure such as group membership, label, and feature
+availability. The cleaning stage validates records, removes intentionally
+corrupted examples, and standardizes the schema. The preparation stage converts
+clean records into train/test artifacts. The exploration stage writes small
+summary tables. The data mining stage performs the lightweight modeling step.
+The evaluation stage computes utility and fairness-oriented metrics. The final
+postprocessing stage creates reviewer-facing tables and simple figures.
 
 \subsection{Context and Orchestration Layer}
-The orchestration layer is responsible for connecting the individual stages
-together. A shared pipeline context object carries metadata, output locations, and
-stage results through the run so that stages do not need direct knowledge of each
-other's internal implementation. This context acts as a lightweight contract for
-information sharing.
+The orchestration layer connects stages without tightly coupling their
+implementations. A shared pipeline context carries metadata, artifact paths, and
+stage results across the run. The \texttt{ReviewPipeline} object builds the
+ordered stage list and executes it either end-to-end or until a named stopping
+point.
 
-The \texttt{ReviewPipeline} orchestrator builds the ordered list of stages and
-executes them in sequence. It can run the full workflow or stop after any named
-stage. At the end of execution, it writes a manifest file that records the active
-configuration, stage outputs, and stage summaries. This manifest becomes the
-single reproducibility record for a run.
+After execution, the orchestrator writes a manifest file containing the active
+configuration, stage outputs, and stage summaries. This manifest is the
+reproducibility record for a run: it identifies what was executed, where
+artifacts were written, and what each stage reported.
 
 \subsection{Interface Layer}
-The user-facing interface is a command-line entry point with one command for each
-stage plus two orchestration commands: one for running the full pipeline and one
-for performing the local merge validation path. This layer was important for the
-assignment because the repository needed explicit runnable scripts rather than a
-single notebook. The command-line interface lets another party run individual
-phases independently or validate the full workflow end-to-end.
+The user-facing interface is a command-line module with one command for each
+required stage plus two orchestration commands: \texttt{run-all} and
+\texttt{merge-check}. The command-line interface is part of the architecture
+because it makes the repository reviewable as software rather than as a single
+notebook. Reviewers can execute a single stage, rerun the full workflow, or
+perform the same merge validation path used by the repository.
 
+%% ─────────────────────────────────────────────────────────────
 \section{Framework and Component Choices}
-The architecture intentionally uses a very small technical stack. The pipeline is
-implemented in standard-library Python with a minimal package structure and
-\texttt{requirements.txt} as the reviewer-facing install path. This choice was
-made to reduce environmental friction during code review. Reviewers do not need to
-install a heavy machine-learning stack or resolve hidden dependencies just to run
-the repository.
+%% ─────────────────────────────────────────────────────────────
 
-JSON was selected for configuration and most structured artifacts because it is
-easy to inspect, easy to validate, and natively supported in Python. CSV was used
-for summary tables because it is a familiar exchange format for grading and quick
-inspection. SVG was used for lightweight visual outputs because it provides a
-clear figure artifact without requiring plotting libraries. The overall component
-selection favors reproducibility, transparency, and short setup time over raw
-performance.
+The implementation intentionally uses a minimal technical stack. The pipeline
+is written with standard-library Python and a small package structure, with
+\texttt{requirements.txt} as the reviewer-facing installation path. This choice
+reduces environmental friction and avoids requiring a heavy machine-learning
+stack for a code review assignment.
 
-\section{Data Storage and Output Design}
+JSON is used for configuration, records, predictions, evaluation summaries, and
+manifests because it is human-readable, easy to validate, and supported without
+third-party libraries. CSV is used for summary tables because it is familiar to
+reviewers and easy to inspect. SVG is used for lightweight charts because it
+provides visual output without requiring plotting dependencies.
+
+These choices prioritize reproducibility, transparency, and short setup time
+over raw performance. That tradeoff is appropriate for this deliverable: the
+goal is not to train a large model, but to demonstrate that the project has a
+clean architecture, separable code paths, tests, and a reliable validation
+workflow.
+
+%% ─────────────────────────────────────────────────────────────
+\section{Data Storage and Reproducibility}
+%% ─────────────────────────────────────────────────────────────
+
 All artifacts are written beneath a stable output root defined by the active
-configuration. Within that root, each stage writes to its own numbered directory.
-This output scheme was chosen for traceability. A reviewer can inspect any stage
-without rerunning the full system, and each run naturally leaves behind a visible
-artifact trail.
+configuration. Within that root, each stage writes to its own numbered
+directory. This output design makes the workflow easy to inspect: every phase
+leaves visible artifacts, intermediate outputs can be reused, and reviewers can
+verify stage behavior without rerunning the entire system.
 
-The output structure is designed to answer three practical questions:
-\begin{itemize}[leftmargin=1.5em]
-    \item What input configuration produced this run?
-    \item What did each stage write?
-    \item What metrics and final outputs were generated?
-\end{itemize}
+The output layout answers three practical questions: what configuration
+produced this run, what each stage wrote, and what final metrics or figures
+were generated. The final manifest connects those answers into a single
+provenance record. Because the repository uses deterministic configuration and
+fixed seeds, another party can reproduce the same artifacts by running the same
+commands.
 
-Those questions are answered by the combination of stage directories and the final
-manifest file. This layout also supports merge validation because the validation
-step can check for expected artifact existence in deterministic locations.
+The expected recreation path is straightforward: create a fresh Python
+environment, install from \texttt{requirements.txt}, run the full pipeline with
+\texttt{configs/fast\_review.json}, inspect the generated results directory,
+and run \texttt{merge-check}. This reproduces the reviewer-safe workflow, its
+stage artifacts, and its validation checks.
 
-\section{Reproducibility Path}
-Another party can recreate the system by setting up a fresh Python environment,
-installing the repository, and executing the pipeline with the provided fast
-review configuration. The expected workflow is:
-\begin{enumerate}[leftmargin=1.5em]
-    \item install dependencies from \texttt{requirements.txt},
-    \item run the full pipeline command with the provided configuration,
-    \item inspect the generated results directory,
-    \item run the merge-check command to execute the local validation path.
-\end{enumerate}
-
-This path reproduces the same stage artifacts, metrics, summaries, and validation
-checks that the repository uses for review. Because the system is configuration-
-driven, deterministic, and documented through explicit stage boundaries, another
-party should be able to recreate both the software behavior and the presented
-results with minimal ambiguity.
-
+%% ─────────────────────────────────────────────────────────────
 \section{Conclusion}
-The architecture emphasizes simplicity, determinism, and inspectability. Rather
-than optimizing for scale, the design optimizes for a clean code review experience:
-small inputs, explicit stages, typed configuration, structured outputs, and a
-repeatable validation path. This makes the system appropriate both for the DSCI
-601 assignment and for future extension into larger reproducible workflows.
+%% ─────────────────────────────────────────────────────────────
+
+The architecture emphasizes simplicity, determinism, and inspectability. It
+uses a recognized CRISP+ML lifecycle as the backbone, object-oriented stage
+classes as the implementation structure, and explicit command-line entry points
+as the reviewer interface. This makes the system appropriate for the DSCI 601
+code review assignment while also providing a reusable foundation for larger
+fairness-aware data science workflows.
 
 \end{document}
