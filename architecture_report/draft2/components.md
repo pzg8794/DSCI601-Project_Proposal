@@ -1,160 +1,208 @@
-# System components and interfaces
+# Draft 2 system components and interfaces
 
-This document is the draft2 component note for the DSCI601 architecture package.
-It is intentionally aligned with the current implementation repository rather
-than with earlier bandit- or simulator-oriented planning documents.
+This note explains the component view for the draft2 architecture package. It
+is written to match the repository as a **push-validated, CRISP-DM-aligned
+review system** rather than as a small standalone ML demo.
 
-## Design goals
+## Architectural intent
 
-- Reproducible: the same configuration and random seed should recreate the same outputs.
-- Reviewable: each stage should be runnable, inspectable, and testable in isolation.
-- Traceable: the writeup, the diagram, the implementation docs, and the code-review docs should describe the same system.
-- Lightweight: reviewers should be able to install and run the workflow quickly on a normal CPU environment.
+The architecture has to satisfy two obligations at the same time:
 
-## Canonical architecture components
+- preserve the project's CRISP-DM logic,
+- preserve the repository's review logic as work is pushed and checked.
 
-### 1. `PipelineConfig`
+That means the important components are not only modeling stages. They also
+include repository triggers, configuration, orchestration, validation, artifact
+publication, and merge evidence.
+
+## Layered component model
+
+### 1. Event layer
+This layer determines when the architecture becomes active.
+
+Representative inputs:
+- repository pushes
+- pull requests
+- developer stage commands
+- `run-all`
+- `merge-check`
+
+Why it matters:
+- the repository is not just run manually once; it is meant to check work as it changes.
+
+### 2. Review policy and configuration subsystem
+Representative component:
+- `PipelineConfig`
+
 Role:
 - loads the active JSON configuration,
-- defines the parameters controlling the workflow,
-- separates experiment settings from stage logic.
-
-Expected fields include:
-- random seed
-- record count
-- invalid record frequency
-- missingness frequency
-- bias level
-- train/test split
-- fairness threshold
-- output directory
+- stores deterministic run settings,
+- defines fairness thresholds, split policy, output paths, and other run controls.
 
 Why it matters:
-- it provides the reproducibility contract for the whole run.
+- this is the reproducibility contract for the whole review path.
 
-### 2. `PipelineContext`
-Role:
+### 3. Shared execution context
+Representative components:
+- `PipelineContext`
+- `StageResult`
+
+Role of `PipelineContext`:
 - stores run metadata, artifact paths, and stage summaries,
 - provides the shared state passed across the pipeline,
-- prevents hard-coded file-path coupling between stages.
+- avoids hard-coded coupling between stages.
 
-Why it matters:
-- it keeps orchestration explicit and reviewable.
+Role of `StageResult`:
+- standardizes what each stage returns,
+- records artifact paths and concise summary metadata,
+- makes stage contracts visible.
 
-### 3. `StageResult`
+Why they matter:
+- together they make provenance explicit rather than implicit.
+
+### 4. Pipeline stage interface
+Representative component:
+- `PipelineStage`
+
 Role:
-- records what an individual stage produced,
-- captures artifact paths and concise summary metadata,
-- standardizes the outputs returned by each stage.
-
-Why it matters:
-- it gives every stage a visible output contract.
-
-### 4. `PipelineStage`
-Role:
-- shared abstract base/interface for all executable stages,
+- shared abstract base / interface for executable stages,
 - defines the common execution contract used by the orchestrator.
 
 Why it matters:
-- it is the mechanism that preserves narrow responsibilities and unit-test boundaries.
+- it preserves narrow responsibilities and testable stage boundaries.
 
-### 5. Seven concrete stage classes
-The repository realizes the review workflow through seven explicit classes:
+## CRISP-DM execution components
 
-1. `DataCollectionStage`
-   - generates the synthetic reviewer-safe dataset
-   - writes raw records
+The repository realizes CRISP-DM through explicit review stages.
 
-2. `DataCleaningStage`
-   - validates schema
-   - removes intentionally invalid records
-   - writes clean records
+### 5. Business-understanding realization
+This phase is represented operationally rather than as a separate numerical stage.
 
-3. `DataPreparationStage`
-   - creates deterministic train/test artifacts
-   - prepares data for downstream modeling
-
-4. `DataExplorationStage`
-   - writes lightweight dataset summaries
-   - reports group balance and completeness information
-
-5. `DataMiningStage`
-   - runs the lightweight modeling / prediction step
-   - writes prediction artifacts
-
-6. `EvaluationStage`
-   - computes utility and fairness-oriented metrics
-   - writes evaluation summaries
-
-7. `ResultsPostprocessingStage`
-   - converts outputs into reviewer-facing summary tables and figures
-   - writes final CSV and SVG artifacts
-
-Why they matter:
-- together they operationalize a CRISP-DM-aligned workflow in a form that is directly reviewable.
-
-## Orchestration layer
-
-### 6. `ReviewPipeline`
-Role:
-- builds the ordered stage list,
-- executes the stages end-to-end or to a named stopping point,
-- writes the final manifest after execution completes.
-
-Manifest responsibilities:
-- store a copy of the active configuration,
-- record stage outputs,
-- preserve stage-level summary metadata.
+Repository realization:
+- fairness objective
+- acceptance criteria
+- merge policy
+- configuration values
 
 Why it matters:
-- it connects methodology, implementation order, and provenance.
+- it defines what counts as a successful run and what evidence is required.
 
-## Interface layer
+### 6. Data-understanding realization
+Representative stage components:
+- `DataCollectionStage`
+- `DataExplorationStage`
 
-### 7. CLI module
+Role:
+- generate or ingest the reviewer-safe dataset,
+- expose what the dataset contains before downstream modeling,
+- summarize group balance, completeness, and basic dataset structure.
+
+Why it matters:
+- reviewers can inspect both the incoming data and the exploratory evidence.
+
+### 7. Data-preparation realization
+Representative stage components:
+- `DataCleaningStage`
+- `DataPreparationStage`
+
+Role:
+- validate schema,
+- remove intentionally invalid records,
+- create deterministic train/test artifacts.
+
+Why it matters:
+- preprocessing stays visible instead of being hidden inside modeling code.
+
+### 8. Modeling realization
+Representative stage component:
+- `DataMiningStage`
+
+Role:
+- run the lightweight modeling / prediction step,
+- produce predictions as explicit artifacts.
+
+Why it matters:
+- modeling is reviewable without dominating the whole architecture.
+
+### 9. Evaluation realization
+Representative stage component:
+- `EvaluationStage`
+
+Role:
+- compute utility-oriented and fairness-oriented metrics,
+- produce the evidence needed for quality judgment.
+
+Why it matters:
+- evaluation is a first-class phase, not a footnote after modeling.
+
+### 10. Deployment and review-delivery realization
+Representative stage component:
+- `ResultsPostprocessingStage`
+
+Role:
+- convert raw outputs into reviewer-facing tables and figures,
+- publish final CSV / SVG outputs,
+- support manifest-based reproducibility and review delivery.
+
+Why it matters:
+- in this assignment context, deployment means producing merge-ready evidence.
+
+## Orchestration and validation components
+
+### 11. `ReviewPipeline`
+Role:
+- builds the ordered execution plan,
+- runs stages end-to-end or to a named stopping point,
+- writes the final manifest after execution completes.
+
+Why it matters:
+- it connects methodology, execution order, and provenance.
+
+### 12. CLI module
 Role:
 - exposes one runnable command per required stage,
 - exposes orchestration commands such as `run-all` and `merge-check`,
-- makes the repository reviewable as software instead of as one notebook.
+- gives reviewers a stable control surface.
 
 Why it matters:
-- it is the reviewer-facing control surface.
+- the architecture is reviewable as software rather than as one notebook.
 
-## Artifact and storage contracts
+### 13. Validation subsystem
+Representative behaviors:
+- unit tests
+- smoke checks
+- local `merge-check`
+- CI mirror of the same validation path
 
-Expected output pattern:
-- a stable output root defined by config,
-- numbered stage directories under the run output folder,
-- final manifest written at the end of the run.
+Why it matters:
+- this is the actual merge-readiness contract of the repository.
 
-Representative artifacts:
-- raw JSON
-- clean JSON
-- train/test JSON
-- summary CSV
-- predictions JSON
-- metrics JSON
-- final CSV
-- SVG figure
+## Artifact and provenance components
+
+Expected artifact classes:
+- configuration snapshot
+- raw records
+- exploratory summaries
+- clean records
+- train/test artifacts
+- predictions
+- metrics
+- final CSV tables
+- SVG figures
 - `pipeline_manifest.json`
 
-Why it matters:
-- reviewers can inspect intermediate and final outputs without guessing where anything was written.
-
-## Validation layer
-
-### 8. `merge-check` and CI validation
-Role:
-- run the fast reviewer configuration,
-- confirm expected artifacts exist,
-- execute the unit-test suite,
-- mirror the same validation path locally and in GitHub Actions.
+Expected storage pattern:
+- stable output root from config,
+- numbered stage directories,
+- final manifest tying the run together.
 
 Why it matters:
-- this is the merge-readiness contract for the repository.
+- reviewers can follow the evidence chain from event to merge decision.
 
 ## Bottom-line architectural claim
 
-The repository should be understood as a CRISP-DM-aligned, reviewer-safe,
-deterministic pipeline whose main strength is not algorithmic complexity but
-clean stage boundaries, reproducible outputs, and merge-checkable validation.
+The repository should be understood as a reviewer-safe system in which pushes or
+review commands trigger a deterministic CRISP-DM-aligned workflow. The central
+strength of the architecture is not algorithmic scale. It is the clear coupling
+between methodology, stage execution, validation, artifact lineage, and merge
+readiness.
