@@ -1,188 +1,211 @@
-# Draft 2 system components and interfaces
+# Draft 2 system components, stage ownership, and replication interfaces
 
-This note explains the component view for the draft2 architecture package. It
-is now aligned with the actual inherited design you described: quantum shared-
-drive storage for collection, `evaluator` for cleaning and evaluation, and
-`state_analysis` for preparation, exploration, and mining.
+This note now matches the strengthened `draft2` architecture report and figure.
+It describes the repository as a **reproducible CRISP-DM review and replication
+pipeline** built on inherited `quantum_project` components.
 
 ## Architectural intent
 
-The architecture has to satisfy two obligations at the same time:
+The architecture must satisfy four obligations at once:
 
-- preserve the project's CRISP-DM logic,
-- preserve the repository's review logic as work is pushed and checked.
+- preserve the CRISP-DM logic of the project,
+- preserve the code-review and validation workflow for the repository,
+- preserve the ability for another party to recreate the system and replicate
+  the presented results,
+- add a repository-side layer that measures **fairness against performance**
+  rather than treating fairness as detached commentary.
 
-That means the important components are not only modeling stages. They also
-include repository triggers, inherited storage access, orchestration,
-validation, artifact publication, and merge evidence.
+That means the important components are not only stage classes. They also
+include shared-drive storage access, notebooks, local and GCP entry paths,
+orchestration, validation, provenance, and the new fairness--performance
+synthesis layer.
 
 ## Layered component model
 
-### 1. Event layer
-This layer determines when the architecture becomes active.
+### 1. High-level context layer
+Representative responsibilities:
+- business understanding,
+- data understanding,
+- fairness criteria,
+- acceptance rules,
+- replication target.
 
-Representative inputs:
-- repository pushes
-- pull requests
-- developer stage commands
+Why it matters:
+- this layer determines what counts as a valid run and what another party is
+  expected to be able to reproduce.
+
+### 2. Control and review layer
+Representative responsibilities:
+- configuration loading,
+- command routing,
+- run ordering,
+- merge policy,
+- local validation and CI mirroring.
+
+Representative interfaces:
 - `run-all`
 - `merge-check`
+- local scripts
+- notebook entry cells
+- GCP batch scripts
 
 Why it matters:
-- the repository is not just run manually once; it is meant to check work as it changes.
+- this is the executable control surface of the architecture.
 
-### 2. Review policy and configuration subsystem
-Representative responsibility:
-- run settings and merge policy
-
-Role:
-- loads the active configuration,
-- stores deterministic run settings,
-- defines fairness thresholds, output paths, and review controls.
-
-Why it matters:
-- this is the reproducibility contract for the whole review path.
-
-### 3. Quantum storage access path
-Representative responsibility:
-- inherited collection logic from the quantum project
-
-Role:
-- connects the repository to the shared-drive quantum data storage,
-- treats that storage as the upstream data source,
-- replaces the earlier placeholder notion of local synthetic collection.
-
-Why it matters:
-- the architecture is an integration architecture, not just a toy local pipeline.
-
-## Core analysis objects
-
-### 4. `evaluator`
-Role:
-- performs data cleaning,
-- applies validity logic,
-- computes evaluation summaries,
-- serves as the quality-judgment object.
-
-Why it matters:
-- cleaning and evaluation are intentionally concentrated in one object that already owns quality logic.
-
-### 5. `state_analysis`
-Role:
-- supports data exploration,
-- performs data preparation,
-- carries data-mining / state-level analytical logic.
-
-Why it matters:
-- this object sits across multiple CRISP-DM phases, which is exactly why the architecture should mention it explicitly.
-
-### 6. Shared execution context / artifact contracts
+### 3. Execution layer
 Representative responsibilities:
-- store run metadata,
-- track artifact paths,
-- standardize what each review phase produces.
-
-Why they matter:
-- they keep provenance explicit instead of burying it inside object internals.
-
-## CRISP-DM execution responsibilities
-
-### 7. Business-understanding realization
-Repository realization:
-- fairness objective
-- acceptance criteria
-- merge policy
-- configuration values
+- collection,
+- cleaning,
+- preparation and exploration,
+- modeling / mining,
+- evaluation.
 
 Why it matters:
-- it defines what counts as a successful run and what evidence is required.
+- this is where inherited quantum components produce the results that later get
+  reviewed and compared.
 
-### 8. Data-understanding realization
-Repository realization:
-- collection from shared-drive quantum storage
-- exploratory work through `state_analysis`
-
-Why it matters:
-- reviewers can inspect both the upstream source and the exploratory interpretation of that source.
-
-### 9. Data-preparation realization
-Repository realization:
-- cleaning through `evaluator`
-- preparation through `state_analysis`
+### 4. Fairness--performance synthesis layer
+Representative responsibilities:
+- combine allocator context,
+- consume runner outputs,
+- consume evaluator summaries,
+- compare fairness criteria against inherited performance metrics,
+- generate tradeoff tables and figures.
 
 Why it matters:
-- preprocessing stays visible and responsibility is assigned clearly.
+- this is the new layer missing from the earlier draft.
 
-### 10. Modeling realization
-Repository realization:
-- mining / analytical transformation through `state_analysis`
-
-Why it matters:
-- the architecture should show where actual mining responsibility lives.
-
-### 11. Evaluation realization
-Repository realization:
-- metric computation and fairness checks through `evaluator`
+### 5. Artifacts and replication outputs layer
+Representative responsibilities:
+- save figures,
+- save tables,
+- save manifest/provenance outputs,
+- keep notebooks and shared-drive outputs reproducible and shareable.
 
 Why it matters:
-- evaluation is a first-class responsibility and should not be buried inside mining.
+- this layer is what another party actually reruns and inspects.
 
-### 12. Deployment and review-delivery realization
-Repository realization:
-- postprocessing,
-- figure/table generation,
-- manifest writing,
-- merge-ready reviewer outputs.
+## Stage-to-object master mapping
+
+| Stage | Component / quantum object | Description (what it does) | Usage (how it is used) |
+|---|---|---|---|
+| Data Collection | `LocalBackupManager`, `GoogleDriveBackupManager`, registry / latest-state lookup | resolves shared-drive paths and retrieves matching framework/model state | notebooks, local scripts, and GCP runs begin by scanning `quantum_data_lake/` and loading compatible saved state |
+| Data Cleaning | `MultiRunEvaluator`, `_infer_models_from_state()`, `__eq__()`, `ensure_summary_contract()` | validates state compatibility, normalizes scenario storage, and repairs summary payloads when needed | collection outputs are filtered into evaluator-valid state before downstream analysis or plotting |
+| Data Preparation / Exploration | `state_analysis.py`, evaluator `scenarios_stats`, evaluator `scenarios_results` | consumes evaluator summaries and restructures them into flattened, scenario-oriented analysis tables | notebooks and local scripts use these outputs for scenario summaries, master datasets, and replication-ready tables |
+| Modeling / Mining | `AllocatorRunner`, `QuantumExperimentRunner`, allocator objects | executes runs, assigns route qubit allocations, and produces model-level outputs and traces | local, notebook, and GCP paths all use the runner chain to generate comparable outputs across scenarios |
+| Evaluation | `MultiRunEvaluator.calculate_scenario_winner()`, `calculate_scenario_performance()`, `calculate_scenarios_performance()` | computes winner counts, average gap, average efficiency, oracle reward, and scenario-level summaries | used to turn raw runner outputs into reviewer-visible performance evidence |
+| Fairness--Performance Synthesis | new repository-side fairness component, evaluator metrics, allocator context, runner outputs, `QuantumEvaluatorVisualizer`, robustness plotting path | compares fairness criteria against inherited performance metrics and creates tradeoff views | used after evaluation to produce fairness-versus-performance tables, plots, and reviewer-facing comparisons |
+| Review Delivery / Replication Outputs | notebooks, `visualizer.py`, shared-drive exports, `pipeline_manifest.json` | publishes figures, tables, notebooks, and provenance artifacts | collaborators rerun notebooks and inspect shared-drive artifacts to reproduce, interpret, and share results |
+
+## Inherited storage and execution components
+
+### 6. Shared-drive quantum data lake
+Representative responsibility:
+- shared upstream source for framework state, model state, visualizations, and
+  day-partitioned outputs.
+
+Representative path pattern:
+- `quantum_data_lake/{component}/day_YYYYMMDD/`
 
 Why it matters:
-- in this assignment context, deployment means publishing evidence for review.
+- this is the authoritative source and destination for replication artifacts.
 
-## Orchestration and validation components
+### 7. Backup-manager / registry path
+Representative components:
+- `LocalBackupManager`
+- `GoogleDriveBackupManager`
+- registry / latest-state resolution methods
 
-### 13. Review pipeline / CLI path
 Role:
-- builds the execution order,
-- exposes `run-all` and `merge-check`,
-- routes events into a reproducible validation path.
+- resolve shared-drive storage,
+- discover available saved state,
+- retrieve the latest or matching experiment artifacts.
 
 Why it matters:
-- the architecture is reviewable as software rather than as one notebook.
+- this is the real implementation of the collection stage.
 
-### 14. Validation subsystem
-Representative behaviors:
-- unit tests
-- smoke checks
-- local `merge-check`
-- CI mirror of the same validation path
-
-Why it matters:
-- this is the merge-readiness contract of the repository.
-
-## Artifact and provenance components
-
-Expected artifact classes:
-- configuration snapshot
-- shared-drive source references
-- cleaned states
-- prepared analysis inputs
-- mined outputs / predictions
-- evaluation summaries
-- final tables and figures
-- `pipeline_manifest.json`
-
-Expected storage pattern:
-- stable output root from config,
-- reviewer-visible artifacts,
-- final manifest tying the run together.
+### 8. `AllocatorRunner`
+Role:
+- initialize allocator objects,
+- propagate testbed and physics configuration,
+- execute full runs through the evaluator,
+- invoke robustness plotting,
+- verify that evaluator summaries were persisted correctly.
 
 Why it matters:
-- reviewers can follow the evidence chain from upstream source to merge decision.
+- this object sits between configuration and full experiment execution.
+
+### 9. `QuantumExperimentRunner`
+Role:
+- execute per-experiment runs,
+- generate model-specific results and traces,
+- store experiment-level outputs consumed by the evaluator.
+
+Why it matters:
+- this object is where mining and experiment execution become concrete.
+
+### 10. `MultiRunEvaluator`
+Role:
+- validate and clean state,
+- own evaluation summaries,
+- compute scenario-level winners and metrics,
+- normalize scenario storage,
+- preserve the evaluation contract consumed by analysis.
+
+Why it matters:
+- cleaning and evaluation are intentionally concentrated here.
+
+### 11. `state_analysis`
+Role:
+- consume evaluator summaries,
+- restructure scenario outputs,
+- support preparation, exploration, flattened analysis, and replication-ready
+  summary tables.
+
+Why it matters:
+- this is the bridge between saved evaluator state and human-readable analysis.
+
+### 12. `QuantumEvaluatorVisualizer` and plotting path
+Role:
+- load saved results,
+- generate comparison plots,
+- expose robustness and scenario summaries visually.
+
+Why it matters:
+- this is one of the main consumers of the fairness--performance layer.
+
+## User workflow components
+
+### 13. Setup path
+Representative steps:
+- clone repo and install requirements locally,
+- or open shared notebook and mount Drive,
+- or provision GCP VM and run startup script.
+
+### 14. Run path
+Representative actions:
+- run notebook cells,
+- run local smoke/validation scripts,
+- run GCP batch scripts,
+- run `merge-check` for repository validation.
+
+### 15. Interpretation path
+Representative components:
+- visualizer,
+- notebook plots,
+- evaluator summaries,
+- saved day directories in the data lake.
+
+### 16. Sharing path
+Representative behavior:
+- save outputs back into the shared-drive data lake so collaborators can inspect,
+  compare, and rerun them.
 
 ## Bottom-line architectural claim
 
-The repository should be understood as a reviewer-safe system in which pushes or
-review commands trigger a deterministic CRISP-DM-aligned workflow built on top
-of inherited quantum-project tooling. The central strength of the architecture
-is the clear coupling between methodology, shared-drive collection,
-`evaluator`, `state_analysis`, validation, artifact lineage, and merge
-readiness.
+`draft2` should be understood as a reviewer-safe and replication-safe system in
+which users may enter through notebooks, local installation, or GCP execution;
+collection begins from the shared-drive quantum data lake; allocator, runner,
+evaluator, and state-analysis logic structure the core pipeline; and a new
+fairness--performance synthesis layer compares fairness criteria against the
+performance metrics already produced by the inherited quantum workflow.
