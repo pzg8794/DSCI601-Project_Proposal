@@ -1,5 +1,4 @@
 \documentclass{IEEEtran}
-
 \usepackage{cite}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -10,6 +9,7 @@
 \usepackage[table]{xcolor}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta,fit,backgrounds}
+\usepackage{pdflscape}
 \usepackage[hidelinks]{hyperref}
 
 \definecolor{phase1blue}{RGB}{52,152,219}
@@ -22,26 +22,22 @@
 {\large\texttt{DSCI 601 Architecture Writeup}}}
 
 \author{%
-\begin{minipage}{0.48\textwidth}
-\begin{center}
+\begin{minipage}{0.48\textwidth}\begin{center}
 {\bf Piter Z. Garcia}\\
 \begin{small}
 MS Data Science / Decision-Making \& Algorithmic Fairness\\
 Rochester Institute of Technology (RIT)\\
 {\it pizg8794@g.rit.edu}
 \end{small}
-\end{center}
-\end{minipage}
+\end{center}\end{minipage}
 \hfill
-\begin{minipage}{0.48\textwidth}
-\begin{center}
+\begin{minipage}{0.48\textwidth}\begin{center}
 {\bf DSCI 601 Project Context}\\
 \begin{small}
 Architecture deliverable aligned with code review,
 reproducibility, and inherited quantum-project tooling
 \end{small}
-\end{center}
-\end{minipage}%
+\end{center}\end{minipage}%
 }
 
 \begin{document}
@@ -63,7 +59,6 @@ reproducibly as it is pushed.
 \end{abstract}
 
 \section{Architecture Overview}
-
 This writeup should be read as the operational companion to the project's
 earlier approach diagram. The earlier approach artifact explains the conceptual
 logic of the work. The architecture presented here explains how that logic is
@@ -91,81 +86,35 @@ standalone ad hoc script layer: cleaning is primarily the responsibility of the
 in the context of this assignment, means reviewer-facing postprocessing,
 manifest generation, and merge-ready evidence.
 
-The architecture therefore has a dual obligation. It must preserve the research
-logic of the project, and it must preserve the inherited software logic on which
-that project already depends. A weak draft can satisfy one while missing the
-other. This draft is designed to keep both visible at once.
-
 \section{Design Principles}
-
-The architecture is governed by four design principles.
-
-\textbf{Methodological traceability.} The repository should remain legible in
-CRISP-DM terms even when one conceptual phase is implemented through inherited
-objects rather than newly written stage classes.
-
-\textbf{Deterministic reviewability.} A reviewer should be able to rerun a
-compact configuration and obtain the same structure of outputs without depending
-on hidden state.
-
-\textbf{Artifact-centered evidence.} The value of the run lies not only in a
-final number or figure, but in the chain of intermediate artifacts that justify
-a merge decision.
-
-\textbf{Inheritance-aware separation of concerns.} Repository events,
+The architecture is governed by four design principles: methodological
+traceability, deterministic reviewability, artifact-centered evidence, and an
+inheritance-aware separation of concerns between repository events,
 orchestration, validation, storage access, evaluation logic, state analysis, and
-evidence publication should be visible as separate responsibilities rather than
-collapsed into one generic pipeline box.
+evidence publication.
 
 \section{System Architecture}
-
-Figure~\ref{fig:architecture_draft2} presents the architecture as a system with
-four interacting layers: an event layer, a control and review layer, a CRISP-DM
-execution layer, and an artifact and provenance layer.
-
-\begin{figure*}[!t]
-\centering
-\resizebox{0.99\textwidth}{!}{\input{architecture_diagram.tex}}
-\caption{Draft 2 architecture for the push-validated CRISP-DM review pipeline.
-Repository events trigger a reproducible review path; orchestration and
-validation control execution; inherited quantum-project objects realize the
-CRISP-DM phases; and the resulting artifacts provide the evidence used in review
-and merge decisions.}
-\label{fig:architecture_draft2}
-\end{figure*}
+The architecture can be understood as a system with four interacting layers: a
+high-level CRISP-DM context layer, a control and review layer, an executable
+validation pipeline, and an artifact and provenance layer. Because the diagram
+contains dense labels and reviewer-facing detail, the full figure is placed on a
+dedicated landscape page at the end of this document so it can remain large and
+legible.
 
 \subsection{Event Layer}
 The left side of the architecture represents the point at which work enters the
-system. In this project, that entry point is not simply a human pressing run on
-a single script. New work arrives through repository pushes, pull requests,
+system. New work arrives through repository pushes, pull requests,
 configuration changes, and explicit developer or reviewer commands such as
-\texttt{run-all} and \texttt{merge-check}. The event layer therefore answers a
-basic architectural question: when does the repository become active as a review
-system?
-
-The answer is that a change is treated as a request for validation. In a local
-workflow that request is handled by the command-line interface. In a shared
-workflow the same request is mirrored by CI. This is why the architecture must
-be described in push-validated terms rather than as a static pipeline drawing.
+\texttt{run-all} and \texttt{merge-check}. A change is treated as a request for
+validation, locally through the CLI and remotely through CI.
 
 \subsection{Control and Review Layer}
 The control layer translates repository events into a structured execution plan.
 It includes configuration loading, command routing, stage ordering,
-reproducibility controls, test invocation, and merge policy. In this project it
-also includes the inheritance path borrowed from the quantum project: the review
-pipeline is not built in isolation, but layered on top of established storage
-and analysis conventions.
-
-Two paths coexist in this layer.
-
-\textbf{Execution path.} The pipeline runs its ordered responsibilities and
-records outputs in a manifest.
-
-\textbf{Validation path.} Tests and merge checks confirm that the execution path
-produced structurally correct outputs and that the repository remains healthy.
-
-That separation is essential. A project can execute without being reviewable,
-but it cannot be reviewable unless validation is architected explicitly.
+reproducibility controls, test invocation, and merge policy. Two paths coexist
+here: an execution path that runs ordered responsibilities and records outputs,
+and a validation path that confirms structural correctness and repository
+health.
 
 \subsection{CRISP-DM Execution Layer}
 The middle of the architecture is the CRISP-DM execution layer. The repository
@@ -192,104 +141,58 @@ Deployment & postprocessing, figures, manifest, merge evidence \\
 
 This explicit mapping is one of the strengths of the architecture. CRISP-DM is
 not invoked as a label only. It is translated into code paths and object
-responsibilities that can be run and inspected. The mapping also corrects a
-major weakness of the earlier draft: it no longer implies that every stage is a
-repo-local abstraction. Instead, it acknowledges that the project inherits key
-behavior from the quantum code path.
-
-Data understanding begins with collection from the quantum data storage layer,
-which behaves as a datalake-like shared-drive backend. This is architecturally
-important because collection is no longer a synthetic placeholder; it is a real
-integration concern. Exploration remains close to \texttt{state\_analysis},
-which makes that object part of both understanding and downstream preparation.
-
-Data preparation is intentionally split by responsibility. Cleaning belongs to
-\texttt{evaluator}, which already owns the logic for determining whether states
-or outputs satisfy validity expectations. Preparation then moves into
-\texttt{state\_analysis}, where the cleaned data are structured for downstream
-analysis. Modeling or data mining is also centered on \texttt{state\_analysis},
-which is appropriate because the same object already mediates state-level
-interpretation and analytical transformation. Evaluation returns to
-\texttt{evaluator}, preserving one clear place for metric computation and
-quality judgment.
+responsibilities that can be run and inspected. Data understanding begins with
+collection from the quantum data storage layer, which behaves as a datalake-like
+shared-drive backend. Data preparation is intentionally split by responsibility:
+cleaning belongs to \texttt{evaluator}, while preparation and mining are carried
+by \texttt{state\_analysis}. Evaluation returns to \texttt{evaluator},
+preserving one clear place for metric computation and quality judgment.
 
 \subsection{Artifact and Provenance Layer}
 The bottom of the architecture collects the products that matter to a reviewer:
 configuration snapshots, shared-drive data references, cleaned and prepared
 state artifacts, mined outputs, evaluation summaries, figures, and the final
-manifest. These outputs are not accidental side effects. They are the objects
-through which the repository becomes auditable.
-
-The architecture therefore treats artifacts as first-class entities. Each phase
-produces evidence, and that evidence can be followed forward into the final
-merge decision. This gives the repository a research-quality property that the
-earlier draft failed to show clearly: the architecture is not only about
-execution order, but about provenance across inherited tools.
+manifest. These outputs are the objects through which the repository becomes
+auditable.
 
 \section{Component View}
-
-The main architectural components can be summarized as follows.
-
-\textbf{Repository interface.} This includes repository events, the CLI, and
-reviewer-facing commands such as \texttt{run-all} and \texttt{merge-check}.
-
-\textbf{Configuration subsystem.} This defines deterministic run parameters such
-as thresholds, seeds, output paths, and review rules.
-
-\textbf{Quantum storage access path.} This inherited path is responsible for
-collecting data from the shared-drive quantum storage layer.
-
-\textbf{Evaluator object.} This is the central object for cleaning and
- evaluation responsibilities.
-
-\textbf{State analysis object.} This object carries exploration, preparation,
-and mining responsibilities.
-
-\textbf{Validation subsystem.} This includes unit tests, smoke checks,
-merge-check execution, and CI mirroring.
-
-\textbf{Artifact and provenance subsystem.} This writes stage outputs and the
-final manifest so every run leaves an inspectable record.
-
-The architectural claim is not simply that these components exist. It is that
-their responsibilities are visible and coherent. That visibility is what makes
-the repository understandable under review.
+The main architectural components can be summarized as repository interface,
+configuration subsystem, quantum storage access path, evaluator object,
+state-analysis object, validation subsystem, and artifact/provenance subsystem.
+The key claim is not just that these components exist, but that their
+responsibilities are visible and coherent under review.
 
 \section{Why this Draft Improves the Previous Version}
-
 The earlier draft was weak because it drew a compact stage sketch where a true
 system architecture was needed, and because it represented several phases as if
-they were generic standalone stage classes. That made the work look smaller,
-less grounded, and less connected to the actual inherited code path than it
-really is.
-
-This draft corrects that in three ways.
-
-\textbf{First, it restores system scale.} The diagram now shows repository
-triggers, orchestration, CRISP-DM execution, inherited object responsibilities,
-evidence generation, and merge decision flow in one architecture.
-
-\textbf{Second, it reconnects the architecture to the project's broader
-approach narrative.} The architecture is presented as the operational
-realization of the earlier conceptual diagram rather than as an unrelated
-artifact.
-
-\textbf{Third, it foregrounds inherited software structure.} The repository is
-described as a system that reuses quantum-project storage and object logic,
-rather than pretending everything is implemented from scratch locally.
+they were generic standalone stage classes. This draft restores system scale,
+reconnects the architecture to the project's broader approach narrative, and
+foregrounds the inherited software structure of the repository.
 
 \section{Conclusion}
-
 A strong architecture writeup should show how methodological intent, inherited
 software responsibilities, artifact generation, and review decisions fit
-together. That is the central purpose of this draft.
+together. The repository should therefore be understood as a push-validated
+CRISP-DM system whose main promise is reproducible review. New work enters
+through repository events, passes through orchestration and validation, is
+processed by explicit CRISP-DM responsibilities realized through the quantum
+storage path, \texttt{evaluator}, and \texttt{state\_analysis}, and produces
+evidence that supports a merge decision.
 
-The repository should therefore be understood as a push-validated CRISP-DM
-system whose main promise is reproducible review. New work enters through
-repository events, passes through orchestration and validation, is processed by
-explicit CRISP-DM responsibilities realized through the quantum storage path,
-\texttt{evaluator}, and \texttt{state\_analysis}, and produces evidence that
-supports a merge decision. That framing better represents the actual work of the
-project and is more appropriate for a research-quality architecture deliverable.
+\clearpage
+\begin{landscape}
+\thispagestyle{plain}
+\begin{figure}[p]
+\centering
+\resizebox{0.96\linewidth}{!}{\input{architecture_diagram.tex}}
+\caption{Draft 2 architecture for the push-validated CRISP-DM review pipeline.
+Business Understanding and Data Understanding remain architectural context at
+the highest level, while the executable Git validation pipeline begins with the
+clean code path. The control layer triggers and validates execution, the
+execution layer transforms inherited inputs into reviewer-facing outputs, and
+the artifacts layer provides the evidence used in merge decisions.}
+\label{fig:architecture_draft2}
+\end{figure}
+\end{landscape}
 
 \end{document}
