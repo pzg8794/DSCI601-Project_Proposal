@@ -1,80 +1,71 @@
 % Research-style architecture diagram for the DSCI601 draft2 package.
-% This version treats the repository as a push-validated CRISP-DM review system
-% rather than as a small standalone stage sketch.
+% This version reflects the inherited quantum-project toolchain:
+% shared-drive quantum storage, evaluator-based cleaning/evaluation,
+% and state_analysis-based preparation, exploration, and mining.
 
 \begin{tikzpicture}[
   font=\sffamily,
   >=Latex,
   layerbox/.style={rectangle, draw=black!50, rounded corners, inner sep=8pt, line width=0.45pt},
   event/.style={rectangle, draw=black, rounded corners, minimum height=1.05cm, text width=3.2cm, align=center, fill=gray!10, line width=0.5pt},
-  control/.style={rectangle, draw=black, rounded corners, minimum height=1.15cm, text width=3.5cm, align=center, fill=gray!8, line width=0.5pt},
-  phase/.style={rectangle, draw=black, rounded corners, minimum height=1.55cm, text width=2.85cm, align=center, line width=0.55pt},
-  artifact/.style={rectangle, draw=black, rounded corners, minimum height=1.00cm, text width=2.8cm, align=center, fill=gray!6, line width=0.45pt},
+  control/.style={rectangle, draw=black, rounded corners, minimum height=1.15cm, text width=3.6cm, align=center, fill=gray!8, line width=0.5pt},
+  phase/.style={rectangle, draw=black, rounded corners, minimum height=1.70cm, text width=3.0cm, align=center, line width=0.55pt},
+  artifact/.style={rectangle, draw=black, rounded corners, minimum height=1.05cm, text width=3.0cm, align=center, fill=gray!6, line width=0.45pt},
   decision/.style={rectangle, draw=black, rounded corners, minimum height=1.20cm, text width=3.2cm, align=center, fill=gray!12, line width=0.55pt},
   flow/.style={->, line width=0.8pt},
   trace/.style={->, dashed, line width=0.65pt},
   lab/.style={font=\scriptsize, align=center}
 ]
 
-% ------------------------------------------------------------------
 % Event layer
-% ------------------------------------------------------------------
 \node[event] (push) at (0.0, 4.8)
-  {\textbf{Repository events}\\push, pull request,\\changed pipeline code};
+  {\textbf{Repository events}\\push, pull request,\\changed analysis code};
 \node[event] (cmd) at (0.0, 2.9)
   {\textbf{Developer / reviewer entry points}\\stage commands,\\\texttt{run-all}, \texttt{merge-check}};
 \node[layerbox, fit=(push)(cmd), label={[font=\small]above:Event layer}] (eventframe) {};
 
-% ------------------------------------------------------------------
 % Control layer
-% ------------------------------------------------------------------
-\node[control, fill=phase1blue!12] (policy) at (4.2, 4.8)
-  {\textbf{Review policy \& configuration}\\seed, split, missingness,\\fairness threshold, acceptance rules};
-\node[control, fill=phase2green!12] (orch) at (8.6, 4.8)
-  {\textbf{Orchestration \& CLI}\\\texttt{ReviewPipeline}, stage ordering,\\manifest writing, stopping points};
-\node[control, fill=phase4purple!12] (val) at (13.0, 4.8)
+\node[control, fill=phase1blue!12] (policy) at (4.4, 4.8)
+  {\textbf{Review policy \& configuration}\\thresholds, seeds, run rules,\\fairness and merge criteria};
+\node[control, fill=phase2green!12] (orch) at (9.0, 4.8)
+  {\textbf{Inherited orchestration path}\\quantum-project conventions,\\CLI ordering, manifest writing};
+\node[control, fill=phase4purple!12] (val) at (13.6, 4.8)
   {\textbf{Validation path}\\unit tests, smoke checks,\\CI mirror of local merge-check};
-\node[decision] (gate) at (17.5, 4.8)
+\node[decision] (gate) at (18.2, 4.8)
   {\textbf{Merge / review decision}\\accept, revise, or reject\\based on run evidence};
 \node[layerbox, fit=(policy)(gate), label={[font=\small]above:Control and review layer}] (controlframe) {};
 
-% ------------------------------------------------------------------
 % CRISP-DM execution layer
-% ------------------------------------------------------------------
-\node[phase, fill=phase1blue!16] (bu) at (1.0, 1.2)
-  {\textbf{Business}\\\textbf{Understanding}\\\scriptsize fairness objective\\\scriptsize merge criteria};
-\node[phase, fill=phase1blue!16] (du) at (4.4, 1.2)
-  {\textbf{Data}\\\textbf{Understanding}\\\scriptsize collection +\\\scriptsize exploration};
-\node[phase, fill=phase2green!16] (dp) at (7.8, 1.2)
-  {\textbf{Data}\\\textbf{Preparation}\\\scriptsize cleaning +\\\scriptsize preparation};
-\node[phase, fill=phase3orange!16] (model) at (11.2, 1.2)
-  {\textbf{Modeling}\\\scriptsize data mining\\\scriptsize stage};
-\node[phase, fill=phase3orange!16] (eval) at (14.6, 1.2)
-  {\textbf{Evaluation}\\\scriptsize utility + fairness\\\scriptsize checks};
-\node[phase, fill=phase4purple!16] (deploy) at (18.0, 1.2)
-  {\textbf{Deployment /}\\\textbf{Review delivery}\\\scriptsize postprocess + manifest\\\scriptsize reviewer outputs};
+\node[phase, fill=phase1blue!16] (bu) at (1.4, 1.2)
+  {\textbf{Business}\\\textbf{Understanding}\\\scriptsize project objective,\\\scriptsize fairness criteria, merge rules};
+\node[phase, fill=phase1blue!16] (du) at (5.0, 1.2)
+  {\textbf{Data}\\\textbf{Understanding}\\\scriptsize quantum datalake collection\\\scriptsize + state\_analysis exploration};
+\node[phase, fill=phase2green!16] (dp) at (8.6, 1.2)
+  {\textbf{Data}\\\textbf{Preparation}\\\scriptsize evaluator cleaning\\\scriptsize + state\_analysis prep};
+\node[phase, fill=phase3orange!16] (model) at (12.2, 1.2)
+  {\textbf{Modeling}\\\scriptsize state\_analysis\\\scriptsize mining / feature logic};
+\node[phase, fill=phase3orange!16] (eval) at (15.8, 1.2)
+  {\textbf{Evaluation}\\\scriptsize evaluator metrics\\\scriptsize and fairness checks};
+\node[phase, fill=phase4purple!16] (deploy) at (19.4, 1.2)
+  {\textbf{Deployment /}\\\textbf{Review delivery}\\\scriptsize postprocess, figures,\\\scriptsize manifest, reviewer outputs};
 \node[layerbox, fit=(bu)(deploy), label={[font=\small]above:CRISP-DM execution layer}] (phaseframe) {};
 
-% ------------------------------------------------------------------
 % Artifact layer
-% ------------------------------------------------------------------
-\node[artifact] (a0) at (1.0, -1.4)
+\node[artifact] (a0) at (1.4, -1.5)
   {config snapshot\\review policy};
-\node[artifact] (a1) at (4.4, -1.4)
-  {raw records\\EDA summaries};
-\node[artifact] (a2) at (7.8, -1.4)
-  {clean records\\train/test artifacts};
-\node[artifact] (a3) at (11.2, -1.4)
-  {predictions\\run outputs};
-\node[artifact] (a4) at (14.6, -1.4)
-  {metrics\\fairness evidence};
-\node[artifact] (a5) at (18.0, -1.4)
+\node[artifact] (a1) at (5.0, -1.5)
+  {shared-drive quantum\\storage references};
+\node[artifact] (a2) at (8.6, -1.5)
+  {cleaned states\\prepared analysis inputs};
+\node[artifact] (a3) at (12.2, -1.5)
+  {mined state outputs\\prediction artifacts};
+\node[artifact] (a4) at (15.8, -1.5)
+  {utility / fairness\\evaluation evidence};
+\node[artifact] (a5) at (19.4, -1.5)
   {tables, figures,\\\texttt{pipeline\_manifest.json}};
 \node[layerbox, fit=(a0)(a5), label={[font=\small]above:Artifact and provenance layer}] (artifactframe) {};
 
-% ------------------------------------------------------------------
 % Main flow
-% ------------------------------------------------------------------
 \draw[flow] (push.east) -- (policy.west);
 \draw[flow] (cmd.east) -- (orch.west);
 \draw[flow] (policy.east) -- (orch.west);
@@ -96,14 +87,15 @@
 \draw[trace] (eval.south) -- (a4.north);
 \draw[trace] (deploy.south) -- (a5.north);
 
-% Cross-cutting validation / reproducibility traces
+% Cross-cutting traces
 \draw[trace] (policy.south) -- ++(0,-0.5) -| (phaseframe.north west);
 \draw[trace] (val.south) -- ++(0,-0.5) -| (phaseframe.north east);
 \draw[trace] (artifactframe.north) -- ++(0,0.45) -| (gate.south);
 
 % Bottom note
-\node[lab] at (9.5, -3.3)
- {\textbf{Operational interpretation:} repository work is checked as it is pushed; CRISP-DM phases structure execution;\
-  artifacts provide reviewer-visible evidence; and the merge gate depends on both validation results and provenance.};
+\node[lab] at (10.4, -3.45)
+ {\textbf{Operational interpretation:} pushes trigger the inherited review path; data are collected from the quantum shared-drive
+  storage layer; \texttt{evaluator} performs cleaning and evaluation; \texttt{state\_analysis} carries exploration,
+  preparation, and mining responsibilities; and merge readiness depends on both validation and artifact provenance.};
 
 \end{tikzpicture}
