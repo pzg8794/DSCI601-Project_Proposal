@@ -1,8 +1,9 @@
 # Draft 2 system components and interfaces
 
 This note explains the component view for the draft2 architecture package. It
-is written to match the repository as a **push-validated, CRISP-DM-aligned
-review system** rather than as a small standalone ML demo.
+is now aligned with the actual inherited design you described: quantum shared-
+drive storage for collection, `evaluator` for cleaning and evaluation, and
+`state_analysis` for preparation, exploration, and mining.
 
 ## Architectural intent
 
@@ -12,8 +13,8 @@ The architecture has to satisfy two obligations at the same time:
 - preserve the repository's review logic as work is pushed and checked.
 
 That means the important components are not only modeling stages. They also
-include repository triggers, configuration, orchestration, validation, artifact
-publication, and merge evidence.
+include repository triggers, inherited storage access, orchestration,
+validation, artifact publication, and merge evidence.
 
 ## Layered component model
 
@@ -31,53 +32,62 @@ Why it matters:
 - the repository is not just run manually once; it is meant to check work as it changes.
 
 ### 2. Review policy and configuration subsystem
-Representative component:
-- `PipelineConfig`
+Representative responsibility:
+- run settings and merge policy
 
 Role:
-- loads the active JSON configuration,
+- loads the active configuration,
 - stores deterministic run settings,
-- defines fairness thresholds, split policy, output paths, and other run controls.
+- defines fairness thresholds, output paths, and review controls.
 
 Why it matters:
 - this is the reproducibility contract for the whole review path.
 
-### 3. Shared execution context
-Representative components:
-- `PipelineContext`
-- `StageResult`
-
-Role of `PipelineContext`:
-- stores run metadata, artifact paths, and stage summaries,
-- provides the shared state passed across the pipeline,
-- avoids hard-coded coupling between stages.
-
-Role of `StageResult`:
-- standardizes what each stage returns,
-- records artifact paths and concise summary metadata,
-- makes stage contracts visible.
-
-Why they matter:
-- together they make provenance explicit rather than implicit.
-
-### 4. Pipeline stage interface
-Representative component:
-- `PipelineStage`
+### 3. Quantum storage access path
+Representative responsibility:
+- inherited collection logic from the quantum project
 
 Role:
-- shared abstract base / interface for executable stages,
-- defines the common execution contract used by the orchestrator.
+- connects the repository to the shared-drive quantum data storage,
+- treats that storage as the upstream data source,
+- replaces the earlier placeholder notion of local synthetic collection.
 
 Why it matters:
-- it preserves narrow responsibilities and testable stage boundaries.
+- the architecture is an integration architecture, not just a toy local pipeline.
 
-## CRISP-DM execution components
+## Core analysis objects
 
-The repository realizes CRISP-DM through explicit review stages.
+### 4. `evaluator`
+Role:
+- performs data cleaning,
+- applies validity logic,
+- computes evaluation summaries,
+- serves as the quality-judgment object.
 
-### 5. Business-understanding realization
-This phase is represented operationally rather than as a separate numerical stage.
+Why it matters:
+- cleaning and evaluation are intentionally concentrated in one object that already owns quality logic.
 
+### 5. `state_analysis`
+Role:
+- supports data exploration,
+- performs data preparation,
+- carries data-mining / state-level analytical logic.
+
+Why it matters:
+- this object sits across multiple CRISP-DM phases, which is exactly why the architecture should mention it explicitly.
+
+### 6. Shared execution context / artifact contracts
+Representative responsibilities:
+- store run metadata,
+- track artifact paths,
+- standardize what each review phase produces.
+
+Why they matter:
+- they keep provenance explicit instead of burying it inside object internals.
+
+## CRISP-DM execution responsibilities
+
+### 7. Business-understanding realization
 Repository realization:
 - fairness objective
 - acceptance criteria
@@ -87,87 +97,58 @@ Repository realization:
 Why it matters:
 - it defines what counts as a successful run and what evidence is required.
 
-### 6. Data-understanding realization
-Representative stage components:
-- `DataCollectionStage`
-- `DataExplorationStage`
-
-Role:
-- generate or ingest the reviewer-safe dataset,
-- expose what the dataset contains before downstream modeling,
-- summarize group balance, completeness, and basic dataset structure.
+### 8. Data-understanding realization
+Repository realization:
+- collection from shared-drive quantum storage
+- exploratory work through `state_analysis`
 
 Why it matters:
-- reviewers can inspect both the incoming data and the exploratory evidence.
+- reviewers can inspect both the upstream source and the exploratory interpretation of that source.
 
-### 7. Data-preparation realization
-Representative stage components:
-- `DataCleaningStage`
-- `DataPreparationStage`
-
-Role:
-- validate schema,
-- remove intentionally invalid records,
-- create deterministic train/test artifacts.
+### 9. Data-preparation realization
+Repository realization:
+- cleaning through `evaluator`
+- preparation through `state_analysis`
 
 Why it matters:
-- preprocessing stays visible instead of being hidden inside modeling code.
+- preprocessing stays visible and responsibility is assigned clearly.
 
-### 8. Modeling realization
-Representative stage component:
-- `DataMiningStage`
-
-Role:
-- run the lightweight modeling / prediction step,
-- produce predictions as explicit artifacts.
+### 10. Modeling realization
+Repository realization:
+- mining / analytical transformation through `state_analysis`
 
 Why it matters:
-- modeling is reviewable without dominating the whole architecture.
+- the architecture should show where actual mining responsibility lives.
 
-### 9. Evaluation realization
-Representative stage component:
-- `EvaluationStage`
-
-Role:
-- compute utility-oriented and fairness-oriented metrics,
-- produce the evidence needed for quality judgment.
+### 11. Evaluation realization
+Repository realization:
+- metric computation and fairness checks through `evaluator`
 
 Why it matters:
-- evaluation is a first-class phase, not a footnote after modeling.
+- evaluation is a first-class responsibility and should not be buried inside mining.
 
-### 10. Deployment and review-delivery realization
-Representative stage component:
-- `ResultsPostprocessingStage`
-
-Role:
-- convert raw outputs into reviewer-facing tables and figures,
-- publish final CSV / SVG outputs,
-- support manifest-based reproducibility and review delivery.
+### 12. Deployment and review-delivery realization
+Repository realization:
+- postprocessing,
+- figure/table generation,
+- manifest writing,
+- merge-ready reviewer outputs.
 
 Why it matters:
-- in this assignment context, deployment means producing merge-ready evidence.
+- in this assignment context, deployment means publishing evidence for review.
 
 ## Orchestration and validation components
 
-### 11. `ReviewPipeline`
+### 13. Review pipeline / CLI path
 Role:
-- builds the ordered execution plan,
-- runs stages end-to-end or to a named stopping point,
-- writes the final manifest after execution completes.
-
-Why it matters:
-- it connects methodology, execution order, and provenance.
-
-### 12. CLI module
-Role:
-- exposes one runnable command per required stage,
-- exposes orchestration commands such as `run-all` and `merge-check`,
-- gives reviewers a stable control surface.
+- builds the execution order,
+- exposes `run-all` and `merge-check`,
+- routes events into a reproducible validation path.
 
 Why it matters:
 - the architecture is reviewable as software rather than as one notebook.
 
-### 13. Validation subsystem
+### 14. Validation subsystem
 Representative behaviors:
 - unit tests
 - smoke checks
@@ -175,34 +156,33 @@ Representative behaviors:
 - CI mirror of the same validation path
 
 Why it matters:
-- this is the actual merge-readiness contract of the repository.
+- this is the merge-readiness contract of the repository.
 
 ## Artifact and provenance components
 
 Expected artifact classes:
 - configuration snapshot
-- raw records
-- exploratory summaries
-- clean records
-- train/test artifacts
-- predictions
-- metrics
-- final CSV tables
-- SVG figures
+- shared-drive source references
+- cleaned states
+- prepared analysis inputs
+- mined outputs / predictions
+- evaluation summaries
+- final tables and figures
 - `pipeline_manifest.json`
 
 Expected storage pattern:
 - stable output root from config,
-- numbered stage directories,
+- reviewer-visible artifacts,
 - final manifest tying the run together.
 
 Why it matters:
-- reviewers can follow the evidence chain from event to merge decision.
+- reviewers can follow the evidence chain from upstream source to merge decision.
 
 ## Bottom-line architectural claim
 
 The repository should be understood as a reviewer-safe system in which pushes or
-review commands trigger a deterministic CRISP-DM-aligned workflow. The central
-strength of the architecture is not algorithmic scale. It is the clear coupling
-between methodology, stage execution, validation, artifact lineage, and merge
+review commands trigger a deterministic CRISP-DM-aligned workflow built on top
+of inherited quantum-project tooling. The central strength of the architecture
+is the clear coupling between methodology, shared-drive collection,
+`evaluator`, `state_analysis`, validation, artifact lineage, and merge
 readiness.
