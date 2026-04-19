@@ -1,0 +1,116 @@
+% architecture_diagram.tex — improved (draft1)
+% Drop-in replacement; \input{architecture_diagram.tex} in the report unchanged.
+% Requires: tikz with libraries positioning, arrows.meta, fit, backgrounds
+% Colors phase1blue, phase2green, phase3orange, phase4purple must be defined
+% in the parent document (already defined in architecture_report.tex).
+
+\begin{tikzpicture}[
+  font=\sffamily\small,
+  >=Latex,
+  phase/.style={
+    rectangle, draw, rounded corners,
+    minimum height=0.75cm, text width=2.55cm, align=center,
+    line width=0.5pt, font=\sffamily\scriptsize\bfseries
+  },
+  stage/.style={
+    rectangle, draw=black, rounded corners,
+    minimum height=1.3cm, text width=2.75cm, align=center,
+    line width=0.5pt
+  },
+  support/.style={
+    rectangle, draw=black, rounded corners,
+    minimum height=0.75cm, text width=3.2cm, align=center,
+    fill=gray!10, line width=0.45pt, font=\sffamily\scriptsize
+  },
+  store/.style={
+    rectangle, draw=black, rounded corners,
+    minimum height=0.85cm, text width=3.6cm, align=center,
+    fill=gray!8, line width=0.45pt, font=\sffamily\scriptsize
+  },
+  arrow/.style={->, line width=0.75pt},
+  ctrl/.style={->, dashed, gray, line width=0.55pt},
+  phase2stage/.style={->, dotted, line width=0.55pt, gray!70}
+]
+
+%% ── Row 0: CRISP-DM phases ──────────────────────────────────────────────────
+\node[font=\sffamily\scriptsize\itshape, gray] at (-2.4, 5.6) {CRISP-DM:};
+\node[phase, fill=phase1blue!18]   (ph-du)  at (0,    5.6) {Data\\Understanding};
+\node[phase, fill=phase1blue!18]   (ph-du2) at (3.2,  5.6) {Data\\Understanding};
+\node[phase, fill=phase2green!18]  (ph-dp)  at (6.4,  5.6) {Data\\Preparation};
+\node[phase, fill=phase2green!18]  (ph-du3) at (9.6,  5.6) {Data\\Understanding};
+\node[phase, fill=phase3orange!18] (ph-mod) at (12.8, 5.6) {Modeling};
+\node[phase, fill=phase3orange!18] (ph-ev)  at (16.0, 5.6) {Evaluation};
+\node[phase, fill=phase4purple!18] (ph-dep) at (19.2, 5.6) {Deployment};
+
+%% ── Row 1: Support / control layer ─────────────────────────────────────────
+\node[support, fill=phase1blue!12]   (config) at (0,    3.6)
+  {\textbf{Configuration}\\seed $\cdot$ split $\cdot$ bias\\fairness threshold};
+\node[support, fill=phase2green!12]  (cli)    at (9.6,  3.6)
+  {\textbf{CLI Interface}\\one command per stage\\\texttt{run-all}, \texttt{merge-check}};
+\node[support, fill=phase4purple!12] (tests)  at (19.2, 3.6)
+  {\textbf{Validation Layer}\\unit tests $\cdot$ smoke run\\CI merge gate};
+
+%% ── Row 2: CRISP+ML pipeline stages ────────────────────────────────────────
+\node[stage, fill=phase1blue!15]   (collect)  at (0,    1.4)
+  {\textbf{1.~Data}\\\textbf{Collection}\\synthetic dataset\\\scriptsize raw JSON};
+\node[stage, fill=phase1blue!15]   (clean)    at (3.2,  1.4)
+  {\textbf{2.~Data}\\\textbf{Cleaning}\\schema $\cdot$ remove invalids\\\scriptsize clean JSON};
+\node[stage, fill=phase2green!15]  (prepare)  at (6.4,  1.4)
+  {\textbf{3.~Data}\\\textbf{Preparation}\\det.\ train/test split\\\scriptsize train+test JSON};
+\node[stage, fill=phase2green!15]  (explore)  at (9.6,  1.4)
+  {\textbf{4.~Exploration}\\\textbf{/ Visualization}\\group + completeness\\\scriptsize CSV + SVG};
+\node[stage, fill=phase3orange!15] (mine)     at (12.8, 1.4)
+  {\textbf{5.~Data Mining}\\lightweight model\\\scriptsize predictions JSON};
+\node[stage, fill=phase3orange!15] (evaluate) at (16.0, 1.4)
+  {\textbf{6.~Evaluation}\\utility + fairness\\\scriptsize metrics JSON};
+\node[stage, fill=phase4purple!15] (post)     at (19.2, 1.4)
+  {\textbf{7.~Results}\\\textbf{Postprocessing}\\final tables + SVG\\\scriptsize CSV + figure};
+
+%% ── Row 3: Manifest ─────────────────────────────────────────────────────────
+\node[store] (manifest) at (9.6, -0.6)
+  {\textbf{Pipeline Manifest}\\config copy $\cdot$ stage outputs\\summary metadata};
+
+%% ── Sequential pipeline flow ────────────────────────────────────────────────
+\draw[arrow] (collect)  -- (clean);
+\draw[arrow] (clean)    -- (prepare);
+\draw[arrow] (prepare)  -- (explore);
+\draw[arrow] (explore)  -- (mine);
+\draw[arrow] (mine)     -- (evaluate);
+\draw[arrow] (evaluate) -- (post);
+
+%% ── Stages → Manifest ───────────────────────────────────────────────────────
+\draw[arrow] (post.south) |- (manifest.east);
+\draw[ctrl]  (collect.south) -- ++(0,-0.4) -| (manifest.west);
+
+%% ── Control layer → pipeline ────────────────────────────────────────────────
+\draw[ctrl] (config.south) -- (collect.north);
+\draw[ctrl] (cli.south)    -- (explore.north);
+\draw[ctrl] (tests.south)  -- (post.north);
+
+%% ── CRISP-DM phase → stage ──────────────────────────────────────────────────
+\draw[phase2stage] (ph-du.south)  -- (collect.north);
+\draw[phase2stage] (ph-du2.south) -- (clean.north);
+\draw[phase2stage] (ph-dp.south)  -- (prepare.north);
+\draw[phase2stage] (ph-du3.south) -- (explore.north);
+\draw[phase2stage] (ph-mod.south) -- (mine.north);
+\draw[phase2stage] (ph-ev.south)  -- (evaluate.north);
+\draw[phase2stage] (ph-dep.south) -- (post.north);
+
+%% ── Storage contract note ───────────────────────────────────────────────────
+\node[font=\scriptsize\itshape, align=center, gray] at (9.6, -1.65) {
+  Each stage writes deterministic artifacts under
+  \texttt{results/fast\_review/<nn\_stage\_name>/}
+};
+
+%% ── Color legend ────────────────────────────────────────────────────────────
+\node[stage, fill=phase1blue!15,   text width=2.0cm, minimum height=0.45cm,
+      font=\sffamily\tiny] (leg1) at (-3.2, 1.8)  {Data Understanding};
+\node[stage, fill=phase2green!15,  text width=2.0cm, minimum height=0.45cm,
+      font=\sffamily\tiny] (leg2) at (-3.2, 1.1)  {Data Preparation};
+\node[stage, fill=phase3orange!15, text width=2.0cm, minimum height=0.45cm,
+      font=\sffamily\tiny] (leg3) at (-3.2, 0.4)  {Modeling / Eval.};
+\node[stage, fill=phase4purple!15, text width=2.0cm, minimum height=0.45cm,
+      font=\sffamily\tiny] (leg4) at (-3.2, -0.3) {Deployment};
+\node[font=\sffamily\tiny\itshape, gray] at (-3.2, -0.85) {CRISP-DM color key};
+
+\end{tikzpicture}

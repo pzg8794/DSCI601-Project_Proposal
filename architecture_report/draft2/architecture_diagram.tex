@@ -1,0 +1,120 @@
+% Revised architecture diagram for the DSCI601 architecture report.
+% This version fixes the broken stage flow, makes the cross-cutting layers
+% explicit, and frames the repository as a CRISP-DM-aligned review pipeline.
+
+\begin{tikzpicture}[
+  font=\sffamily,
+  >=Latex,
+  support/.style={
+    rectangle,
+    draw=black,
+    rounded corners,
+    minimum height=0.95cm,
+    text width=3.2cm,
+    align=center,
+    fill=gray!10,
+    line width=0.45pt
+  },
+  stage/.style={
+    rectangle,
+    draw=black,
+    rounded corners,
+    minimum height=1.2cm,
+    text width=2.25cm,
+    align=center,
+    line width=0.45pt
+  },
+  store/.style={
+    rectangle,
+    draw=black,
+    rounded corners,
+    minimum height=1.0cm,
+    text width=12.8cm,
+    align=center,
+    fill=gray!8,
+    line width=0.45pt
+  },
+  framebox/.style={
+    rectangle,
+    draw=black!45,
+    rounded corners,
+    inner sep=8pt,
+    line width=0.4pt
+  },
+  arrow/.style={->, line width=0.75pt},
+  dashedarrow/.style={->, dashed, line width=0.6pt},
+  note/.style={font=\scriptsize, align=center}
+]
+
+% ─────────────────────────────────────────────────────────────
+% Support / control layer
+% ─────────────────────────────────────────────────────────────
+\node[support, fill=phase1blue!12] (config) at (2.7, 2.2)
+  {\textbf{Configuration}\\seed, split, missingness,\\fairness threshold};
+
+\node[support, fill=phase2green!12] (cli) at (8.1, 2.2)
+  {\textbf{CLI Interface}\\stage commands,\\\texttt{run-all}, \texttt{merge-check}};
+
+\node[support, fill=phase4purple!12] (tests) at (13.5, 2.2)
+  {\textbf{Validation Layer}\\unit tests, smoke run,\\CI merge gate};
+
+% ─────────────────────────────────────────────────────────────
+% Executable stage layer
+% ─────────────────────────────────────────────────────────────
+\node[stage, fill=phase1blue!16] (collect) at (0.0, 0)
+  {\textbf{1. Data}\\\textbf{Collection}\\\scriptsize raw JSON};
+
+\node[stage, fill=phase1blue!16] (clean) at (2.7, 0)
+  {\textbf{2. Data}\\\textbf{Cleaning}\\\scriptsize clean JSON};
+
+\node[stage, fill=phase2green!16] (prepare) at (5.4, 0)
+  {\textbf{3. Data}\\\textbf{Preparation}\\\scriptsize train/test JSON};
+
+\node[stage, fill=phase2green!16] (explore) at (8.1, 0)
+  {\textbf{4. Exploration}\\\textbf{/ Visualization}\\\scriptsize summaries};
+
+\node[stage, fill=phase3orange!16] (mine) at (10.8, 0)
+  {\textbf{5. Data}\\\textbf{Mining}\\\scriptsize predictions};
+
+\node[stage, fill=phase3orange!16] (evaluate) at (13.5, 0)
+  {\textbf{6. Evaluation}\\\scriptsize utility + fairness\\\scriptsize metrics};
+
+\node[stage, fill=phase4purple!16] (post) at (16.2, 0)
+  {\textbf{7. Results}\\\textbf{Postprocessing}\\\scriptsize CSV + SVG};
+
+% Stage flow
+\draw[arrow] (collect) -- (clean);
+\draw[arrow] (clean) -- (prepare);
+\draw[arrow] (prepare) -- (explore);
+\draw[arrow] (explore) -- (mine);
+\draw[arrow] (mine) -- (evaluate);
+\draw[arrow] (evaluate) -- (post);
+
+% Framing box for executable pipeline
+\node[framebox, fit=(collect)(post), label={[font=\small]above:Executable review pipeline (CRISP-DM-aligned)}] (pipelineframe) {};
+
+% Cross-cutting control arrows
+\draw[dashedarrow] (config.south) -- (pipelineframe.north west);
+\draw[dashedarrow] (cli.south) -- (pipelineframe.north);
+\draw[dashedarrow] (tests.south) -- (pipelineframe.north east);
+
+% ─────────────────────────────────────────────────────────────
+% Artifact / provenance layer
+% ─────────────────────────────────────────────────────────────
+\node[store] (storage) at (8.1, -2.2)
+  {\textbf{Artifact and provenance layer}\\
+   numbered stage outputs under \texttt{results/fast\_review/} \quad + \quad
+   \texttt{pipeline\_manifest.json} recording configuration, stage outputs, and summaries};
+
+\draw[dashedarrow] (pipelineframe.south) -- (storage.north);
+
+% Mapping note
+\node[note] at (8.1, -3.55)
+  {\textbf{CRISP-DM mapping:} business understanding = configuration + fairness goals;
+   data understanding = collection + exploration;
+   data preparation = cleaning + preparation;
+   modeling = mining;
+   evaluation = evaluation;
+   deployment = postprocessing + manifest + merge validation.};
+
+\end{tikzpicture}

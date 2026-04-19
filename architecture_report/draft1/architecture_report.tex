@@ -1,0 +1,277 @@
+\documentclass{IEEEtran}
+
+\usepackage{cite}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage[table]{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,fit,backgrounds}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{phase1blue}{RGB}{52,152,219}
+\definecolor{phase2green}{RGB}{46,204,113}
+\definecolor{phase3orange}{RGB}{230,126,34}
+\definecolor{phase4purple}{RGB}{155,89,182}
+
+\title{{\LARGE\textbf{Architecture for a Reproducible CRISP+ML Review Pipeline}}\\
+{\Large\textit{Fairness-Aware Data Science Code Review Infrastructure}}\\
+{\large\texttt{(Architecture Writeup)}}}
+
+\author{%
+\begin{minipage}{0.48\textwidth}
+\begin{center}
+{\bf Piter Z. Garcia}\\
+\begin{small}
+MS Data Science / Decision-Making \& Algorithmic Fairness\\
+Rochester Institute of Technology (RIT)\\
+{\it pizg8794@g.rit.edu}
+\end{small}
+\end{center}
+\end{minipage}
+\hfill
+\begin{minipage}{0.48\textwidth}
+\begin{center}
+{\bf Dr. Daniel Krutz, Travis Desell}\\
+\begin{small}
+Department of Software Engineering, Data Science\\
+RIT Research Advisors\\
+{\it dxkvse@g.rit.edu, tjdvse@g.rit.edu}
+\end{small}
+\end{center}
+\end{minipage}%
+}
+
+\begin{document}
+\maketitle
+
+%% ─────────────────────────────────────────────────────────────
+\section{Architecture Overview}
+%% ─────────────────────────────────────────────────────────────
+
+This writeup describes the implementation of the code-review repository for the
+DSCI~601 assignment. The repository is organized as a reproducible
+\textit{CRISP+ML} pipeline that mirrors a real machine-learning workflow while
+remaining fast enough for reviewers to install, run, test, and inspect locally.
+The design goal is a reviewer-safe system with clear stage boundaries,
+deterministic behavior, and enough implementation detail that another party can
+recreate the workflow and reproduce the same outputs from a single configuration
+file.
+
+The system is structured around seven explicit lifecycle stages that directly
+instantiate the six canonical phases of the Cross-Industry Standard Process for
+Data Mining (CRISP-DM)~\cite{wirth2000crisp}: data collection, data cleaning,
+data preparation, data exploration and visualization, data mining, evaluation,
+and results postprocessing and visualization.
+Table~\ref{tab:crispmap} makes the mapping explicit.
+
+\begin{table}[h]
+\centering
+\caption{Mapping of CRISP-DM phases to CRISP+ML pipeline stages.}
+\label{tab:crispmap}
+\small
+\begin{tabular}{@{}lp{5.2cm}@{}}
+\toprule
+\textbf{CRISP-DM Phase} & \textbf{Realized by} \\
+\midrule
+Business Understanding  & \texttt{configs/fast\_review.json} + external proposal artifacts \\
+Data Understanding      & Stages 1 (Collection), 2 (Cleaning), 4 (Exploration) \\
+Data Preparation        & Stage 3 (Preparation) \\
+Modeling                & Stage 5 (Data Mining) \\
+Evaluation              & Stage 6 (Evaluation) \\
+Deployment              & Stage 7 (Postprocessing) + CI + publish workflow \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The architecture is therefore not only a package layout---it is a data pipeline:
+each CRISP+ML stage consumes a concrete artifact, produces the next artifact,
+and is covered by a corresponding unit-test boundary. This is the key design
+choice that lets reviewers inspect the work as a reproducible system rather
+than as disconnected scripts.
+
+%% ─────────────────────────────────────────────────────────────
+\section{System Architecture}
+%% ─────────────────────────────────────────────────────────────
+
+Figure~\ref{fig:architecture} shows the full four-layer architecture.
+The \textit{top layer} maps each stage to its corresponding CRISP-DM phase.
+The \textit{second layer} is the cross-cutting infrastructure---configuration,
+CLI, and validation---that controls, exposes, and tests the pipeline.
+The \textit{third layer} is the CRISP+ML pipeline itself, with sequential
+data flow from collection through postprocessing.
+The \textit{bottom layer} is the pipeline manifest that records provenance for
+the entire run.
+
+\begin{figure*}[!t]
+\centering
+\resizebox{0.97\textwidth}{!}{\input{architecture_diagram.tex}}
+\caption{Four-layer architecture of the reviewer-safe CRISP+ML pipeline.
+  Top: CRISP-DM phase alignment.
+  Second: configuration, CLI, and validation infrastructure.
+  Third: the seven sequential CRISP+ML stages with artifact outputs.
+  Bottom: pipeline manifest recording configuration and stage provenance.
+  Solid arrows show data/control flow; dashed arrows show cross-cutting
+  control; dotted arrows show CRISP-DM phase-to-stage alignment.}
+\label{fig:architecture}
+\end{figure*}
+
+\subsection{Configuration Layer}
+The configuration layer defines the parameters controlling each run. In the
+implementation repository, a typed configuration object is loaded from a single
+JSON file. The configuration records the random seed, record counts,
+train/test split, invalid-record frequency, missingness frequency, bias level,
+fairness threshold, and output directory.
+
+This layer separates experiment settings from stage logic. A reviewer can
+change the run size, seed, or output location without modifying source code.
+This design also supports reproducibility: the same configuration and seed
+produce the same stage artifacts.
+
+\subsection{Stage Layer}
+Each lifecycle step is implemented as its own concrete class under a shared
+\texttt{PipelineStage} interface. This keeps the implementation object-oriented
+and gives every phase a narrow, testable responsibility. The stage layer is the
+most important part of the architecture because it directly maps the
+methodology to code:
+
+\begin{itemize}
+    \item \textbf{Data Collection:} \texttt{DataCollectionStage} generates a
+    tiny synthetic dataset with the same type of fairness-relevant fields used
+    by the project narrative: group membership, labels, feature values, and
+    controlled missingness.
+    \item \textbf{Data Cleaning:} \texttt{DataCleaningStage} validates schema,
+    removes intentionally invalid examples, and writes clean records. This
+    stage is separate so preprocessing is not hidden inside modeling code.
+    \item \textbf{Data Preparation:} \texttt{DataPreparationStage} converts
+    clean records into deterministic train/test artifacts. The split is
+    configuration-driven so reviewers can reproduce it.
+    \item \textbf{Data Exploration / Visualization:}
+    \texttt{DataExplorationStage} writes lightweight summaries of dataset
+    size, group balance, and feature completeness before modeling.
+    \item \textbf{Data Mining:} \texttt{DataMiningStage} runs the lightweight
+    model/experiment step and writes predictions. This stage is intentionally
+    small so the review workflow remains fast.
+    \item \textbf{Evaluation:} \texttt{EvaluationStage} computes utility and
+    fairness-oriented metrics from predictions, including group-aware summary
+    values needed by the project.
+    \item \textbf{Results Postprocessing / Visualization:}
+    \texttt{ResultsPostprocessingStage} converts evaluation outputs into final
+    reviewer-facing CSV and SVG artifacts.
+\end{itemize}
+
+The implementation treats these classes as pipeline stages, not helper
+functions. Each stage has an input contract, an output contract, and tests that
+verify the expected artifact exists and has the expected structure.
+
+\subsection{Context and Orchestration Layer}
+The orchestration layer connects stages without tightly coupling their
+implementations. A shared pipeline context carries metadata, artifact paths, and
+stage results across the run. The \texttt{ReviewPipeline} object builds the
+ordered stage list and executes it either end-to-end or until a named stopping
+point.
+
+After execution, the orchestrator writes a manifest file containing the active
+configuration, stage outputs, and stage summaries. This manifest is the
+reproducibility record for a run: it identifies what was executed, where
+artifacts were written, and what each stage reported.
+
+The same orchestrator supports both normal execution and review execution.
+Individual commands can stop at a stage for debugging, while the full
+\texttt{run-all} path executes the entire chain. This design makes the repo
+usable by both a developer checking one phase and a reviewer checking the whole
+submission.
+
+\subsection{Interface Layer}
+The user-facing interface is a command-line module with one command for each
+required stage plus two orchestration commands: \texttt{run-all} and
+\texttt{merge-check}. The command-line interface is part of the architecture
+because it makes the repository reviewable as software rather than as a single
+notebook. Reviewers can execute a single stage, rerun the full workflow, or
+perform the same merge validation path used by the repository.
+
+The \texttt{merge-check} command is the local quality gate. It runs the quick
+pipeline and the unit tests so submitted changes can be checked before merging.
+The remote CI workflow mirrors this path, making local and pull-request
+validation consistent.
+
+%% ─────────────────────────────────────────────────────────────
+\section{Framework and Component Choices}
+%% ─────────────────────────────────────────────────────────────
+
+The implementation intentionally uses a minimal technical stack. The pipeline
+is written with standard-library Python and a small package structure, with
+\texttt{requirements.txt} as the reviewer-facing installation path. This choice
+reduces environmental friction and avoids requiring a heavy machine-learning
+stack for a code review assignment.
+
+JSON is used for configuration, records, predictions, evaluation summaries, and
+manifests because it is human-readable, easy to validate, and supported without
+third-party libraries. CSV is used for summary tables because it is familiar to
+reviewers and easy to inspect. SVG is used for lightweight charts because it
+provides visual output without requiring plotting dependencies.
+
+These choices prioritize reproducibility, transparency, and short setup time
+over raw performance. That tradeoff is appropriate for this deliverable: the
+goal is not to train a large model, but to demonstrate that the project has a
+clean architecture, separable code paths, tests, and a reliable validation
+workflow.
+
+%% ─────────────────────────────────────────────────────────────
+\section{Data Storage and Reproducibility}
+%% ─────────────────────────────────────────────────────────────
+
+All artifacts are written beneath a stable output root defined by the active
+configuration. Within that root, each stage writes to its own numbered
+directory. This output design makes the workflow easy to inspect: every phase
+leaves visible artifacts, intermediate outputs can be reused, and reviewers can
+verify stage behavior without rerunning the entire system. The major artifacts
+are raw records, clean records, prepared train/test splits, exploration
+summaries, predictions, evaluation metrics, final tables, SVG figures, and the
+pipeline manifest.
+
+The output layout answers three practical questions: what configuration
+produced this run, what each stage wrote, and what final metrics or figures
+were generated. The final manifest connects those answers into a single
+provenance record. Because the repository uses deterministic configuration and
+fixed seeds, another party can reproduce the same artifacts by running the same
+commands.
+
+The expected recreation path is straightforward: create a fresh Python
+environment, install from \texttt{requirements.txt}, run the full pipeline with
+\texttt{configs/fast\_review.json}, inspect the generated results directory,
+and run \texttt{merge-check}. This reproduces the reviewer-safe workflow, its
+stage artifacts, and its validation checks.
+
+%% ─────────────────────────────────────────────────────────────
+\section{Conclusion}
+%% ─────────────────────────────────────────────────────────────
+
+The architecture emphasizes simplicity, determinism, and inspectability. It
+uses a recognized CRISP+ML lifecycle as the backbone, object-oriented stage
+classes as the implementation structure, and explicit command-line entry points
+as the reviewer interface. This makes the system appropriate for the DSCI 601
+code review assignment while also providing a reusable foundation for larger
+fairness-aware data science workflows.
+
+The explicit CRISP-DM mapping in Table~\ref{tab:crispmap} and the four-layer
+diagram in Figure~\ref{fig:architecture} together ensure that the methodology
+is not implicit but structurally visible at every level of the implementation.
+This traceability---from a recognized data-science process model down to
+individually runnable CLI commands, numbered artifact directories, and a
+deterministic pipeline manifest---is the property that makes this system
+suitable for both the DSCI~601 code-review assignment and for extension into
+larger fairness-aware sequential decision-making workflows.
+
+\begin{thebibliography}{1}
+\bibitem{wirth2000crisp}
+R.~Wirth and J.~Hipp,
+``CRISP-DM: Towards a standard process model for data mining,''
+in \textit{Proc.\ 4th Int.\ Conf.\ Practical Applications of Knowledge
+Discovery and Data Mining}, 2000, pp.~29--39.
+\end{thebibliography}
+
+\end{document}
