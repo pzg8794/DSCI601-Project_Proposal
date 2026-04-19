@@ -1,34 +1,85 @@
-% Architecture diagram for DSCI601 proposal (moved from presentation/)
-% Include this file in slides with: \input{architecture/architecture_diagram.tex}
-% Requires tikz package; presentation templates already load tikz.
+% Architecture diagram for the DSCI601 architecture report.
+% The figure mirrors the implemented CRISP+ML stage pipeline and highlights
+% how configuration, CLI commands, tests, and storage wrap the stages.
 
-\begin{tikzpicture}[node distance=1.2cm, auto, >=Latex, font=\sffamily]
-  % node styles
-  \tikzstyle{box} = [rectangle, draw=black, fill=blue!6, text width=8.5em, text centered, rounded corners, minimum height=2.2em]
-  \tikzstyle{smallbox} = [rectangle, draw=black, fill=gray!6, text width=6.5em, text centered, rounded corners, minimum height=2em]
+\begin{tikzpicture}[
+  font=\sffamily,
+  >=Latex,
+  support/.style={
+    rectangle,
+    draw=black,
+    rounded corners,
+    minimum height=0.9cm,
+    text width=3.6cm,
+    align=center,
+    fill=gray!10,
+    line width=0.45pt
+  },
+  stage/.style={
+    rectangle,
+    draw=black,
+    rounded corners,
+    minimum height=1.25cm,
+    text width=3.0cm,
+    align=center,
+    line width=0.45pt
+  },
+  store/.style={
+    rectangle,
+    draw=black,
+    rounded corners,
+    minimum height=0.9cm,
+    text width=4.6cm,
+    align=center,
+    fill=gray!8,
+    line width=0.45pt
+  },
+  arrow/.style={->, line width=0.75pt},
+  dashedarrow/.style={->, dashed, line width=0.6pt},
+  note/.style={font=\scriptsize, align=center}
+]
 
-  % nodes
-  \node[box] (data) {Data Sources\\(clinical, synthetic, quantum traces)};
-  \node[smallbox, right=1.6cm of data] (config) {Experiment Configs\\(seeds, scenarios, metrics)};
+% Support / control layer
+\node[support, fill=phase1blue!12] (config) at (0, 2.1)
+  {\textbf{Configuration}\\seed, split, missingness,\\fairness threshold};
+\node[support, fill=phase2green!12] (cli) at (5.0, 2.1)
+  {\textbf{CLI Interface}\\one command per stage\\\texttt{run-all}, \texttt{merge-check}};
+\node[support, fill=phase4purple!12] (tests) at (10.0, 2.1)
+  {\textbf{Validation Layer}\\unit tests, smoke run,\\CI merge gate};
 
-  \node[box, below=1.4cm of data] (env) {Environment / Simulator\\(clinical sim, quantum routing)};
-  \node[box, right=1.6cm of env] (runner) {Runner / Orchestrator\\(batched trials, seeds)};
+% CRISP+ML lifecycle row 1
+\node[stage, fill=phase1blue!15] (collect) at (0, 0)
+  {\textbf{1. Data}\\\textbf{Collection}\\synthetic reviewer dataset\\\scriptsize output: raw JSON};
+\node[stage, fill=phase1blue!15] (clean) at (3.8, 0)
+  {\textbf{2. Data}\\\textbf{Cleaning}\\schema validation\\\scriptsize output: clean JSON};
+\node[stage, fill=phase2green!15] (prepare) at (7.6, 0)
+  {\textbf{3. Data}\\\textbf{Preparation}\\deterministic split\\\scriptsize output: train/test JSON};
+\node[stage, fill=phase2green!15] (explore) at (11.4, 0)
+  {\textbf{4. Exploration}\\\textbf{/ Visualization}\\group + completeness\\summaries\\\scriptsize output: CSV};
 
-  \node[box, right=2.6cm of runner] (model) {Model / Policy\\(MAB, CMAB, iCMAB)};
+% CRISP+ML lifecycle row 2
+\node[stage, fill=phase3orange!15] (mine) at (0, -2.3)
+  {\textbf{5. Data}\\\textbf{Mining}\\lightweight model run\\\scriptsize output: predictions JSON};
+\node[stage, fill=phase3orange!15] (evaluate) at (3.8, -2.3)
+  {\textbf{6. Evaluation}\\utility + fairness metrics\\\scriptsize output: metrics JSON};
+\node[stage, fill=phase4purple!15] (post) at (7.4, -2.3)
+  {\textbf{7. Results Postprocess}\\final tables + SVG\\\scriptsize output: CSV + figure};
+\node[store] (manifest) at (11.5, -2.3)
+  {\textbf{Pipeline Manifest}\\config copy, stage outputs,\\summary metadata};
 
-  \node[smallbox, right=1.4cm of model] (evaluator) {Evaluator\\(utility + fairness metrics)};
-  \node[smallbox, below=1.0cm of evaluator] (visual) {Visualizer / Notebooks\\(plots, figures)};
+% Stage flow
+\draw[arrow] (collect) -- (clean);
+\draw[arrow] (clean) -- (prepare);
+\draw[arrow] (prepare) -- (explore);
+\draw[arrow] (mine) -- (evaluate);
+\draw[arrow] (evaluate) -- (post);
+\draw[arrow] (post) -- (manifest);
 
-  % arrows
-  \draw[->] (data) -- (env) node[midway,left] {datasets};
-  \draw[->] (config) -- (runner) node[midway, above] {configs};
-  \draw[->] (env) -- (runner) node[midway, above] {observations / feedback};
-  \draw[->] (runner) -- (model) node[midway, above] {context};
-  \draw[->] (model) -- (runner) node[midway, below] {actions};
-  \draw[->] (runner) -- (evaluator) node[midway, above] {per-run logs};
-  \draw[->] (evaluator) -- (visual) node[midway, right] {reports};
-  \draw[->, bend right=20] (runner) to (visual) node[midway, below] {run artifacts};
+% Control / validation flow
+% Storage/provenance note
+\node[note, align=center] at (5.7, -3.85) {
+  \textbf{Storage contract:} each stage writes deterministic artifacts under
+  \texttt{results/fast\_review/<numbered-stage>/}; the manifest records the full run.
+};
 
-  % annotations
-  \node[below=0.6cm of env, font=\scriptsize] (note) {Design goals: reproducible configs, fixed seeds, small fast tests for review};
 \end{tikzpicture}

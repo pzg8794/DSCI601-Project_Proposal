@@ -68,19 +68,30 @@ visualization. These stages were chosen so that the implementation follows a
 recognized methodology while also satisfying the code review assignment's
 requirement for separable runnable code paths.
 
+The architecture is therefore not only a package layout. It is a data pipeline:
+each CRISP+ML stage consumes a concrete artifact, produces the next artifact,
+and is covered by a corresponding unit-test boundary. This is the key design
+choice that lets reviewers inspect the work as a reproducible system rather
+than as disconnected scripts.
+
 %% ─────────────────────────────────────────────────────────────
 \section{System Architecture}
 %% ─────────────────────────────────────────────────────────────
 
-Figure~\ref{fig:architecture} shows the overall system structure. The software
-is organized into four main layers: configuration, stage execution,
-orchestration, and output storage. The architecture is intentionally small, but
-the same layer boundaries can scale to larger fairness-aware experiments.
+Figure~\ref{fig:architecture} shows the overall system structure. The center of
+the diagram is the CRISP+ML pipeline itself: collection flows into cleaning,
+cleaning into preparation, preparation into exploration, and then the prepared
+artifacts feed data mining, evaluation, and final postprocessing. The top layer
+shows the cross-cutting infrastructure---configuration, command-line interface,
+and validation---that controls, exposes, and tests the pipeline.
 
 \begin{figure*}[!t]
 \centering
 \resizebox{0.97\textwidth}{!}{\input{architecture_diagram.tex}}
-\caption{Architecture of the reviewer-safe CRISP+ML pipeline.}
+\caption{Architecture of the reviewer-safe CRISP+ML pipeline. The diagram
+shows the seven lifecycle stages, the artifacts passed between them, and the
+configuration, CLI, and validation layers that make the workflow reproducible
+and merge-checkable.}
 \label{fig:architecture}
 \end{figure*}
 
@@ -98,21 +109,39 @@ produce the same stage artifacts.
 
 \subsection{Stage Layer}
 Each lifecycle step is implemented as its own concrete class under a shared
-\texttt{PipelineStage} interface. The concrete classes are:
-\texttt{DataCollectionStage}, \texttt{DataCleaningStage},
-\texttt{DataPreparationStage}, \texttt{DataExplorationStage},
-\texttt{DataMiningStage}, \texttt{EvaluationStage}, and
-\texttt{ResultsPostprocessingStage}. This keeps the implementation
-object-oriented and gives every phase a narrow, testable responsibility.
+\texttt{PipelineStage} interface. This keeps the implementation object-oriented
+and gives every phase a narrow, testable responsibility. The stage layer is the
+most important part of the architecture because it directly maps the
+methodology to code:
 
-The data collection stage generates a tiny synthetic dataset preserving
-fairness-relevant structure such as group membership, label, and feature
-availability. The cleaning stage validates records, removes intentionally
-corrupted examples, and standardizes the schema. The preparation stage converts
-clean records into train/test artifacts. The exploration stage writes small
-summary tables. The data mining stage performs the lightweight modeling step.
-The evaluation stage computes utility and fairness-oriented metrics. The final
-postprocessing stage creates reviewer-facing tables and simple figures.
+\begin{itemize}
+    \item \textbf{Data Collection:} \texttt{DataCollectionStage} generates a
+    tiny synthetic dataset with the same type of fairness-relevant fields used
+    by the project narrative: group membership, labels, feature values, and
+    controlled missingness.
+    \item \textbf{Data Cleaning:} \texttt{DataCleaningStage} validates schema,
+    removes intentionally invalid examples, and writes clean records. This
+    stage is separate so preprocessing is not hidden inside modeling code.
+    \item \textbf{Data Preparation:} \texttt{DataPreparationStage} converts
+    clean records into deterministic train/test artifacts. The split is
+    configuration-driven so reviewers can reproduce it.
+    \item \textbf{Data Exploration / Visualization:}
+    \texttt{DataExplorationStage} writes lightweight summaries of dataset
+    size, group balance, and feature completeness before modeling.
+    \item \textbf{Data Mining:} \texttt{DataMiningStage} runs the lightweight
+    model/experiment step and writes predictions. This stage is intentionally
+    small so the review workflow remains fast.
+    \item \textbf{Evaluation:} \texttt{EvaluationStage} computes utility and
+    fairness-oriented metrics from predictions, including group-aware summary
+    values needed by the project.
+    \item \textbf{Results Postprocessing / Visualization:}
+    \texttt{ResultsPostprocessingStage} converts evaluation outputs into final
+    reviewer-facing CSV and SVG artifacts.
+\end{itemize}
+
+The implementation treats these classes as pipeline stages, not helper
+functions. Each stage has an input contract, an output contract, and tests that
+verify the expected artifact exists and has the expected structure.
 
 \subsection{Context and Orchestration Layer}
 The orchestration layer connects stages without tightly coupling their
@@ -126,6 +155,12 @@ configuration, stage outputs, and stage summaries. This manifest is the
 reproducibility record for a run: it identifies what was executed, where
 artifacts were written, and what each stage reported.
 
+The same orchestrator supports both normal execution and review execution.
+Individual commands can stop at a stage for debugging, while the full
+\texttt{run-all} path executes the entire chain. This design makes the repo
+usable by both a developer checking one phase and a reviewer checking the whole
+submission.
+
 \subsection{Interface Layer}
 The user-facing interface is a command-line module with one command for each
 required stage plus two orchestration commands: \texttt{run-all} and
@@ -133,6 +168,11 @@ required stage plus two orchestration commands: \texttt{run-all} and
 because it makes the repository reviewable as software rather than as a single
 notebook. Reviewers can execute a single stage, rerun the full workflow, or
 perform the same merge validation path used by the repository.
+
+The \texttt{merge-check} command is the local quality gate. It runs the quick
+pipeline and the unit tests so submitted changes can be checked before merging.
+The remote CI workflow mirrors this path, making local and pull-request
+validation consistent.
 
 %% ─────────────────────────────────────────────────────────────
 \section{Framework and Component Choices}
@@ -164,7 +204,10 @@ All artifacts are written beneath a stable output root defined by the active
 configuration. Within that root, each stage writes to its own numbered
 directory. This output design makes the workflow easy to inspect: every phase
 leaves visible artifacts, intermediate outputs can be reused, and reviewers can
-verify stage behavior without rerunning the entire system.
+verify stage behavior without rerunning the entire system. The major artifacts
+are raw records, clean records, prepared train/test splits, exploration
+summaries, predictions, evaluation metrics, final tables, SVG figures, and the
+pipeline manifest.
 
 The output layout answers three practical questions: what configuration
 produced this run, what each stage wrote, and what final metrics or figures
