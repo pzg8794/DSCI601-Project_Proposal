@@ -1,80 +1,99 @@
 \begin{tikzpicture}[
 font=\sffamily\small,>=Latex,
 layerband/.style={rectangle,rounded corners,inner sep=12pt,line width=0.5pt,draw=black!35},
-event/.style={rectangle,draw=black,rounded corners,minimum height=1.15cm,text width=4.1cm,align=center,fill=gray!8,line width=0.55pt},
-control/.style={rectangle,draw=black,rounded corners,minimum height=1.25cm,text width=4.35cm,align=center,line width=0.55pt},
-context/.style={rectangle,draw=black,rounded corners,minimum height=1.45cm,text width=5.1cm,align=center,line width=0.6pt},
-stage/.style={rectangle,draw=black,rounded corners,minimum height=1.7cm,text width=4.15cm,align=center,line width=0.6pt},
-sourcebox/.style={rectangle,draw=black,rounded corners,minimum height=1.2cm,text width=3.9cm,align=center,fill=gray!6,line width=0.55pt},
-artifact/.style={rectangle,draw=black,rounded corners,minimum height=1.1cm,text width=3.8cm,align=center,line width=0.5pt},
-decision/.style={rectangle,draw=black,rounded corners,minimum height=1.25cm,text width=4.0cm,align=center,fill=gray!12,line width=0.6pt},
+event/.style={rectangle,draw=black,rounded corners,minimum height=1.15cm,text width=4.2cm,align=center,fill=gray!8,line width=0.55pt},
+control/.style={rectangle,draw=black,rounded corners,minimum height=1.25cm,text width=4.55cm,align=center,line width=0.55pt},
+context/.style={rectangle,draw=black,rounded corners,minimum height=1.45cm,text width=5.3cm,align=center,line width=0.6pt},
+stage/.style={rectangle,draw=black,rounded corners,minimum height=1.7cm,text width=4.3cm,align=center,line width=0.6pt},
+sourcebox/.style={rectangle,draw=black,rounded corners,minimum height=1.2cm,text width=4.2cm,align=center,fill=gray!6,line width=0.55pt},
+artifact/.style={rectangle,draw=black,rounded corners,minimum height=1.1cm,text width=4.0cm,align=center,line width=0.5pt},
+decision/.style={rectangle,draw=black,rounded corners,minimum height=1.25cm,text width=4.2cm,align=center,fill=gray!12,line width=0.6pt},
 flow/.style={->,line width=0.9pt},trace/.style={->,dashed,line width=0.7pt},lab/.style={font=\scriptsize,align=center}]
 
-\node[context,fill=phase1blue!16] (bu) at (7.4,6.5)
-{\textbf{Business Understanding}\\\scriptsize project objectives, fairness constraints,\\\scriptsize acceptance criteria, architectural scope};
-\node[context,fill=phase1blue!16] (du) at (22.2,6.5)
-{\textbf{Data Understanding}\\\scriptsize quantum shared-drive storage, data semantics,\\\scriptsize exploratory framing and data expectations};
+% High-level context
+\node[context,fill=phase1blue!16] (bu) at (8.0,6.6)
+{\textbf{Business Understanding}\\\scriptsize objectives, fairness constraints,\\\scriptsize acceptance criteria, research scope};
+\node[context,fill=phase1blue!16] (du) at (28.0,6.6)
+{\textbf{Data Understanding}\\\scriptsize shared-drive quantum data lake,\\\scriptsize state semantics, notebook expectations};
 
-\node[event] (push) at (1.1,4.0)
+% Control layer
+\node[event] (push) at (1.2,4.1)
 {\textbf{Repository events}\\push, pull request,\\changed analysis code};
-\node[event] (cmd) at (7.0,4.0)
-{\textbf{Developer / reviewer}\\stage commands,\\\texttt{run-all}, \texttt{merge-check}};
-\node[control,fill=phase2green!16] (policy) at (13.4,4.0)
+\node[event] (cmd) at (8.2,4.1)
+{\textbf{User entry paths}\\CLI, notebooks, local scripts,\\Colab or GCP runs};
+\node[control,fill=phase2green!16] (policy) at (15.8,4.1)
 {\textbf{Control policy}\\thresholds, seeds, run rules,\\merge and fairness criteria};
-\node[control,fill=phase2green!16] (orch) at (19.8,4.0)
-{\textbf{Orchestration path}\\CLI ordering, inherited conventions,\\manifest and execution control};
-\node[control,fill=phase2green!16] (val) at (26.2,4.0)
+\node[control,fill=phase2green!16] (orch) at (23.8,4.1)
+{\textbf{Orchestration path}\\run ordering, inherited conventions,\\manifest and execution control};
+\node[control,fill=phase2green!16] (val) at (31.8,4.1)
 {\textbf{Validation layer}\\unit tests, smoke checks,\\CI mirror of local merge-check};
-\node[decision] (gate) at (32.6,4.0)
-{\textbf{Merge decision}\\accept, revise, or reject\\based on executable evidence};
+\node[decision] (gate) at (39.8,4.1)
+{\textbf{Merge / review decision}\\accept, revise, or reject\\based on executable evidence};
 
-\node[sourcebox] (source) at (1.1,1.0)
-{\textbf{External inherited source}\\quantum shared-drive storage\\\scriptsize not a CI stage};
-\node[stage,fill=phase3orange!16] (prep) at (10.2,1.0)
-{\textbf{Data Preparation}\\\scriptsize evaluator cleaning\\\scriptsize + state\_analysis preparation};
-\node[stage,fill=phase3orange!16] (model) at (17.8,1.0)
-{\textbf{Modeling / Mining}\\\scriptsize state\_analysis\\\scriptsize mining and feature logic};
-\node[stage,fill=phase3orange!16] (eval) at (25.4,1.0)
-{\textbf{Evaluation}\\\scriptsize evaluator metrics\\\scriptsize and fairness checks};
-\node[stage,fill=phase3orange!16] (deploy) at (33.0,1.0)
-{\textbf{Review Delivery}\\\scriptsize postprocess, figures,\\\scriptsize manifest, reviewer outputs};
+% Execution layer
+\node[sourcebox] (source) at (1.2,0.9)
+{\textbf{Inherited source layer}\\shared-drive quantum storage\\\scriptsize notebooks and scripts read here};
+\node[stage,fill=phase3orange!16] (collect) at (8.2,0.9)
+{\textbf{Data Collection}\\\scriptsize backup managers / registry lookup\\\scriptsize latest state and source retrieval};
+\node[stage,fill=phase3orange!16] (clean) at (15.2,0.9)
+{\textbf{Data Cleaning}\\\scriptsize evaluator validation,\\\scriptsize schema and compatibility checks};
+\node[stage,fill=phase3orange!16] (prep) at (22.2,0.9)
+{\textbf{Data Preparation /}\\\textbf{Exploration}\\\scriptsize state\_analysis transforms,\\\scriptsize scenario stats, train/test prep};
+\node[stage,fill=phase3orange!16] (model) at (29.2,0.9)
+{\textbf{Modeling / Mining}\\\scriptsize state\_analysis or notebook\\\scriptsize mining and feature logic};
+\node[stage,fill=phase3orange!16] (eval) at (36.2,0.9)
+{\textbf{Evaluation}\\\scriptsize evaluator metrics,\\\scriptsize fairness and winner checks};
+\node[stage,fill=phase3orange!16] (deploy) at (43.2,0.9)
+{\textbf{Review Delivery /}\\\textbf{Replication Outputs}\\\scriptsize figures, notebooks, manifest,\\\scriptsize shared results and exports};
 
-\node[artifact,fill=phase4purple!12] (a0) at (1.1,-2.1) {source refs\\shared-drive links};
-\node[artifact,fill=phase4purple!12] (a1) at (10.2,-2.1) {cleaned states\\prepared inputs};
-\node[artifact,fill=phase4purple!12] (a2) at (17.8,-2.1) {mined outputs\\prediction artifacts};
-\node[artifact,fill=phase4purple!12] (a3) at (25.4,-2.1) {utility / fairness\\evaluation evidence};
-\node[artifact,fill=phase4purple!12] (a4) at (33.0,-2.1) {tables, figures,\\\texttt{pipeline\_manifest.json}};
+% Artifacts layer
+\node[artifact,fill=phase4purple!12] (a0) at (1.2,-2.3) {drive paths\\source references};
+\node[artifact,fill=phase4purple!12] (a1) at (8.2,-2.3) {retrieved states\\raw experiment inputs};
+\node[artifact,fill=phase4purple!12] (a2) at (15.2,-2.3) {cleaned states\\validated records};
+\node[artifact,fill=phase4purple!12] (a3) at (22.2,-2.3) {prepared tables\\scenario summaries};
+\node[artifact,fill=phase4purple!12] (a4) at (29.2,-2.3) {mined outputs\\predictions or analyses};
+\node[artifact,fill=phase4purple!12] (a5) at (36.2,-2.3) {utility / fairness\\evaluation evidence};
+\node[artifact,fill=phase4purple!12] (a6) at (43.2,-2.3) {tables, figures, notebooks,\\\texttt{pipeline\_manifest.json}};
 
+% Main flow
 \draw[flow] (push.east) -- (policy.west);
 \draw[flow] (cmd.east) -- (orch.west);
 \draw[flow] (policy.east) -- (orch.west);
 \draw[flow] (orch.east) -- (val.west);
 \draw[flow] (val.east) -- (gate.west);
-\draw[flow] (orch.south) -- ++(0,-0.85) -| (prep.north);
-\draw[flow] (source.east) -- (prep.west);
+\draw[flow] (orch.south) -- ++(0,-0.9) -| (collect.north);
+\draw[flow] (source.east) -- (collect.west);
+\draw[flow] (collect.east) -- (clean.west);
+\draw[flow] (clean.east) -- (prep.west);
 \draw[flow] (prep.east) -- (model.west);
 \draw[flow] (model.east) -- (eval.west);
 \draw[flow] (eval.east) -- (deploy.west);
-\draw[flow] (deploy.north) -- ++(0,0.95) -| (gate.south);
+\draw[flow] (deploy.north) -- ++(0,1.0) -| (gate.south);
 
-\draw[trace] (bu.south) -- ++(0,-0.7) -| (policy.north);
-\draw[trace] (du.south) -- ++(0,-0.7) -| (source.north);
-\draw[trace] (du.south) -- ++(0,-0.7) -| (prep.north);
+% Context traces
+\draw[trace] (bu.south) -- ++(0,-0.8) -| (policy.north);
+\draw[trace] (du.south) -- ++(0,-0.8) -| (source.north);
+\draw[trace] (du.south) -- ++(0,-0.8) -| (collect.north);
+\draw[trace] (cmd.south) -- ++(0,-0.8) -| (deploy.north);
 
+% Artifact traces
 \draw[trace] (source.south) -- (a0.north);
-\draw[trace] (prep.south) -- (a1.north);
-\draw[trace] (model.south) -- (a2.north);
-\draw[trace] (eval.south) -- (a3.north);
-\draw[trace] (deploy.south) -- (a4.north);
-\draw[trace] (a4.north) -- ++(0,0.6) -| (gate.south);
+\draw[trace] (collect.south) -- (a1.north);
+\draw[trace] (clean.south) -- (a2.north);
+\draw[trace] (prep.south) -- (a3.north);
+\draw[trace] (model.south) -- (a4.north);
+\draw[trace] (eval.south) -- (a5.north);
+\draw[trace] (deploy.south) -- (a6.north);
+\draw[trace] (a6.north) -- ++(0,0.65) -| (gate.south);
 
+% Layer bands
 \begin{scope}[on background layer]
-\node[layerband,fill=phase1blue!8,fit=(bu)(du),label={[font=\small,text=phase1blue!80!black]above:High-level CRISP-DM context (architectural framing, not the Git validation pipeline)}] {};
+\node[layerband,fill=phase1blue!8,fit=(bu)(du),label={[font=\small,text=phase1blue!80!black]above:High-level CRISP-DM context}] {};
 \node[layerband,fill=phase2green!8,fit=(push)(gate),label={[font=\small,text=phase2green!60!black]above:Control Layer}] {};
-\node[layerband,fill=phase3orange!8,fit=(prep)(deploy),label={[font=\small,text=phase3orange!70!black]above:Execution Layer (clean and executable Git pipeline)}] {};
-\node[layerband,fill=phase4purple!8,fit=(a0)(a4),label={[font=\small,text=phase4purple!75!black]above:Artifacts Layer}] {};
+\node[layerband,fill=phase3orange!8,fit=(collect)(deploy),label={[font=\small,text=phase3orange!70!black]above:Execution Layer}] {};
+\node[layerband,fill=phase4purple!8,fit=(a0)(a6),label={[font=\small,text=phase4purple!75!black]above:Artifacts Layer}] {};
 \end{scope}
 
-\node[lab] at (17.0,-4.35)
-{\textbf{Interpretation:} Business Understanding and Data Understanding remain part of the architecture at the highest level, but the Git validation pipeline begins with executable code paths only. The control layer triggers and validates the pipeline, the execution layer keeps the code clean and runnable, and the artifacts layer provides merge evidence.};
+\node[lab] at (22.5,-4.65)
+{\textbf{Interpretation:} Business and Data Understanding remain architectural context, while the executable workflow starts with collection from the shared-drive source layer. Users can run the system through CLI, notebooks, local scripts, Colab, or GCP; the same inherited stages then produce reviewer-visible evidence and replication outputs.};
 \end{tikzpicture}
