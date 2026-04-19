@@ -16,9 +16,10 @@
 \definecolor{phase2green}{RGB}{46,204,113}
 \definecolor{phase3orange}{RGB}{230,126,34}
 \definecolor{phase4purple}{RGB}{155,89,182}
+\definecolor{quantumteal}{RGB}{22,160,133}
 
 \title{{\LARGE\textbf{Architecture for a Reproducible CRISP+ML Review Pipeline}}\\
-{\Large\textit{Fairness-Aware Data Science Code Review Infrastructure}}\\
+{\Large\textit{Quantum-Integrated, Fairness-Aware Data Science Code Review Infrastructure}}\\
 {\large\texttt{(Architecture Writeup)}}}
 
 \author{%
@@ -97,25 +98,28 @@ than as disconnected scripts.
 \section{System Architecture}
 %% ─────────────────────────────────────────────────────────────
 
-Figure~\ref{fig:architecture} shows the full four-layer architecture.
+Figure~\ref{fig:architecture} shows the full five-layer architecture.
 The \textit{top layer} maps each stage to its corresponding CRISP-DM phase.
 The \textit{second layer} is the cross-cutting infrastructure---configuration,
 CLI, and validation---that controls, exposes, and tests the pipeline.
 The \textit{third layer} is the CRISP+ML pipeline itself, with sequential
 data flow from collection through postprocessing.
-The \textit{bottom layer} is the pipeline manifest that records provenance for
-the entire run.
+The \textit{fourth layer} shows the quantum-project object each stage inherits,
+grounding each CRISP-DM step in a real research artifact.
+The \textit{bottom layer} is the quantum data lake and pipeline manifest that
+record data provenance for the entire run.
 
 \begin{figure*}[!t]
 \centering
 \resizebox{0.97\textwidth}{!}{\input{architecture_diagram.tex}}
-\caption{Four-layer architecture of the reviewer-safe CRISP+ML pipeline.
+\caption{Five-layer architecture of the quantum-integrated CRISP+ML pipeline.
   Top: CRISP-DM phase alignment.
   Second: configuration, CLI, and validation infrastructure.
   Third: the seven sequential CRISP+ML stages with artifact outputs.
-  Bottom: pipeline manifest recording configuration and stage provenance.
-  Solid arrows show data/control flow; dashed arrows show cross-cutting
-  control; dotted arrows show CRISP-DM phase-to-stage alignment.}
+  Fourth: inherited quantum-project objects that implement each stage.
+  Bottom: quantum data lake (Google Shared Drive) and pipeline manifest.
+  Solid arrows show data/control flow; double arrows show quantum object inheritance;
+  dashed arrows show cross-cutting control; dotted arrows show CRISP-DM phase-to-stage alignment.}
 \label{fig:architecture}
 \end{figure*}
 
@@ -139,33 +143,69 @@ most important part of the architecture because it directly maps the
 methodology to code:
 
 \begin{itemize}
-    \item \textbf{Data Collection:} \texttt{DataCollectionStage} generates a
-    tiny synthetic dataset with the same type of fairness-relevant fields used
-    by the project narrative: group membership, labels, feature values, and
-    controlled missingness.
-    \item \textbf{Data Cleaning:} \texttt{DataCleaningStage} validates schema,
-    removes intentionally invalid examples, and writes clean records. This
-    stage is separate so preprocessing is not hidden inside modeling code.
-    \item \textbf{Data Preparation:} \texttt{DataPreparationStage} converts
-    clean records into deterministic train/test artifacts. The split is
-    configuration-driven so reviewers can reproduce it.
+    \item \textbf{Data Collection:} \texttt{DataCollectionStage} retrieves
+    real experiment artifacts from the quantum data lake, a Google Shared Drive
+    hosted at \url{https://drive.google.com/drive/u/0/folders/12mZyGQHD__G54g2yCYIyWfXydhO3DxIt}.
+    By inheritance from the quantum project, it uses
+    \texttt{LocalBackupManager} (which extends \texttt{GoogleDriveBackupManager})
+    to call \texttt{build\_registry()} and \texttt{get\_latest\_state()} and
+    resolve the latest saved \texttt{MultiRunEvaluator} or model state for a
+    given component and date partition
+    (\texttt{quantum\_data\_lake/\{component\}/day\_YYYYMMDD/}).
+    \item \textbf{Data Cleaning:} \texttt{DataCleaningStage} mirrors the
+    validation contract of \texttt{MultiRunEvaluator}: it calls
+    \texttt{\_infer\_models\_from\_state()} to reconstruct model identity from
+    a saved state file, applies the evaluator equality contract (\texttt{\_\_eq\_\_})
+    to reject structurally invalid or incompatible states, and writes only
+    schema-valid records. This stage is separate so preprocessing is not
+    hidden inside modeling code.
+    \item \textbf{Data Preparation:} \texttt{DataPreparationStage} mirrors
+    the \texttt{state\_analysis} decomposition pattern: it extracts scenario
+    statistics (\texttt{scenarios\_stats}), partitions records by scenario
+    key, and writes deterministic train/test artifacts under a fixed seed,
+    exactly as the quantum project separates stochastic from baseline
+    scenarios before model evaluation.
     \item \textbf{Data Exploration / Visualization:}
-    \texttt{DataExplorationStage} writes lightweight summaries of dataset
-    size, group balance, and feature completeness before modeling.
-    \item \textbf{Data Mining:} \texttt{DataMiningStage} runs the lightweight
-    model/experiment step and writes predictions. This stage is intentionally
-    small so the review workflow remains fast.
-    \item \textbf{Evaluation:} \texttt{EvaluationStage} computes utility and
-    fairness-oriented metrics from predictions, including group-aware summary
-    values needed by the project.
+    \texttt{DataExplorationStage} mirrors \texttt{state\_analysis} exploration
+    utilities (\texttt{display\_experiment\_conditions()},
+    \texttt{print\_summary()}) to write lightweight summaries of dataset size,
+    group balance, scenario coverage, and feature completeness before modeling.
+    \item \textbf{Data Mining:} \texttt{DataMiningStage} inherits the
+    \texttt{QuantumExperimentRunner} pattern: it invokes \texttt{run\_experiment()}
+    to produce reward traces and prediction artifacts, keeping the stage
+    intentionally lightweight so the review workflow remains fast.
+    \item \textbf{Evaluation:} \texttt{EvaluationStage} mirrors
+    \texttt{MultiRunEvaluator} evaluation methods, including
+    \texttt{calculate\_scenario\_winner()} for efficiency ranking and
+    fairness-oriented group-aware summary values needed by the project.
     \item \textbf{Results Postprocessing / Visualization:}
-    \texttt{ResultsPostprocessingStage} converts evaluation outputs into final
-    reviewer-facing CSV and SVG artifacts.
+    \texttt{ResultsPostprocessingStage} inherits the \texttt{visualizer.py}
+    pattern from the quantum project to convert evaluation outputs into
+    final reviewer-facing CSV tables, SVG figures, and a Markdown summary report.
 \end{itemize}
 
 The implementation treats these classes as pipeline stages, not helper
 functions. Each stage has an input contract, an output contract, and tests that
 verify the expected artifact exists and has the expected structure.
+
+\subsection{Quantum Object Inheritance}
+Each CRISP+ML stage is grounded in a real object from the quantum networking
+research codebase~\cite{quantumhub}, inheriting its interface by design rather
+than reimplementing equivalent logic from scratch.
+\texttt{DataCollectionStage} inherits \texttt{LocalBackupManager} /
+\texttt{GoogleDriveBackupManager} (registry-based data lake access).
+\texttt{DataCleaningStage} and \texttt{EvaluationStage} both inherit
+\texttt{MultiRunEvaluator} (state validation contract and scenario winner
+calculation, respectively).
+\texttt{DataPreparationStage} and \texttt{DataExplorationStage} both inherit
+\texttt{state\_analysis} utilities (scenario decomposition and experiment
+condition reporting).
+\texttt{DataMiningStage} inherits \texttt{QuantumExperimentRunner} (experiment
+execution and reward trace production).
+\texttt{ResultsPostprocessingStage} inherits \texttt{visualizer.py} (final
+chart and CSV export conventions).
+This inheritance layer is shown as Row~4 in Figure~\ref{fig:architecture} and
+documented in full in the component reference (\texttt{components.md}).
 
 \subsection{Context and Orchestration Layer}
 The orchestration layer connects stages without tightly coupling their
@@ -257,7 +297,7 @@ as the reviewer interface. This makes the system appropriate for the DSCI 601
 code review assignment while also providing a reusable foundation for larger
 fairness-aware data science workflows.
 
-The explicit CRISP-DM mapping in Table~\ref{tab:crispmap} and the four-layer
+The explicit CRISP-DM mapping in Table~\ref{tab:crispmap} and the five-layer
 diagram in Figure~\ref{fig:architecture} together ensure that the methodology
 is not implicit but structurally visible at every level of the implementation.
 This traceability---from a recognized data-science process model down to
@@ -266,12 +306,17 @@ deterministic pipeline manifest---is the property that makes this system
 suitable for both the DSCI~601 code-review assignment and for extension into
 larger fairness-aware sequential decision-making workflows.
 
-\begin{thebibliography}{1}
+\begin{thebibliography}{2}
 \bibitem{wirth2000crisp}
 R.~Wirth and J.~Hipp,
 ``CRISP-DM: Towards a standard process model for data mining,''
 in \textit{Proc.\ 4th Int.\ Conf.\ Practical Applications of Knowledge
 Discovery and Data Mining}, 2000, pp.~29--39.
+\bibitem{quantumhub}
+P.~Z.~Garcia,
+``Quantum Project Hub,
+GitHub repository, 2025--2026.
+[Online]. Available: \url{https://github.com/pzg8794/quantum_project_hub}
 \end{thebibliography}
 
 \end{document}
