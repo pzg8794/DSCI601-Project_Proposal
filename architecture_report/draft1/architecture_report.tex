@@ -10,6 +10,7 @@
 \usepackage[table]{xcolor}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta,fit,backgrounds}
+\usepackage{pdflscape}
 \usepackage[hidelinks]{hyperref}
 
 \definecolor{phase1blue}{RGB}{52,152,219}
@@ -98,30 +99,19 @@ than as disconnected scripts.
 \section{System Architecture}
 %% ─────────────────────────────────────────────────────────────
 
-Figure~\ref{fig:architecture} shows the full five-layer architecture.
-The \textit{top layer} maps each stage to its corresponding CRISP-DM phase.
-The \textit{second layer} is the cross-cutting infrastructure---configuration,
-CLI, and validation---that controls, exposes, and tests the pipeline.
-The \textit{third layer} is the CRISP+ML pipeline itself, with sequential
-data flow from collection through postprocessing.
-The \textit{fourth layer} shows the quantum-project object each stage inherits,
-grounding each CRISP-DM step in a real research artifact.
-The \textit{bottom layer} is the quantum data lake and pipeline manifest that
-record data provenance for the entire run.
+The architecture is organized as a five-layer system. The top layer maps each
+stage to its corresponding CRISP-DM phase. The second layer is the cross-cutting
+infrastructure---configuration, CLI, and validation---that controls, exposes,
+and tests the pipeline. The third layer is the CRISP+ML pipeline itself, with
+sequential data flow from collection through postprocessing. The fourth layer
+shows the quantum-project object each stage inherits, grounding each CRISP-DM
+step in a real research artifact. The bottom layer is the quantum data lake and
+pipeline manifest that record data provenance for the entire run.
 
-\begin{figure*}[!t]
-\centering
-\resizebox{0.97\textwidth}{!}{\input{architecture_diagram.tex}}
-\caption{Five-layer architecture of the quantum-integrated CRISP+ML pipeline.
-  Top: CRISP-DM phase alignment.
-  Second: configuration, CLI, and validation infrastructure.
-  Third: the seven sequential CRISP+ML stages with artifact outputs.
-  Fourth: inherited quantum-project objects that implement each stage.
-  Bottom: quantum data lake (Google Shared Drive) and pipeline manifest.
-  Solid arrows show data/control flow; double arrows show quantum object inheritance;
-  dashed arrows show cross-cutting control; dotted arrows show CRISP-DM phase-to-stage alignment.}
-\label{fig:architecture}
-\end{figure*}
+Because the figure now carries substantial stage, inheritance, and provenance
+detail, it is placed on its own dedicated landscape page at the end of this
+document so it can remain large and easy to read without competing with the
+main writeup text.
 
 \subsection{Configuration Layer}
 The configuration layer defines the parameters controlling each run. In the
@@ -204,8 +194,8 @@ condition reporting).
 execution and reward trace production).
 \texttt{ResultsPostprocessingStage} inherits \texttt{visualizer.py} (final
 chart and CSV export conventions).
-This inheritance layer is shown as Row~4 in Figure~\ref{fig:architecture} and
-documented in full in the component reference (\texttt{components.md}).
+This inheritance layer is shown in the full architecture figure and documented
+in full in the component reference (\texttt{components.md}).
 
 \subsection{Context and Orchestration Layer}
 The orchestration layer connects stages without tightly coupling their
@@ -298,13 +288,30 @@ code review assignment while also providing a reusable foundation for larger
 fairness-aware data science workflows.
 
 The explicit CRISP-DM mapping in Table~\ref{tab:crispmap} and the five-layer
-diagram in Figure~\ref{fig:architecture} together ensure that the methodology
-is not implicit but structurally visible at every level of the implementation.
-This traceability---from a recognized data-science process model down to
+architecture figure together ensure that the methodology is not implicit but
+structurally visible at every level of the implementation. This traceability---from a recognized data-science process model down to
 individually runnable CLI commands, numbered artifact directories, and a
 deterministic pipeline manifest---is the property that makes this system
 suitable for both the DSCI~601 code-review assignment and for extension into
 larger fairness-aware sequential decision-making workflows.
+
+\clearpage
+\begin{landscape}
+\thispagestyle{plain}
+\begin{figure}[p]
+\centering
+\resizebox{0.98\linewidth}{!}{\input{architecture_diagram.tex}}
+\caption{Five-layer architecture of the quantum-integrated CRISP+ML pipeline.
+Top: CRISP-DM phase alignment. Second: configuration, CLI, and validation
+infrastructure. Third: the seven sequential CRISP+ML stages with artifact
+outputs. Fourth: inherited quantum-project objects that implement each stage.
+Bottom: quantum data lake (Google Shared Drive) and pipeline manifest. Solid
+arrows show data/control flow; double arrows show quantum object inheritance;
+dashed arrows show cross-cutting control; dotted arrows show CRISP-DM
+phase-to-stage alignment.}
+\label{fig:architecture}
+\end{figure}
+\end{landscape}
 
 \begin{thebibliography}{2}
 \bibitem{wirth2000crisp}
