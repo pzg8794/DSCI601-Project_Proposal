@@ -1,0 +1,34 @@
+% Architecture diagram for DSCI601 proposal (moved from presentation/)
+% Include this file in slides with: \input{architecture/architecture_diagram.tex}
+% Requires tikz package; presentation templates already load tikz.
+
+\begin{tikzpicture}[node distance=1.2cm, auto, >=Latex, font=\sffamily]
+  % node styles
+  \tikzstyle{box} = [rectangle, draw=black, fill=blue!6, text width=8.5em, text centered, rounded corners, minimum height=2.2em]
+  \tikzstyle{smallbox} = [rectangle, draw=black, fill=gray!6, text width=6.5em, text centered, rounded corners, minimum height=2em]
+
+  % nodes
+  \node[box] (data) {Data Sources\\(clinical, synthetic, quantum traces)};
+  \node[smallbox, right=1.6cm of data] (config) {Experiment Configs\\(seeds, scenarios, metrics)};
+
+  \node[box, below=1.4cm of data] (env) {Environment / Simulator\\(clinical sim, quantum routing)};
+  \node[box, right=1.6cm of env] (runner) {Runner / Orchestrator\\(batched trials, seeds)};
+
+  \node[box, right=2.6cm of runner] (model) {Model / Policy\\(MAB, CMAB, iCMAB)};
+
+  \node[smallbox, right=1.4cm of model] (evaluator) {Evaluator\\(utility + fairness metrics)};
+  \node[smallbox, below=1.0cm of evaluator] (visual) {Visualizer / Notebooks\\(plots, figures)};
+
+  % arrows
+  \draw[->] (data) -- (env) node[midway,left] {datasets};
+  \draw[->] (config) -- (runner) node[midway, above] {configs};
+  \draw[->] (env) -- (runner) node[midway, above] {observations / feedback};
+  \draw[->] (runner) -- (model) node[midway, above] {context};
+  \draw[->] (model) -- (runner) node[midway, below] {actions};
+  \draw[->] (runner) -- (evaluator) node[midway, above] {per-run logs};
+  \draw[->] (evaluator) -- (visual) node[midway, right] {reports};
+  \draw[->, bend right=20] (runner) to (visual) node[midway, below] {run artifacts};
+
+  % annotations
+  \node[below=0.6cm of env, font=\scriptsize] (note) {Design goals: reproducible configs, fixed seeds, small fast tests for review};
+\end{tikzpicture}
