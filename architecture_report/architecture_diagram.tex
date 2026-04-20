@@ -75,7 +75,7 @@ lab/.style={font=\large,align=center}]
 
 % Main flow
 \draw[flow] (push.north east) -- ++(2.1,1.05) -| (policy.north west);
-\draw[flow] (entry.east) -- (orch.west);
+\draw[flow] (entry.east) -- (policy.west);
 \draw[flow] (policy.east) -- (orch.west);
 \draw[flow] (orch.east) -- (val.west);
 \draw[flow] (val.east) -- (gate.west);
@@ -95,7 +95,6 @@ lab/.style={font=\large,align=center}]
 \draw[trace] (du.south) -- ++(0,-0.9) -| (collect.north);
 \draw[trace] (entry.south) -- ++(0,-1.25) -| (deliver.north);
 \draw[trace] (model.south) -- ++(0,-0.85) -| (fp.north west);
-\draw[trace] (eval.south) -- ++(0,-1.05) -| (fp.north east);
 \draw[trace] (orch.south) -- ++(0,-2.8) -| (fp.north);
 
 % Artifact traces
@@ -118,11 +117,11 @@ lab/.style={font=\large,align=center}]
 \end{scope}
 
 % Layer labels
-\node[font=\Huge, text=phase1blue!80!black] at (3.5,15.0) {High-level CRISP-DM context};
-\node[font=\Huge, text=phase2green!60!black] at (1.0,9.5) {Control Layer};
-\node[font=\Huge, text=phase3orange!70!black] at (2.0,4.0) {Execution Layer};
-\node[font=\Huge, text=phase4purple!75!black] at (12.8,-2.1) {Fairness--Performance Layer};
-\node[font=\Huge, text=phase4purple!75!black] at (7.5,-7.0) {Artifacts Layer};
+\node[font=\Huge, text=phase1blue!80!black] at (27.0,15.0) {High-level CRISP-DM context};
+\node[font=\Huge, text=phase2green!60!black] at (27.0,9.5) {Control Layer};
+\node[font=\Huge, text=phase3orange!70!black] at (27.0,4.0) {Execution Layer};
+\node[font=\Huge, text=phase4purple!75!black] at (27.0,-2.1) {Fairness--Performance Layer};
+\node[font=\Huge, text=phase4purple!75!black] at (27.0,-7.0) {Artifacts Layer};
 
 \node[lab] at (29.0,-09.0)
 {\LARGE\textbf{Interpretation:} the executable workflow starts with collection from the shared-drive source layer, passes through the evaluator and state-analysis stages.\\
