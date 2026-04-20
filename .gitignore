@@ -68,6 +68,22 @@ survey_report/*.md
 # Architecture working drafts (kept local; do not track)
 architecture_report/draft1/
 architecture_report/draft2/
+## Report cleanup: ignore non .pdf/.tex/.bib files in report-like directories
+# Ignore everything under directories whose names contain 'report', 'reports', 'architecture_report', 'paper', or 'draft'
+**/*report*/**
+**/*paper*/**
+**/*draft*/**
+
+# Allow only TeX, Bib, and PDF files inside those directories
+!**/*report*/**/*.tex
+!**/*report*/**/*.bib
+!**/*report*/**/*.pdf
+!**/*paper*/**/*.tex
+!**/*paper*/**/*.bib
+!**/*paper*/**/*.pdf
+!**/*draft*/**/*.tex
+!**/*draft*/**/*.bib
+!**/*draft*/**/*.pdf
 
 # OS/editor junk
 .DS_Store
