@@ -1,5 +1,4 @@
 \documentclass{IEEEtran}
-
 \usepackage{cite}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -11,7 +10,16 @@
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta,fit,backgrounds}
 \usepackage{pdflscape}
+\usepackage{array}
+\usepackage{tabularx}
 \usepackage[hidelinks]{hyperref}
+\usepackage{array,tabularx,makecell}
+
+\urlstyle{tt}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash\hspace{0pt}}p{#1}}
+\newcommand{\code}[1]{\nolinkurl{#1}}
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.10}
 
 \definecolor{phase1blue}{RGB}{52,152,219}
 \definecolor{phase2green}{RGB}{46,204,113}
@@ -21,279 +29,385 @@
 
 \title{{\LARGE\textbf{Architecture for a Reproducible CRISP+ML Review Pipeline}}\\
 {\Large\textit{Quantum-Integrated, Fairness-Aware Data Science Code Review Infrastructure}}\\
-{\large\texttt{(Architecture Writeup)}}}
+{\large\texttt{DSCI 601 Architecture Report}}}
 
 \author{%
-\begin{minipage}{0.48\textwidth}
-\begin{center}
+\begin{minipage}{0.48\textwidth}\begin{center}
 {\bf Piter Z. Garcia}\\
 \begin{small}
 MS Data Science / Decision-Making \& Algorithmic Fairness\\
 Rochester Institute of Technology (RIT)\\
 {\it pizg8794@g.rit.edu}
 \end{small}
-\end{center}
-\end{minipage}
+\end{center}\end{minipage}
 \hfill
-\begin{minipage}{0.48\textwidth}
-\begin{center}
+\begin{minipage}{0.48\textwidth}\begin{center}
 {\bf Dr. Daniel Krutz, Travis Desell}\\
 \begin{small}
 Department of Software Engineering, Data Science\\
 RIT Research Advisors\\
 {\it dxkvse@g.rit.edu, tjdvse@g.rit.edu}
 \end{small}
-\end{center}
-\end{minipage}%
+\end{center}\end{minipage}%
 }
 
 \begin{document}
 \maketitle
 
-%% ─────────────────────────────────────────────────────────────
 \section{Architecture Overview}
-%% ─────────────────────────────────────────────────────────────
 
-This writeup describes the implementation of the code-review repository for the
-DSCI~601 assignment. The repository is organized as a reproducible
-\textit{CRISP+ML} pipeline that mirrors a real machine-learning workflow while
-remaining fast enough for reviewers to install, run, test, and inspect locally.
-The design goal is a reviewer-safe system with clear stage boundaries,
-deterministic behavior, and enough implementation detail that another party can
-recreate the workflow and reproduce the same outputs from a single configuration
-file.
+This report presents the project architecture as a reproducible,
+CRISP-DM-aligned system built on top of the existing
+\texttt{quantum\_project} infrastructure. The purpose of the report is to
+identify the major layers of the system, document the components that implement
+each stage, and provide enough workflow detail for another party to recreate the
+software, execute the pipeline, and replicate the reported results.
 
-The system is structured around seven explicit lifecycle stages that directly
-instantiate the six canonical phases of the Cross-Industry Standard Process for
-Data Mining (CRISP-DM)~\cite{wirth2000crisp}: data collection, data cleaning,
-data preparation, data exploration and visualization, data mining, evaluation,
-and results postprocessing and visualization.
-Table~\ref{tab:crispmap} makes the mapping explicit.
+The inherited quantum workflow provides the main execution structure used here:
+shared-drive storage, notebook-based analysis, evaluator-owned summaries,
+runner-based experiment execution, and state-analysis postprocessing. The
+current repository extends that structure by adding a review-oriented control
+layer and a fairness--performance synthesis layer that compares fairness
+criteria against inherited performance metrics.
 
-\begin{table}[h]
+The architecture is organized around five concerns: CRISP-DM context, control
+and validation, execution stages, fairness--performance synthesis, and artifacts
+and replication outputs.
+
+\section{Recreating the System and Replicating Results}
+
+The architecture supports three entry paths so that another party can recreate
+the system and reproduce the reported behavior.
+
+\begin{table}[ht!]
 \centering
-\caption{Mapping of CRISP-DM phases to CRISP+ML pipeline stages.}
-\label{tab:crispmap}
-\small
-\begin{tabular}{@{}lp{5.2cm}@{}}
+\caption{Supported execution and replication paths inherited from the quantum project}
+\label{tab:paths}
+\begin{tabular}{p{1.8cm}p{2.8cm}p{2.7cm}}
 \toprule
-\textbf{CRISP-DM Phase} & \textbf{Realized by} \\
+\textbf{Path} & \textbf{How it is started} & \textbf{Purpose} \\
 \midrule
-Business Understanding  & \texttt{configs/fast\_review.json} + external proposal artifacts \\
-Data Understanding      & Stages 1 (Collection), 2 (Cleaning), 4 (Exploration) \\
-Data Preparation        & Stage 3 (Preparation) \\
-Modeling                & Stage 5 (Data Mining) \\
-Evaluation              & Stage 6 (Evaluation) \\
-Deployment              & Stage 7 (Postprocessing) + CI + publish workflow \\
+Colab / shared notebook & open shared notebook, mount Drive, run notebook cells & fastest replication of presented results \\
+Local installation & clone repo, create virtual environment, install dependencies, run scripts or notebooks & development and reproducible local validation \\
+GCP VM / batch path & startup script plus batch runner scripts & large runs, longer experiments, remote replication \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The architecture is therefore not only a package layout---it is a data pipeline:
-each CRISP+ML stage consumes a concrete artifact, produces the next artifact,
-and is covered by a corresponding unit-test boundary. This is the key design
-choice that lets reviewers inspect the work as a reproducible system rather
-than as disconnected scripts.
+The notebook path is the fastest route to replication because the shared
+notebooks already mount Drive, install dependencies, load saved evaluator or
+framework state, and write results back to the shared infrastructure. The local
+path remains necessary for repository review, testing, and debugging. The GCP
+path extends the same workflow to longer or larger runs without changing the
+underlying component structure.
 
-%% ─────────────────────────────────────────────────────────────
+These entry paths lead into the same inherited execution chain. They do not
+create separate systems. For that reason, the report documents setup, execution,
+interpretation, and sharing as part of the architecture rather than as
+supplementary instructions.
+
 \section{System Architecture}
-%% ─────────────────────────────────────────────────────────────
 
-The architecture is organized as a five-layer system. The top layer maps each
-stage to its corresponding CRISP-DM phase. The second layer is the cross-cutting
-infrastructure---configuration, CLI, and validation---that controls, exposes,
-and tests the pipeline. The third layer is the CRISP+ML pipeline itself, with
-sequential data flow from collection through postprocessing. The fourth layer
-shows the quantum-project object each stage inherits, grounding each CRISP-DM
-step in a real research artifact. The bottom layer is the quantum data lake and
-pipeline manifest that record data provenance for the entire run.
+Figure~\ref{fig:architecture} summarizes the full workflow. At the highest
+level, Business Understanding and Data Understanding remain contextual layers
+rather than CI stages. The control layer receives repository events or user
+entry paths, applies configuration and validation rules, and drives the
+execution stages. The execution layer performs collection, cleaning,
+preparation, exploration, mining, and evaluation. The fairness--performance
+layer then combines inherited performance summaries with repository-side
+fairness criteria. Finally, the artifacts layer preserves the evidence produced
+by each stage.
 
-Because the figure now carries substantial stage, inheritance, and provenance
-detail, it is placed on its own dedicated landscape page at the end of this
-document so it can remain large and easy to read without competing with the
-main writeup text.
+The figure is placed on its own landscape page at the end of the report so that
+all layers, arrows, and stage labels remain legible.
 
-\subsection{Configuration Layer}
-The configuration layer defines the parameters controlling each run. In the
-implementation repository, a typed configuration object is loaded from a single
-JSON file. The configuration records the random seed, record counts,
-train/test split, invalid-record frequency, missingness frequency, bias level,
-fairness threshold, and output directory.
+\section{Stage-to-Component Mapping}
 
-This layer separates experiment settings from stage logic. A reviewer can
-change the run size, seed, or output location without modifying source code.
-This design also supports reproducibility: the same configuration and seed
-produce the same stage artifacts.
+Table~\ref{tab:stage_objects} identifies the quantum-side components associated
+with each stage and specifies their operational role within the workflow.
 
-\subsection{Stage Layer}
-Each lifecycle step is implemented as its own concrete class under a shared
-\texttt{PipelineStage} interface. This keeps the implementation object-oriented
-and gives every phase a narrow, testable responsibility. The stage layer is the
-most important part of the architecture because it directly maps the
-methodology to code:
+\begin{table*}[!t]
+\centering
+\caption{Stage-to-component mapping for the inherited review and replication workflow}
+\label{tab:stage_objects}
+\scriptsize
+\begin{tabular}{L{1.9cm} L{3.9cm} L{5.25cm} L{5.25cm}}
+\toprule
+\textbf{Stage} & \textbf{Component} & \textbf{Description} & \textbf{Usage} \\
+\midrule
 
-\begin{itemize}
-    \item \textbf{Data Collection:} \texttt{DataCollectionStage} retrieves
-    real experiment artifacts from the quantum data lake, a Google Shared Drive
-    hosted at \url{https://drive.google.com/drive/u/0/folders/12mZyGQHD__G54g2yCYIyWfXydhO3DxIt}.
-    By inheritance from the quantum project, it uses
-    \texttt{LocalBackupManager} (which extends \texttt{GoogleDriveBackupManager})
-    to call \texttt{build\_registry()} and \texttt{get\_latest\_state()} and
-    resolve the latest saved \texttt{MultiRunEvaluator} or model state for a
-    given component and date partition
-    (\texttt{quantum\_data\_lake/\{component\}/day\_YYYYMMDD/}).
-    \item \textbf{Data Cleaning:} \texttt{DataCleaningStage} mirrors the
-    validation contract of \texttt{MultiRunEvaluator}: it calls
-    \texttt{\_infer\_models\_from\_state()} to reconstruct model identity from
-    a saved state file, applies the evaluator equality contract (\texttt{\_\_eq\_\_})
-    to reject structurally invalid or incompatible states, and writes only
-    schema-valid records. This stage is separate so preprocessing is not
-    hidden inside modeling code.
-    \item \textbf{Data Preparation:} \texttt{DataPreparationStage} mirrors
-    the \texttt{state\_analysis} decomposition pattern: it extracts scenario
-    statistics (\texttt{scenarios\_stats}), partitions records by scenario
-    key, and writes deterministic train/test artifacts under a fixed seed,
-    exactly as the quantum project separates stochastic from baseline
-    scenarios before model evaluation.
-    \item \textbf{Data Exploration / Visualization:}
-    \texttt{DataExplorationStage} mirrors \texttt{state\_analysis} exploration
-    utilities (\texttt{display\_experiment\_conditions()},
-    \texttt{print\_summary()}) to write lightweight summaries of dataset size,
-    group balance, scenario coverage, and feature completeness before modeling.
-    \item \textbf{Data Mining:} \texttt{DataMiningStage} inherits the
-    \texttt{QuantumExperimentRunner} pattern: it invokes \texttt{run\_experiment()}
-    to produce reward traces and prediction artifacts, keeping the stage
-    intentionally lightweight so the review workflow remains fast.
-    \item \textbf{Evaluation:} \texttt{EvaluationStage} mirrors
-    \texttt{MultiRunEvaluator} evaluation methods, including
-    \texttt{calculate\_scenario\_winner()} for efficiency ranking and
-    fairness-oriented group-aware summary values needed by the project.
-    \item \textbf{Results Postprocessing / Visualization:}
-    \texttt{ResultsPostprocessingStage} inherits the \texttt{visualizer.py}
-    pattern from the quantum project to convert evaluation outputs into
-    final reviewer-facing CSV tables, SVG figures, and a Markdown summary report.
-\end{itemize}
+Data Collection &
+\makecell[tl]{
+\code{LocalBackupManager}\\
+\code{GoogleDriveBackupManager}\\
+registry build /\\
+latest-state lookup
+} &
+resolves shared-drive paths and retrieves matching framework or model state from
+\code{quantum_data_lake/} &
+notebooks, local scripts, and GCP runs begin by scanning the registry and
+loading compatible saved state \\
+\addlinespace[2pt]
 
-The implementation treats these classes as pipeline stages, not helper
-functions. Each stage has an input contract, an output contract, and tests that
-verify the expected artifact exists and has the expected structure.
+Data Cleaning &
+\makecell[tl]{
+\code{MultiRunEvaluator}\\
+\code{_infer_models_}\\
+\code{from_state()}\\
+\code{__eq__()}\\
+\code{ensure_summary_}\\
+\code{contract()}
+} &
+validates state compatibility, normalizes scenario storage, and repairs missing
+evaluator summary payloads when needed &
+collection outputs are filtered into evaluator-valid state before analysis,
+plotting, or summary generation \\
+\addlinespace[2pt]
 
-\subsection{Quantum Object Inheritance}
-Each CRISP+ML stage is grounded in a real object from the quantum networking
-research codebase~\cite{quantumhub}, inheriting its interface by design rather
-than reimplementing equivalent logic from scratch.
-\texttt{DataCollectionStage} inherits \texttt{LocalBackupManager} /
-\texttt{GoogleDriveBackupManager} (registry-based data lake access).
-\texttt{DataCleaningStage} and \texttt{EvaluationStage} both inherit
-\texttt{MultiRunEvaluator} (state validation contract and scenario winner
-calculation, respectively).
-\texttt{DataPreparationStage} and \texttt{DataExplorationStage} both inherit
-\texttt{state\_analysis} utilities (scenario decomposition and experiment
-condition reporting).
-\texttt{DataMiningStage} inherits \texttt{QuantumExperimentRunner} (experiment
-execution and reward trace production).
-\texttt{ResultsPostprocessingStage} inherits \texttt{visualizer.py} (final
-chart and CSV export conventions).
-This inheritance layer is shown in the full architecture figure and documented
-in full in the component reference (\texttt{components.md}).
+\makecell[tl]{Data Preparation /\\ Exploration} &
+\makecell[tl]{
+\code{state_analysis.py}\\
+evaluator\\
+\code{scenarios_stats}\\
+evaluator\\
+\code{scenarios_results}\\
+payloads
+} &
+consumes evaluator-produced summaries and restructures them into flattened or
+scenario-oriented tables &
+notebooks and scripts use these outputs for master datasets, scenario summaries,
+and replication-ready tables \\
+\addlinespace[2pt]
 
-\subsection{Context and Orchestration Layer}
-The orchestration layer connects stages without tightly coupling their
-implementations. A shared pipeline context carries metadata, artifact paths, and
-stage results across the run. The \texttt{ReviewPipeline} object builds the
-ordered stage list and executes it either end-to-end or until a named stopping
-point.
+Modeling / Mining &
+\makecell[tl]{
+\code{AllocatorRunner}\\
+\code{QuantumExperimentRunner}\\
+allocator objects
+} &
+executes runs, assigns route qubit allocations, and produces model-level
+outputs, traces, and experiment artifacts &
+local, notebook, and GCP paths use the runner chain to generate comparable
+outputs across scenarios \\
+\addlinespace[2pt]
 
-After execution, the orchestrator writes a manifest file containing the active
-configuration, stage outputs, and stage summaries. This manifest is the
-reproducibility record for a run: it identifies what was executed, where
-artifacts were written, and what each stage reported.
+Evaluation &
+\makecell[tl]{
+\code{MultiRunEvaluator.}\\
+\code{calculate_}\\
+\code{scenario_winner()}\\
+\code{calculate_}\\
+\code{scenario_}\\
+\code{performance()}\\
+\code{calculate_}\\
+\code{scenarios_}\\
+\code{performance()}
+} &
+computes winner counts, average gap, average efficiency, oracle reward, and
+scenario-level summaries &
+turns raw runner outputs into reviewer-visible performance evidence and
+comparison payloads \\
+\addlinespace[2pt]
 
-The same orchestrator supports both normal execution and review execution.
-Individual commands can stop at a stage for debugging, while the full
-\texttt{run-all} path executes the entire chain. This design makes the repo
-usable by both a developer checking one phase and a reviewer checking the whole
-submission.
+\makecell[tl]{Fairness--Performance\\ Synthesis} &
+\makecell[tl]{
+repository-side\\
+fairness--performance\\
+component\\
+allocator context\\
+evaluator metrics\\
+runner outputs\\
+\code{QuantumEvaluator}\\
+\code{Visualizer}\\
+robustness plotting\\
+path
+} &
+combines inherited performance metrics with fairness criteria and produces
+tradeoff views &
+used after evaluation to generate fairness-versus-performance tables, plots, and
+reviewer-facing comparisons \\
+\addlinespace[2pt]
 
-\subsection{Interface Layer}
-The user-facing interface is a command-line module with one command for each
-required stage plus two orchestration commands: \texttt{run-all} and
-\texttt{merge-check}. The command-line interface is part of the architecture
-because it makes the repository reviewable as software rather than as a single
-notebook. Reviewers can execute a single stage, rerun the full workflow, or
-perform the same merge validation path used by the repository.
+\makecell[tl]{Review Delivery /\\ Replication Outputs} &
+\makecell[tl]{
+notebooks\\
+\code{visualizer.py}\\
+shared-drive exports\\
+\code{pipeline_}\\
+\code{manifest.json}
+} &
+publishes figures, tables, notebook-ready outputs, and provenance artifacts &
+collaborators rerun notebooks and inspect shared-drive artifacts to reproduce,
+interpret, and share results \\
+\bottomrule
+\end{tabular}
+\end{table*}
 
-The \texttt{merge-check} command is the local quality gate. It runs the quick
-pipeline and the unit tests so submitted changes can be checked before merging.
-The remote CI workflow mirrors this path, making local and pull-request
-validation consistent.
+\section{Detailed Description of Each Stage}
 
-%% ─────────────────────────────────────────────────────────────
-\section{Framework and Component Choices}
-%% ─────────────────────────────────────────────────────────────
+\subsection{Business Understanding}
+Business Understanding defines the research objective, the fairness criteria,
+the acceptance rules, and the replication target. It establishes what the
+system is expected to optimize and what evidence must be produced before results
+are considered review-ready.
 
-The implementation intentionally uses a minimal technical stack. The pipeline
-is written with standard-library Python and a small package structure, with
-\texttt{requirements.txt} as the reviewer-facing installation path. This choice
-reduces environmental friction and avoids requiring a heavy machine-learning
-stack for a code review assignment.
+\subsection{Data Understanding}
+Data Understanding defines the structure of the shared-drive data lake, the
+semantics of the saved state, and the assumptions that notebooks and analysis
+scripts make about evaluator outputs. The repository depends on a real upstream
+storage model rather than an isolated local file layout.
 
-JSON is used for configuration, records, predictions, evaluation summaries, and
-manifests because it is human-readable, easy to validate, and supported without
-third-party libraries. CSV is used for summary tables because it is familiar to
-reviewers and easy to inspect. SVG is used for lightweight charts because it
-provides visual output without requiring plotting dependencies.
+\subsection{Data Collection Stage}
+\textbf{Components.} The collection stage is built from
+\texttt{LocalBackupManager}, \texttt{GoogleDriveBackupManager}, and the
+registry-based latest-state lookup path listed in Table~\ref{tab:stage_objects}.
 
-These choices prioritize reproducibility, transparency, and short setup time
-over raw performance. That tradeoff is appropriate for this deliverable: the
-goal is not to train a large model, but to demonstrate that the project has a
-clean architecture, separable code paths, tests, and a reliable validation
-workflow.
+\textbf{Linkage.} \texttt{GoogleDriveBackupManager} resolves the shared-drive
+source and identifies the relevant storage root. \texttt{LocalBackupManager}
+provides a local-facing wrapper around that storage path. The registry logic
+then indexes the available saved states and selects the latest compatible
+artifact for the requested component or run. Together, these parts convert the
+shared-drive namespace into a concrete set of executable inputs for the
+downstream pipeline.
 
-%% ─────────────────────────────────────────────────────────────
-\section{Data Storage and Reproducibility}
-%% ─────────────────────────────────────────────────────────────
+\textbf{Output.} The stage produces source references and retrieved framework or
+model states that can be passed into evaluator-based validation.
 
-All artifacts are written beneath a stable output root defined by the active
-configuration. Within that root, each stage writes to its own numbered
-directory. This output design makes the workflow easy to inspect: every phase
-leaves visible artifacts, intermediate outputs can be reused, and reviewers can
-verify stage behavior without rerunning the entire system. The major artifacts
-are raw records, clean records, prepared train/test splits, exploration
-summaries, predictions, evaluation metrics, final tables, SVG figures, and the
-pipeline manifest.
+\subsection{Data Cleaning Stage}
+\textbf{Components.} The cleaning stage is centered on
+\texttt{MultiRunEvaluator}, supported by \texttt{\_infer\_models\_from\_state()},
+\texttt{\_\_eq\_\_()}, and \texttt{ensure\_summary\_contract()}.
 
-The output layout answers three practical questions: what configuration
-produced this run, what each stage wrote, and what final metrics or figures
-were generated. The final manifest connects those answers into a single
-provenance record. Because the repository uses deterministic configuration and
-fixed seeds, another party can reproduce the same artifacts by running the same
-commands.
+\textbf{Linkage.} The retrieved state from the collection stage is first
+inspected by \texttt{\_infer\_models\_from\_state()} so that the system can
+recover the model identity and expected evaluator structure. \texttt{\_\_eq\_\_()}
+and related evaluator-side checks verify structural compatibility. When
+evaluator summaries are incomplete or not normalized,
+\texttt{ensure\_summary\_contract()} repairs the summary shape so that later
+analysis stages consume a stable payload. Together, these components transform
+raw retrieved state into evaluator-valid state.
 
-The expected recreation path is straightforward: create a fresh Python
-environment, install from \texttt{requirements.txt}, run the full pipeline with
-\texttt{configs/fast\_review.json}, inspect the generated results directory,
-and run \texttt{merge-check}. This reproduces the reviewer-safe workflow, its
-stage artifacts, and its validation checks.
+\textbf{Output.} The output is a cleaned and contract-consistent evaluator state
+that downstream analysis can trust.
 
-%% ─────────────────────────────────────────────────────────────
-\section{Conclusion}
-%% ─────────────────────────────────────────────────────────────
+\subsection{Data Preparation and Exploration Stage}
+\textbf{Components.} This stage is built from \texttt{state\_analysis.py} and
+the evaluator-owned \texttt{scenarios\_stats} and
+\texttt{scenarios\_results} payloads referenced in
+Table~\ref{tab:stage_objects}.
 
-The architecture emphasizes simplicity, determinism, and inspectability. It
-uses a recognized CRISP+ML lifecycle as the backbone, object-oriented stage
-classes as the implementation structure, and explicit command-line entry points
-as the reviewer interface. This makes the system appropriate for the DSCI 601
-code review assignment while also providing a reusable foundation for larger
-fairness-aware data science workflows.
+\textbf{Linkage.} \texttt{MultiRunEvaluator} provides the scenario summaries
+and normalized result structures. \texttt{state\_analysis.py} then consumes
+those evaluator outputs and restructures them into flattened tables,
+scenario-oriented summaries, and analysis-ready views. The stage is therefore a
+composition of evaluator-generated summaries plus state-analysis postprocessing
+rather than an independent replacement for evaluator logic.
 
-The explicit CRISP-DM mapping in Table~\ref{tab:crispmap} and the five-layer
-architecture figure together ensure that the methodology is not implicit but
-structurally visible at every level of the implementation. This traceability---from a recognized data-science process model down to
-individually runnable CLI commands, numbered artifact directories, and a
-deterministic pipeline manifest---is the property that makes this system
-suitable for both the DSCI~601 code-review assignment and for extension into
-larger fairness-aware sequential decision-making workflows.
+\textbf{Output.} The output is a prepared set of scenario summaries, tables,
+and exploratory artifacts that support mining, notebooks, and reviewer
+inspection.
+
+\subsection{Modeling and Mining Stage}
+\textbf{Components.} The mining stage is implemented through
+\texttt{AllocatorRunner}, \texttt{QuantumExperimentRunner}, and the allocator
+objects responsible for route qubit allocation.
+
+\textbf{Linkage.} The allocator objects define the decision logic used within
+each run. \texttt{QuantumExperimentRunner} executes the underlying experiment
+path and produces run-level outputs and traces. \texttt{AllocatorRunner}
+orchestrates the higher-level execution across allocators, scenarios, and
+configurations. Together, these components produce the substantive outputs that
+the evaluator later summarizes.
+
+\textbf{Output.} The stage produces model outputs, traces, and experiment
+artifacts suitable for scenario-level comparison.
+
+\subsection{Evaluation Stage}
+\textbf{Components.} The evaluation stage is owned by
+\texttt{MultiRunEvaluator}, particularly through
+\texttt{calculate\_scenario\_winner()},
+\texttt{calculate\_scenario\_performance()}, and
+\texttt{calculate\_scenarios\_performance()}.
+
+\textbf{Linkage.} The evaluator consumes the runner outputs, organizes them by
+scenario, and computes the summary statistics required for comparison: winner
+counts, average gap, average efficiency, oracle reward, and related
+scenario-level measures. This stage is deliberately evaluator-owned so that
+judgment logic remains close to the object that also maintains the state
+contract.
+
+\textbf{Output.} The output is a reviewer-visible performance summary that can
+be consumed directly or passed into the fairness--performance layer.
+
+\subsection{Fairness--Performance Synthesis Layer}
+\textbf{Components.} This new layer combines a repository-side
+fairness--performance component with allocator context, runner outputs,
+evaluator metrics, and visualizer or robustness-plotting consumers such as
+\texttt{QuantumEvaluatorVisualizer}.
+
+\textbf{Linkage.} The runner chain and allocator context define how
+performance was produced. The evaluator computes the inherited performance
+metrics. The fairness--performance component then places those metrics beside
+the fairness criteria defined at the repository level and produces tradeoff
+views that neither the raw runner nor the raw evaluator produces on its own.
+The visualizer path then consumes those combined outputs to generate figures and
+comparative summaries.
+
+\textbf{Output.} The output is a set of tradeoff tables, comparative plots, and
+review-facing fairness-versus-performance summaries.
+
+\subsection{Review Delivery and Replication Outputs}
+\textbf{Components.} The final stage uses notebooks, \texttt{visualizer.py},
+shared-drive exports, and \texttt{pipeline\_manifest.json}.
+
+\textbf{Linkage.} The prior stages generate the saved state, metrics,
+fairness summaries, and plots. The notebook and visualizer path turns those
+into human-readable artifacts. The manifest records provenance for the run.
+Shared-drive export keeps the outputs accessible to collaborators and later
+reanalysis.
+
+\textbf{Output.} The output is a set of figures, tables, rerunnable notebook
+artifacts, and provenance records that support review and replication.
+
+\section{User Workflow: Setup, Run, Interpret, and Share}
+
+\subsection{Setup and Installation}
+A user can interact with the system through three supported paths.
+
+\textbf{Notebook path.} The user opens the shared-drive notebook, mounts Google
+Drive, installs dependencies in the notebook environment, and runs the relevant
+cells. This is the fastest path for reproducing reported results.
+
+\textbf{Local path.} The user clones the repository, creates a virtual
+environment, installs dependencies from \texttt{requirements.txt}, and runs a
+smoke or validation script.
+
+\textbf{GCP path.} The user provisions or enters a VM, runs the startup script,
+and then uses the batch or dynamic runner scripts for longer experiments.
+
+\subsection{How the User Runs the System}
+Once setup is complete, the user chooses a stage or full workflow. In the local
+path, this usually means running the quick validation or full review path. In
+the notebook path, it means configuring an experiment in the notebook and
+executing the evaluator-backed workflow. In the GCP path, it means invoking the
+startup and batch scripts and letting the run complete remotely.
+
+These paths are different entry points into the same inherited execution
+structure. They do not define different systems.
+
+\subsection{How the User Interprets Results}
+The user interprets results through the same artifact conventions used by the
+upstream project. Framework-state and model-state outputs are written under the
+shared data lake, often in day-partitioned directories. Notebooks and visualizer
+logic then consume those results to generate plots, scenario comparisons, and
+summary tables.
+
+\subsection{How the User Shares Results}
+Because the data lake is shared-drive based, completed runs can be made visible
+to collaborators without inventing a second export pipeline. Results written to
+\texttt{quantum\_data\_lake/}, including framework state, model state, tables,
+and figures, are already placed in a common location that supports team
+inspection and notebook-based reanalysis.
 
 \clearpage
 \begin{landscape}
@@ -301,14 +415,12 @@ larger fairness-aware sequential decision-making workflows.
 \begin{figure}[p]
 \centering
 \resizebox{0.98\linewidth}{!}{\input{architecture_diagram.tex}}
-\caption{Five-layer architecture of the quantum-integrated CRISP+ML pipeline.
-Top: CRISP-DM phase alignment. Second: configuration, CLI, and validation
-infrastructure. Third: the seven sequential CRISP+ML stages with artifact
-outputs. Fourth: inherited quantum-project objects that implement each stage.
-Bottom: quantum data lake (Google Shared Drive) and pipeline manifest. Solid
-arrows show data/control flow; double arrows show quantum object inheritance;
-dashed arrows show cross-cutting control; dotted arrows show CRISP-DM
-phase-to-stage alignment.}
+\caption{Architecture of the inherited CRISP-DM review and replication pipeline.
+Business Understanding and Data Understanding remain architectural context,
+while the executable workflow starts with collection from the shared-drive
+source layer. A separate fairness--performance synthesis layer compares
+fairness criteria against inherited performance metrics before review delivery
+and replication outputs are published.}
 \label{fig:architecture}
 \end{figure}
 \end{landscape}
@@ -321,8 +433,7 @@ in \textit{Proc.\ 4th Int.\ Conf.\ Practical Applications of Knowledge
 Discovery and Data Mining}, 2000, pp.~29--39.
 \bibitem{quantumhub}
 P.~Z.~Garcia,
-``Quantum Project Hub,
-GitHub repository, 2025--2026.
+``Quantum Project Hub,'' GitHub repository, 2025--2026.
 [Online]. Available: \url{https://github.com/pzg8794/quantum_project_hub}
 \end{thebibliography}
 
