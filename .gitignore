@@ -65,6 +65,10 @@ proposal_report/*.md
 proposal_report/revised-proposal-report/.DS_Store
 survey_report/*.md
 
+# Architecture working drafts (kept local; do not track)
+architecture_report/draft1/
+architecture_report/draft2/
+
 # OS/editor junk
 .DS_Store
 
