@@ -13,6 +13,20 @@
 \usepackage{array}
 \usepackage{tabularx}
 \usepackage[hidelinks]{hyperref}
+\usepackage{array,tabularx,makecell}
+
+% \usepackage{array}
+% \usepackage{makecell}
+% \usepackage{url}
+\urlstyle{tt}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash\hspace{0pt}}p{#1}}
+\newcommand{\code}[1]{\nolinkurl{#1}}
+
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.12}
+
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.12}
 
 \definecolor{phase1blue}{RGB}{52,152,219}
 \definecolor{phase2green}{RGB}{46,204,113}
@@ -68,8 +82,7 @@ provenance and reviewer-visible evidence.
 
 \section{Recreating the System and Replicating Results}
 
-To allow another party to recreate the software and replicate the presented
-results, the architecture supports three entry paths rather than one.
+To allow users to recreate the software and replicate results, the architecture supports three entry paths rather than one.
 
 \begin{table}[ht!]
 \centering
@@ -86,18 +99,9 @@ GCP VM / batch path & startup script plus batch runner scripts & large runs, lon
 \end{tabular}
 \end{table}
 
-The notebook path is the fastest route to result replication because the shared
-notebooks already mount the Drive, install dependencies, load saved evaluator or
-framework state, and write results back to the same shared infrastructure. The
-local path remains necessary because a reviewer or developer must also be able
-to install the software, run tests, and inspect outputs without relying on
-Colab. The GCP path extends the same architecture to a remote execution context
-for larger or longer runs.
+The shared notebook is the fastest route to result replication because it already mounts the Drive, installs dependencies, loads saved evaluator or framework state, and writes results back to the same shared infrastructure. The local path remains necessary because a reviewer or developer must also be able to install the software, run tests, and inspect outputs without relying on Colab. The GCP path extends the same architecture to a remote execution context for larger or longer runs.
 
-These paths do not lead to different systems. They are different entry points
-into the same inherited execution structure. That is why the architecture report
-must explain how users set up the environment, run the code, interpret results,
-and share outputs.
+These paths do not lead to different systems, but different entry points into the same inherited execution structure. That is why this work explains how users set up the environment, run the code, interpret results, and share outputs.
 
 \section{System Architecture}
 
@@ -115,8 +119,7 @@ evaluation. Beneath that, the fairness--performance synthesis layer combines
 inherited performance summaries with repository-side fairness criteria. Finally,
 the artifacts layer preserves the evidence produced by each stage.
 
-Because the figure is dense, it is placed on its own landscape page at the end
-of the report.
+% Because the figure is dense, it is placed on its own landscape page at the end of the report.
 
 \section{Stage-to-Component Mapping}
 
@@ -127,20 +130,100 @@ used to build and execute it.
 \centering
 \caption{Stage-to-component mapping for the inherited review and replication workflow}
 \label{tab:stage_objects}
-\small
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{1.7cm} >{\raggedright\arraybackslash}p{3.3cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
+\scriptsize
+\begin{tabular}{L{2.0cm} L{4.2cm} L{5.0cm} L{5.0cm}}
 \toprule
-\textbf{Stage} & \textbf{Component / quantum object} & \textbf{Description} & \textbf{Usage} \\
+\textbf{Stage} & \textbf{Component} & \textbf{Description} & \textbf{Usage} \\
 \midrule
-Data Collection & \texttt{LocalBackupManager}, \texttt{GoogleDriveBackupManager}, registry build / latest-state lookup & resolves shared-drive paths and retrieves matching framework or model state from \texttt{quantum\_data\_lake/} & notebooks, local scripts, and GCP runs begin by scanning the registry and loading compatible saved state \\
-Data Cleaning & \texttt{MultiRunEvaluator}, \texttt{\_infer\_models\_from\_state()}, \texttt{\_\_eq\_\_()}, \texttt{ensure\_summary\_contract()} & validates state compatibility, normalizes scenario storage, and repairs missing evaluator summary payloads when needed & collection outputs are filtered into evaluator-valid state before analysis, plotting, or summary generation \\
-Data Preparation / Exploration & \texttt{state\_analysis.py}, evaluator \texttt{scenarios\_stats}, evaluator \texttt{scenarios\_results} payloads & consumes evaluator-produced summaries and restructures them into flattened or scenario-oriented tables & notebooks and scripts use these outputs for master datasets, scenario summaries, and replication-ready tables \\
-Modeling / Mining & \texttt{AllocatorRunner}, \texttt{QuantumExperimentRunner}, allocator objects & executes runs, assigns route qubit allocations, and produces model-level outputs, traces, and experiment artifacts & local, notebook, and GCP paths use the runner chain to generate comparable outputs across scenarios \\
-Evaluation & \texttt{MultiRunEvaluator.calculate\_scenario\_winner()}, \texttt{calculate\_scenario\_performance()}, \texttt{calculate\_scenarios\_performance()} & computes winner counts, average gap, average efficiency, oracle reward, and scenario-level summaries & turns raw runner outputs into reviewer-visible performance evidence and comparison payloads \\
-Fairness--Performance Synthesis & repository-side fairness--performance component, allocator context, evaluator metrics, runner outputs, \texttt{QuantumEvaluatorVisualizer}, robustness plotting path & combines inherited performance metrics with fairness criteria and produces tradeoff views & used after evaluation to generate fairness-versus-performance tables, plots, and reviewer-facing comparisons \\
-Review Delivery / Replication Outputs & notebooks, \texttt{visualizer.py}, shared-drive exports, \texttt{pipeline\_manifest.json} & publishes figures, tables, notebook-ready outputs, and provenance artifacts & collaborators rerun notebooks and inspect shared-drive artifacts to reproduce, interpret, and share results \\
+
+Data Collection &
+\makecell[tl]{
+\code{LocalBackupManager}\\
+\code{GoogleDriveBackupManager}\\
+registry build / latest-state lookup
+} &
+resolves shared-drive paths and retrieves matching framework or model state from
+\code{quantum_data_lake/} &
+notebooks, local scripts, and GCP runs begin by scanning the registry and loading
+compatible saved state \\
+\addlinespace[2pt]
+
+Data Cleaning &
+\makecell[tl]{
+\code{MultiRunEvaluator}\\
+\code{_infer_models_from_state()}\\
+\code{__eq__()}\\
+\code{ensure_summary_contract()}
+} &
+validates state compatibility, normalizes scenario storage, and repairs missing
+evaluator summary payloads when needed &
+collection outputs are filtered into evaluator-valid state before analysis,
+plotting, or summary generation \\
+\addlinespace[2pt]
+
+\makecell[tl]{Data Preparation /\\ Exploration} &
+\makecell[tl]{
+\code{state_analysis.py}\\
+evaluator \code{scenarios_stats}\\
+evaluator \code{scenarios_results} payloads
+} &
+consumes evaluator-produced summaries and restructures them into flattened or
+scenario-oriented tables &
+notebooks and scripts use these outputs for master datasets, scenario summaries,
+and replication-ready tables \\
+\addlinespace[2pt]
+
+Modeling / Mining &
+\makecell[tl]{
+\code{AllocatorRunner}\\
+\code{QuantumExperimentRunner}\\
+allocator objects
+} &
+executes runs, assigns route qubit allocations, and produces model-level outputs,
+traces, and experiment artifacts &
+local, notebook, and GCP paths use the runner chain to generate comparable
+outputs across scenarios \\
+\addlinespace[2pt]
+
+Evaluation &
+\makecell[tl]{
+\code{MultiRunEvaluator.calculate_scenario_winner()}\\
+\code{calculate_scenario_performance()}\\
+\code{calculate_scenarios_performance()}
+} &
+computes winner counts, average gap, average efficiency, oracle reward, and
+scenario-level summaries &
+turns raw runner outputs into reviewer-visible performance evidence and
+comparison payloads \\
+\addlinespace[2pt]
+
+\makecell[tl]{Fairness--Performance\\ Synthesis} &
+\makecell[tl]{
+repository-side fairness--performance component\\
+allocator context\\
+evaluator metrics\\
+runner outputs\\
+\code{QuantumEvaluatorVisualizer}\\
+robustness plotting path
+} &
+combines inherited performance metrics with fairness criteria and produces
+tradeoff views &
+used after evaluation to generate fairness-versus-performance tables, plots, and
+reviewer-facing comparisons \\
+\addlinespace[2pt]
+
+\makecell[tl]{Review Delivery /\\ Replication Outputs} &
+\makecell[tl]{
+notebooks\\
+\code{visualizer.py}\\
+shared-drive exports\\
+\code{pipeline_manifest.json}
+} &
+publishes figures, tables, notebook-ready outputs, and provenance artifacts &
+collaborators rerun notebooks and inspect shared-drive artifacts to reproduce,
+interpret, and share results \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{table*}
 
 \section{Detailed Description of Each Stage}
