@@ -1,85 +1,130 @@
-% Architecture diagram for the DSCI601 architecture report.
-% The figure mirrors the implemented CRISP+ML stage pipeline and highlights
-% how configuration, CLI commands, tests, and storage wrap the stages.
-
 \begin{tikzpicture}[
-  font=\sffamily,
-  >=Latex,
-  support/.style={
-    rectangle,
-    draw=black,
-    rounded corners,
-    minimum height=0.9cm,
-    text width=3.6cm,
-    align=center,
-    fill=gray!10,
-    line width=0.45pt
-  },
-  stage/.style={
-    rectangle,
-    draw=black,
-    rounded corners,
-    minimum height=1.25cm,
-    text width=3.0cm,
-    align=center,
-    line width=0.45pt
-  },
-  store/.style={
-    rectangle,
-    draw=black,
-    rounded corners,
-    minimum height=0.9cm,
-    text width=4.6cm,
-    align=center,
-    fill=gray!8,
-    line width=0.45pt
-  },
-  arrow/.style={->, line width=0.75pt},
-  dashedarrow/.style={->, dashed, line width=0.6pt},
-  note/.style={font=\scriptsize, align=center}
-]
+font=\sffamily\Large,>=Latex,
+layerband/.style={rectangle,rounded corners,inner sep=14pt,line width=1.55pt,draw=black!35},
+event/.style={rectangle,draw=black,rounded corners,minimum height=2.70cm,text width=7.2cm,align=center,fill=gray!8,line width=1.65pt,font=\sffamily\LARGE},
+control/.style={rectangle,draw=black,rounded corners,minimum height=2.85cm,text width=7.8cm,align=center,line width=1.65pt,font=\sffamily\LARGE},
+context/.style={rectangle,draw=black,rounded corners,minimum height=3.00cm,text width=8.4cm,align=center,line width=1.7pt,font=\sffamily\LARGE},
+stage/.style={rectangle,draw=black,rounded corners,minimum height=3.25cm,text width=7.9cm,align=center,line width=1.7pt,font=\sffamily\LARGE},
+sourcebox/.style={rectangle,draw=black,rounded corners,minimum height=2.70cm,text width=6.9cm,align=center,fill=gray!6,line width=1.65pt,font=\sffamily\LARGE},
+artifact/.style={rectangle,draw=black,rounded corners,minimum height=2.45cm,text width=6.2cm,align=center,line width=1.55pt,font=\sffamily\Large},
+decision/.style={rectangle,draw=black,rounded corners,minimum height=2.85cm,text width=7.0cm,align=center,fill=gray!12,line width=1.7pt,font=\sffamily\LARGE},
+flow/.style={->,line width=1.0pt},
+trace/.style={->,dashed,line width=0.8pt},
+lab/.style={font=\large,align=center}]
 
-% Support / control layer
-\node[support, fill=phase1blue!12] (config) at (0, 2.1)
-  {\textbf{Configuration}\\seed, split, missingness,\\fairness threshold};
-\node[support, fill=phase2green!12] (cli) at (5.0, 2.1)
-  {\textbf{CLI Interface}\\one command per stage\\\texttt{run-all}, \texttt{merge-check}};
-\node[support, fill=phase4purple!12] (tests) at (10.0, 2.1)
-  {\textbf{Validation Layer}\\unit tests, smoke run,\\CI merge gate};
+% High-level context
+\node[context,fill=phase1blue!16] (bu) at (10.2,12.2)
+{\textbf{Business Understanding}\\research objective, fairness criteria,\\acceptance rules, replication target};
 
-% CRISP+ML lifecycle row 1
-\node[stage, fill=phase1blue!15] (collect) at (0, 0)
-  {\textbf{1. Data}\\\textbf{Collection}\\synthetic reviewer dataset\\\scriptsize output: raw JSON};
-\node[stage, fill=phase1blue!15] (clean) at (3.8, 0)
-  {\textbf{2. Data}\\\textbf{Cleaning}\\schema validation\\\scriptsize output: clean JSON};
-\node[stage, fill=phase2green!15] (prepare) at (7.6, 0)
-  {\textbf{3. Data}\\\textbf{Preparation}\\deterministic split\\\scriptsize output: train/test JSON};
-\node[stage, fill=phase2green!15] (explore) at (11.4, 0)
-  {\textbf{4. Exploration}\\\textbf{/ Visualization}\\group + completeness\\summaries\\\scriptsize output: CSV};
+\node[context,fill=phase1blue!16] (du) at (34.8,12.2)
+{\textbf{Data Understanding}\\shared-drive quantum data lake,\\state semantics, notebook expectations};
 
-% CRISP+ML lifecycle row 2
-\node[stage, fill=phase3orange!15] (mine) at (0, -2.3)
-  {\textbf{5. Data}\\\textbf{Mining}\\lightweight model run\\\scriptsize output: predictions JSON};
-\node[stage, fill=phase3orange!15] (evaluate) at (3.8, -2.3)
-  {\textbf{6. Evaluation}\\utility + fairness metrics\\\scriptsize output: metrics JSON};
-\node[stage, fill=phase4purple!15] (post) at (7.4, -2.3)
-  {\textbf{7. Results Postprocess}\\final tables + SVG\\\scriptsize output: CSV + figure};
-\node[store] (manifest) at (11.5, -2.3)
-  {\textbf{Pipeline Manifest}\\config copy, stage outputs,\\summary metadata};
+% Control layer
+\node[event] (push) at (2.5,7.0)
+{\textbf{Repository events}\\push, pull request,\\changed analysis code};
 
-% Stage flow
-\draw[arrow] (collect) -- (clean);
-\draw[arrow] (clean) -- (prepare);
-\draw[arrow] (prepare) -- (explore);
-\draw[arrow] (mine) -- (evaluate);
-\draw[arrow] (evaluate) -- (post);
-\draw[arrow] (post) -- (manifest);
+\node[event] (entry) at (12.0,7.0)
+{\textbf{User entry paths}\\CLI, notebooks, local scripts,\\Colab or GCP runs};
 
-% Control / validation flow
-% Storage/provenance note
-\node[note, align=center] at (5.7, -3.85) {
-  \textbf{Storage contract:} each stage writes deterministic artifacts under
-  \texttt{results/fast\_review/<numbered-stage>/}; the manifest records the full run.
-};
+\node[control,fill=phase2green!16] (policy) at (21.7,7.0)
+{\textbf{Control policy}\\thresholds, seeds, run rules,\\merge and fairness criteria};
 
+\node[control,fill=phase2green!16] (orch) at (31.4,7.0)
+{\textbf{Orchestration path}\\run ordering, resume logic,\\manifest and execution control};
+
+\node[control,fill=phase2green!16] (val) at (41.1,7.0)
+{\textbf{Validation layer}\\unit tests, smoke checks,\\CI mirror of local merge-check};
+
+\node[decision] (gate) at (50.8,7.0)
+{\textbf{Merge / review decision}\\accept, revise, or reject\\based on executable evidence};
+
+% Execution layer
+\node[sourcebox] (source) at (2.5,1.0)
+{\textbf{Inherited source layer}\\shared-drive quantum storage\\notebooks and scripts read here};
+
+\node[stage,fill=phase1blue!16] (collect) at (10.9,1.0)
+{\textbf{Data Collection}\\backup managers, registry,\\latest state retrieval};
+
+\node[stage,fill=phase1blue!16] (clean) at (19.7,1.0)
+{\textbf{Data Cleaning}\\evaluator validation,\\schema and contract checks};
+
+\node[stage,fill=phase2green!16] (prep) at (28.5,1.0)
+{\textbf{Data Preparation /}\\\textbf{Exploration}\\state\_analysis transforms,\\scenario summaries};
+
+\node[stage,fill=phase3orange!16] (model) at (37.3,1.0)
+{\textbf{Modeling / Mining}\\runner- and notebook-driven\\model outputs and traces};
+
+\node[stage,fill=phase3orange!16] (eval) at (46.1,1.0)
+{\textbf{Evaluation}\\evaluator winner logic,\\utility and scenario metrics};
+
+% Fairness-performance layer
+\node[stage,fill=phase4purple!14] (fp) at (17.5,-5.5)
+{\textbf{Fairness--Performance}\\\textbf{Synthesis Layer}\\combines allocator context,\\runner outputs, evaluator summaries,\\and state\_analysis tables};
+
+\node[stage,fill=phase4purple!14] (deliver) at (36.5,-5.5)
+{\textbf{Review Delivery /}\\\textbf{Replication Outputs}\\notebooks, figures, exports,\\manifest and shared results};
+
+% Artifacts layer
+\node[artifact,fill=phase4purple!8] (a0) at (1.5,-11.8) {drive paths\\source references};
+\node[artifact,fill=phase4purple!8] (a1) at (9.8,-11.8) {retrieved states\\raw experiment inputs};
+\node[artifact,fill=phase4purple!8] (a2) at (18.1,-11.8) {cleaned states\\validated records};
+\node[artifact,fill=phase4purple!8] (a3) at (26.4,-11.8) {prepared tables\\scenario summaries};
+\node[artifact,fill=phase4purple!8] (a4) at (34.7,-11.8) {mined outputs\\predictions or traces};
+\node[artifact,fill=phase4purple!8] (a5) at (43.0,-11.8) {utility / fairness\\evaluation evidence};
+\node[artifact,fill=phase4purple!8] (a6) at (52.0,-11.8) {tradeoff tables, figures, notebooks,\\\texttt{pipeline\_manifest.json}};
+
+% Main flow
+\draw[flow] (push.north east) -- ++(2.1,1.05) -| (policy.north west);
+\draw[flow] (entry.east) -- (orch.west);
+\draw[flow] (policy.east) -- (orch.west);
+\draw[flow] (orch.east) -- (val.west);
+\draw[flow] (val.east) -- (gate.west);
+\draw[flow] (orch.south) -- ++(0,-1.0) -| (collect.north);
+\draw[flow] (source.east) -- (collect.west);
+\draw[flow] (collect.east) -- (clean.west);
+\draw[flow] (clean.east) -- (prep.west);
+\draw[flow] (prep.east) -- (model.west);
+\draw[flow] (model.east) -- (eval.west);
+\draw[flow] (eval.south) -- ++(0,-0.75) -| (fp.north east);
+\draw[flow] (fp.east) -- (deliver.west);
+\draw[flow] (deliver.north) -- ++(0,1.15) -| (gate.south);
+
+% Context and cross-layer traces
+\draw[trace] (bu.south west) -- ++(-1.0,-0.85) -| (policy.north west);
+\draw[trace] (du.south) -- ++(0,-0.9) -| (source.north);
+\draw[trace] (du.south) -- ++(0,-0.9) -| (collect.north);
+\draw[trace] (entry.south) -- ++(0,-1.25) -| (deliver.north);
+\draw[trace] (model.south) -- ++(0,-0.85) -| (fp.north west);
+\draw[trace] (eval.south) -- ++(0,-1.05) -| (fp.north east);
+\draw[trace] (orch.south) -- ++(0,-2.8) -| (fp.north);
+
+% Artifact traces
+\draw[trace] (source.south) -- (a0.north);
+\draw[trace] (collect.south) -- (a1.north);
+\draw[trace] (clean.south) -- (a2.north);
+\draw[trace] (prep.south) -- (a3.north);
+\draw[trace] (model.south) -- (a4.north);
+\draw[trace] (eval.south) -- (a5.north);
+\draw[trace] (deliver.south) -- (a6.north);
+\draw[trace] (a6.north) -- ++(0,0.95) -| (gate.south);
+
+% Layer bands
+\begin{scope}[on background layer]
+\node[layerband,fill=phase1blue!8,fit=(bu)(du)] (ctxband) {};
+\node[layerband,fill=phase2green!8,fit=(push)(gate)] (ctrlband) {};
+\node[layerband,fill=phase3orange!8,fit=(source)(eval)] (execband) {};
+\node[layerband,fill=phase4purple!12,fit=(fp)(deliver)] (fpband) {};
+\node[layerband,fill=phase4purple!6,fit=(a0)(a6)] (artband) {};
+\end{scope}
+
+% Layer labels
+\node[font=\Huge, text=phase1blue!80!black] at (3.5,15.0) {High-level CRISP-DM context};
+\node[font=\Huge, text=phase2green!60!black] at (1.0,9.5) {Control Layer};
+\node[font=\Huge, text=phase3orange!70!black] at (2.0,4.0) {Execution Layer};
+\node[font=\Huge, text=phase4purple!75!black] at (12.8,-2.1) {Fairness--Performance Layer};
+\node[font=\Huge, text=phase4purple!75!black] at (7.5,-7.0) {Artifacts Layer};
+
+\node[lab] at (29.0,-09.0)
+{\LARGE\textbf{Interpretation:} the executable workflow starts with collection from the shared-drive source layer, passes through the evaluator and state-analysis stages.\\
+\LARGE Then, it enters a fairness--performance synthesis layer that compares fairness criteria against inherited performance metrics before review delivery and replication.};
 \end{tikzpicture}
