@@ -47,12 +47,7 @@ reproducibility, and inherited quantum-project tooling
 
 \section{Architecture Overview}
 
-This work describes the project's architecture as a reproducible,
-CRISP-DM-aligned system built on top of the existing
-\texttt{quantum\_project} infrastructure. The goal is to describe the code
-organization while providing sufficient architectural and workflow detail for
-users to recreate the system, run the code, understand each stage, and
-replicate the results presented.
+This work describes the project's architecture as a reproducible, CRISP-DM-aligned system built on top of our existing \texttt{quantum\_project} infrastructure. The goal is to describe the code organization while providing sufficient architectural and workflow detail for users to recreate the system, run the code, understand each stage, and replicate the results presented.
 
 The inherited quantum workflow reuses the same shared-drive storage, notebook
 path, evaluator logic, runner path, and state-analysis conventions that already
@@ -68,7 +63,7 @@ provenance and reviewer-visible evidence.
 
 \section{Recreating the System and Replicating Results}
 
-To allow users to recreate the software and replicate results, the architecture supports three entry paths rather than one.
+To allow users to recreate the software and replicate results, the architecture supports three entry paths.
 
 \begin{table}[ht!]
 \centering
@@ -122,18 +117,31 @@ used to build and execute it.
 \rowcolor{phase2green!18}
 \textbf{Stage} & \textbf{Component} & \textbf{Description} & \textbf{Usage} \\
 \midrule
+
 \rowcolor{phase3orange!12}
 Data Collection & \textit{LocalBackupManager}, \textit{GoogleDriveBackupManager}, registry build / latest-state lookup & resolves shared-drive paths and retrieves matching framework or model state from \textit{quantum\_data\_lake/} & notebooks, local scripts, and GCP runs begin by scanning the registry and loading compatible saved state \\
+\midrule
+
 \rowcolor{phase3orange!12}
 Data Cleaning & \textit{MultiRunEvaluator}, \textit{\_infer\_models\_from\_state()}, \textit{\_\_eq\_\_()}, \textit{ensure\_summary\_contract()} & validates state compatibility, normalizes scenario storage, and repairs missing evaluator summary payloads when needed & collection outputs are filtered into evaluator-valid state before analysis, plotting, or summary generation \\
+\midrule
+
 \rowcolor{phase3orange!12}
 Data Preparation / Exploration & \textit{state\_analysis.py}, evaluator \textit{scenarios\_stats}, evaluator \textit{scenarios\_results} payloads & consumes evaluator-produced summaries and restructures them into flattened or scenario-oriented tables & notebooks and scripts use these outputs for master datasets, scenario summaries, and replication-ready tables \\
+\midrule
+
 \rowcolor{phase3orange!12}
 Modeling / Mining & \textit{AllocatorRunner}, \textit{QuantumExperimentRunner}, allocator objects & executes runs, assigns route qubit allocations, and produces model-level outputs, traces, and experiment artifacts & local, notebook, and GCP paths use the runner chain to generate comparable outputs across scenarios \\
+\midrule
+
 \rowcolor{phase3orange!12}
 Evaluation & \textit{MultiRunEvaluator.calculate\_scenario\_winner()}, \textit{calculate\_scenario\_performance()}, \textit{calculate\_scenarios\_performance()} & computes winner counts, average gap, average efficiency, oracle reward, and scenario-level summaries & turns raw runner outputs into reviewer-visible performance evidence and comparison payloads \\
+\midrule
+
 \rowcolor{phase4purple!14}
 Fairness--Performance Synthesis & repository-side fairness--performance component, allocator context, evaluator metrics, runner outputs, \textit{QuantumEvaluatorVisualizer}, robustness plotting path & combines inherited performance metrics with fairness criteria and produces tradeoff views & used after evaluation to generate fairness-versus-performance tables, plots, and reviewer-facing comparisons \\
+\midrule
+
 \rowcolor{phase4purple!10}
 Review Delivery / Replication Outputs & notebooks, \textit{visualizer.py}, shared drive exports, \textit{pipeline\_manifest.json} & publishes figures, tables, notebook-ready outputs, and provenance artifacts & collaborators rerun notebooks and inspect shared-drive artifacts to reproduce, interpret, and share results \\
 \bottomrule
@@ -142,12 +150,12 @@ Review Delivery / Replication Outputs & notebooks, \textit{visualizer.py}, share
 
 \section{Detailed Description of Each Stage}
 
-\subsection{Business Understanding}
+\subsection{Business \& Data Understanding}
 Business Understanding defines the project objective, the fairness criteria, the
 acceptance rules, and the replication target. This stage determines what counts
 as success and which outputs must exist before work is considered review-ready.
 
-\subsection{Data Understanding}
+% \subsection{Data Understanding}
 Data Understanding characterizes the shared-drive storage model, the semantics
 of saved state, and the assumptions that notebooks and downstream analysis make
 about evaluator outputs. The repository is not inventing a synthetic storage
@@ -155,11 +163,8 @@ model; it depends on the real upstream data lake.
 
 \subsection{Data Collection Stage}
 The collection stage is built from \texttt{LocalBackupManager}, \texttt{GoogleDriveBackupManager}, and the registry-based latest-state lookup path listed in Table~\ref{tab:stage_objects}.
-
 \texttt{GoogleDriveBackupManager} resolves the shared-drive source and identifies the relevant storage root. \texttt{LocalBackupManager}
-provides the local-facing wrapper around that storage path. The registry logic then indexes the available saved states and selects the latest compatible artifact for the requested component or run. Together, these parts convert the shared-drive namespace into a concrete set of executable inputs for the pipeline.
-
-The stage produces source references and retrieved framework or model states that can be passed into evaluator-based validation.
+provides the local-facing wrapper around that storage path. The registry logic then indexes the available saved states and selects the latest compatible artifact for the requested component or run. Together, these parts convert the shared-drive namespace into a concrete set of executable inputs for the pipeline. This stage produces source references and retrieved framework or model states that can be passed into evaluator-based validation.
 
 \subsection{Data Cleaning Stage}
 The cleaning stage is centered on \texttt{MultiRunEvaluator}, supported by \texttt{\_infer\_models\_from\_state()}, \texttt{\_\_eq\_\_()}, and \texttt{ensure\_summary\_contract()}.
@@ -223,7 +228,8 @@ Because the data lake is shared-drive based, completed runs can be made visible 
 \thispagestyle{plain}
 \begin{figure}[p]
 \centering
-\resizebox{0.98\linewidth}{!}{\input{architecture_diagram.tex}}
+% \resizebox{0.98\linewidth}{!}{\input{architecture_diagram.tex}}
+\resizebox{1.05\linewidth}{!}{\input{architecture_diagram.tex}}
 \caption{Architecture of the inherited CRISP-DM review and replication pipeline.
 Business Understanding and Data Understanding remain in the architectural
 context, while the executable workflow starts with collection from the
