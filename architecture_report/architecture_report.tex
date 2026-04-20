@@ -52,7 +52,7 @@ RIT Research Advisors\\
 
 \section{Architecture Overview}
 
-This work describes the project's architecture as a reproducible, CRISP-DM-aligned system built on top of our existing \texttt{quantum\_project} infrastructure~\cite{quantumhub}. The goal is to describe the code organization while providing sufficient architectural and workflow detail for users to recreate the system, run the code, understand each stage, and replicate the results presented.
+This work describes the project's architecture as a reproducible, CRISP-DM-aligned system built on top of our existing \texttt{quantum\_project} infrastructure~\cite{quantumproject}. The goal is to describe the code organization while providing sufficient architectural and workflow detail for users to recreate the system, run the code, understand each stage, and replicate the results presented.
 
 The inherited quantum workflow reuses the same shared-drive storage, notebook path, evaluator logic, runner path, and state-analysis conventions that already produce reproducible artifacts in the upstream project. The work treats replication as part of the architecture itself rather than as a separate appendix.
 
@@ -71,11 +71,11 @@ written by the workflow.
 \textbf{CRISP-DM Phase} & \textbf{Realized in this architecture} \\
 \midrule
 Business Understanding & project objective, fairness criteria, and replication target \\
-Data Understanding & collection, cleaning, and exploration over shared-drive \\
+Data Understanding & collection, cleaning, and exploration over shared-drive quantum state \\
 Data Preparation & preparation and restructuring by evaluators and \texttt{state\_analysis.py} \\
 Modeling & runner- and allocator-driven modeling/mining path \\
 Evaluation & evaluator metrics plus fairness--performance synthesis \\
-Deployment & review delivery, notebook, shared-drive, and manifest-based provenance \\
+Deployment & review delivery stage, notebook replication, shared-drive exports, and \texttt{pipeline\_manifest.json} provenance record \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -107,13 +107,6 @@ validation rules, and drives the actual execution stages. The \textit{execution 
 
 In operational terms, the \textit{control layer} is realized through configuration, orchestration, and validation entry points that correspond to the repository's local review behavior. The same logic that governs stage ordering, reproducibility, and merge validation is what allows the architecture to be inspected and rerun consistently by reviewers and collaborators.
 
-% Because the figure is dense, it is placed on its own landscape page at the end of the report.
-
-% \section{Stage-to-Component Mapping}
-
-% Table~\ref{tab:stage_objects} maps each stage to the quantum-side components
-% used to build and execute it.
-
 \begin{table*}[!t]
 \centering
 \caption{Stage-to-component mapping for the inherited review and replication workflow}
@@ -121,19 +114,19 @@ In operational terms, the \textit{control layer} is realized through configurati
 \small
 \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.7cm} >{\raggedright\arraybackslash}p{4.7cm} >{\raggedright\arraybackslash}p{4.3cm} >{\raggedright\arraybackslash}p{5.0cm}}
 \toprule
-\rowcolor{phase2green!18}
+\rowcolor{gray!15}
 \textbf{Stage} & \textbf{Component} & \textbf{Description} & \textbf{Usage} \\
 \midrule
 
-\rowcolor{phase3orange!12}
+\rowcolor{phase1blue!12}
 Data Collection & \textit{LocalBackupManager}, \textit{GoogleDriveBackupManager}, registry build / latest-state lookup & resolves shared-drive paths and retrieves matching framework or model state from \textit{quantum\_data\_lake/} & notebooks, local scripts, and GCP runs begin by scanning the registry and loading compatible saved state \\
 \midrule
 
-\rowcolor{phase3orange!12}
+\rowcolor{phase1blue!12}
 Data Cleaning & \textit{MultiRunEvaluator}, \textit{\_infer\_models\_from\_state()}, \textit{\_\_eq\_\_()}, \textit{ensure\_summary\_contract()} & validates state compatibility, normalizes scenario storage, and repairs missing evaluator summary payloads when needed & collection outputs are filtered into evaluator-valid state before analysis, plotting, or summary generation \\
 \midrule
 
-\rowcolor{phase3orange!12}
+\rowcolor{phase2green!12}
 Data Preparation / Exploration & \textit{state\_analysis.py}, evaluator \textit{scenarios\_stats}, evaluator \textit{scenarios\_results} payloads & consumes evaluator-produced summaries and restructures them into flattened or scenario-oriented tables & notebooks and scripts use these outputs for master datasets, scenario summaries, and replication-ready tables \\
 \midrule
 
@@ -218,11 +211,11 @@ R.~Wirth and J.~Hipp,
 in \textit{Proc. 4th Int. Conf. Practical Applications of Knowledge
 Discovery and Data Mining}, 2000, pp.~29--39.
 
-\bibitem{quantumhub}
+\bibitem{quantumproject}
 P.~Z.~Garcia,
-``Quantum Project Hub,''
+``quantum\_project,''
 GitHub repository, 2025--2026.
-[Online]. Available: \url{https://github.com/pzg8794/quantum_project_hub}
+[Online]. Available: \url{https://github.com/pzg8794/quantum_project}
 
 \end{thebibliography}
 
@@ -233,7 +226,7 @@ GitHub repository, 2025--2026.
 \centering
 % \resizebox{0.98\linewidth}{!}{\input{architecture_diagram.tex}}
 \resizebox{1.05\linewidth}{!}{\input{architecture_diagram.tex}}
-\caption{Architecture of the inherited CRISP-DM review and replication pipeline~\cite{wirth2000crisp}. Business Understanding and Data Understanding remain within the architectural context, while the executable workflow begins with data collection from the shared-drive source layer. A separate fairness--performance synthesis layer compares fairness criteria against inherited performance metrics before review delivery and replication outputs are published.}
+\caption{Five-layer architecture of the inherited CRISP-DM review and replication pipeline~\cite{wirth2000crisp}. The top layer defines the Business and Data Understanding context. The second layer is the control layer, consisting of repository events, entry paths, control policy, orchestration, validation, and the merge gate. The third layer is the execution layer, spanning data collection through evaluation and grounded in inherited \texttt{quantum\_project} objects. The fourth layer is the fairness--performance synthesis layer, which combines allocator context, runner outputs, evaluator metrics, and \texttt{state\_analysis} tables. The bottom layer is the artifacts layer, which preserves per-stage provenance outputs and \texttt{pipeline\_manifest.json}.}
 \label{fig:architecture_draft2}
 \end{figure}
 \end{landscape}
