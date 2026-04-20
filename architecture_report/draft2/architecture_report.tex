@@ -61,6 +61,33 @@ execution layer that performs collection through evaluation, a
 fairness--performance synthesis layer, and an artifacts layer that preserves
 provenance and reviewer-visible evidence.
 
+Operationally, the architecture also depends on three repository-side
+mechanisms that make the workflow reviewable as software rather than only as a
+notebook analysis: a configuration-controlled execution path, a local
+validation and merge-check path, and a manifest-based provenance record. These
+mechanisms allow another party to reproduce a run from a fixed configuration,
+execute the same validation logic locally, and inspect the exact artifacts
+written by the workflow.
+
+\begin{table}[ht!]
+\centering
+\caption{CRISP-DM alignment of the architecture}
+\label{tab:crisp_alignment}
+\small
+\begin{tabular}{p{2.2cm}p{4.8cm}}
+\toprule
+\textbf{CRISP-DM Phase} & \textbf{Realized in this architecture} \\
+\midrule
+Business Understanding & project objective, fairness criteria, and replication target \\
+Data Understanding & collection, cleaning, and exploration over shared-drive quantum state \\
+Data Preparation & preparation and restructuring through evaluator summaries and \texttt{state\_analysis.py} \\
+Modeling & runner- and allocator-driven modeling / mining path \\
+Evaluation & evaluator metrics plus fairness--performance synthesis \\
+Deployment & review delivery, notebook replication, shared-drive export, and manifest-based provenance \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Recreating the System and Replicating Results}
 
 To allow users to recreate the software and replicate results, the architecture supports three entry paths.
@@ -99,6 +126,12 @@ performs collection, cleaning, preparation, exploration, mining, and
 evaluation. Beneath that, the fairness--performance synthesis layer combines
 inherited performance summaries with repository-side fairness criteria. Finally,
 the artifacts layer preserves the evidence produced by each stage.
+
+In operational terms, the control layer is realized through configuration,
+orchestration, and validation entry points that correspond to the repository's
+local review behavior. The same logic that governs stage ordering,
+reproducibility, and merge validation is what allows the architecture to be
+inspected and rerun consistently by reviewers and collaborators.
 
 % Because the figure is dense, it is placed on its own landscape page at the end of the report.
 
@@ -155,7 +188,6 @@ Business Understanding defines the project objective, the fairness criteria, the
 acceptance rules, and the replication target. This stage determines what counts
 as success and which outputs must exist before work is considered review-ready.
 
-% \subsection{Data Understanding}
 Data Understanding characterizes the shared-drive storage model, the semantics
 of saved state, and the assumptions that notebooks and downstream analysis make
 about evaluator outputs. The repository is not inventing a synthetic storage
@@ -218,7 +250,7 @@ scripts or notebooks.
 Once setup is complete, the user chooses a stage or full workflow. In the local path, that usually means running the quick test or full validation script. In the notebook path, it means configuring an experiment in the notebook and executing the evaluator-backed workflow. In the GCP path, it means invoking the startup and batch scripts and allowing the run to complete remotely. These paths remain different entry points into the same inherited execution structure.
 
 \subsection{How the User Interprets Results}
-The user interprets results through the same artifact conventions used by the upstream project. Framework-state and model-state outputs are written under the shared data lake, often in day-partitioned directories. Notebooks and visualizer logic then consume those results to generate plots, scenario comparisons, and summary tables.
+The user interprets results through the same artifact conventions used by the upstream project. Framework-state and model-state outputs are written under the shared data lake, often in day-partitioned directories. Notebooks and visualizer logic then consume those results to generate plots, scenario comparisons, and summary tables. Deterministic stage outputs together with \texttt{pipeline\_manifest.json} preserve the configuration, artifact paths, and provenance of each run, allowing a figure or summary to be traced back to the exact execution path that produced it.
 
 \subsection{How the User Shares Results}
 Because the data lake is shared-drive based, completed runs can be made visible to collaborators without a separate export pipeline. Results written to \texttt{quantum\_data\_lake/}, including framework state, model state, tables, and figures, are already placed in a location that supports team inspection and notebook-based reanalysis.
