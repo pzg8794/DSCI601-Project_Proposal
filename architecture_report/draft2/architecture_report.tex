@@ -47,28 +47,29 @@ reproducibility, and inherited quantum-project tooling
 
 \section{Architecture Overview}
 
-This report presents the project architecture as a reproducible,
+This work describes the project's architecture as a reproducible,
 CRISP-DM-aligned system built on top of the existing
-\texttt{quantum\_project} infrastructure. The purpose of the report is to
-identify the major layers of the system, document the components that implement
-each stage, and provide enough workflow detail for another party to recreate the
-software, execute the pipeline, and replicate the reported results.
+\texttt{quantum\_project} infrastructure. The goal is to describe the code
+organization while providing sufficient architectural and workflow detail for
+users to recreate the system, run the code, understand each stage, and
+replicate the results presented.
 
-The inherited quantum workflow provides the main execution structure used here:
-shared-drive storage, notebook-based analysis, evaluator-owned summaries,
-runner-based experiment execution, and state-analysis postprocessing. The
-current repository extends that structure by adding a review-oriented control
-layer and a fairness--performance synthesis layer that compares fairness
-criteria against inherited performance metrics.
+The inherited quantum workflow reuses the same shared-drive storage, notebook
+path, evaluator logic, runner path, and state-analysis conventions that already
+produce reproducible artifacts in the upstream project. The work treats
+replication as part of the architecture itself rather than as a separate
+appendix.
 
-The architecture is organized around five concerns: CRISP-DM context, control
-and validation, execution stages, fairness--performance synthesis, and artifacts
-and replication outputs.
+The architecture is organized around five interacting concerns: high-level
+CRISP-DM context, a control layer that governs execution and validation, an
+execution layer that performs collection through evaluation, a
+fairness--performance synthesis layer, and an artifacts layer that preserves
+provenance and reviewer-visible evidence.
 
 \section{Recreating the System and Replicating Results}
 
-The architecture supports three entry paths so that another party can recreate
-the system and reproduce the reported behavior.
+To allow another party to recreate the software and replicate the presented
+results, the architecture supports three entry paths rather than one.
 
 \begin{table}[ht!]
 \centering
@@ -85,37 +86,42 @@ GCP VM / batch path & startup script plus batch runner scripts & large runs, lon
 \end{tabular}
 \end{table}
 
-The notebook path is the fastest route to replication because the shared
-notebooks already mount Drive, install dependencies, load saved evaluator or
-framework state, and write results back to the shared infrastructure. The local
-path remains necessary for repository review, testing, and debugging. The GCP
-path extends the same workflow to longer or larger runs without changing the
-underlying component structure.
+The notebook path is the fastest route to result replication because the shared
+notebooks already mount the Drive, install dependencies, load saved evaluator or
+framework state, and write results back to the same shared infrastructure. The
+local path remains necessary because a reviewer or developer must also be able
+to install the software, run tests, and inspect outputs without relying on
+Colab. The GCP path extends the same architecture to a remote execution context
+for larger or longer runs.
 
-These entry paths lead into the same inherited execution chain. They do not
-create separate systems. For that reason, the report documents setup, execution,
-interpretation, and sharing as part of the architecture rather than as
-supplementary instructions.
+These paths do not lead to different systems. They are different entry points
+into the same inherited execution structure. That is why the architecture report
+must explain how users set up the environment, run the code, interpret results,
+and share outputs.
 
 \section{System Architecture}
 
-Figure~\ref{fig:architecture_draft2} summarizes the full workflow. At the
-highest level, Business Understanding and Data Understanding remain contextual
-layers rather than CI stages. The control layer receives repository events or
-user entry paths, applies configuration and validation rules, and drives the
-execution stages. The execution layer performs collection, cleaning,
-preparation, exploration, mining, and evaluation. The fairness--performance
-layer then combines inherited performance summaries with repository-side
-fairness criteria. Finally, the artifacts layer preserves the evidence produced
-by each stage.
+Figure~\ref{fig:architecture_draft2} presents the architecture as a technical
+summary of the full workflow. The figure should be read from left to right and
+from top to bottom.
 
-The figure is placed on its own landscape page at the end of the report so that
-all layers, arrows, and stage labels remain legible.
+At the highest level, Business and Data Understanding remain in an
+architectural context that defines the project objective, fairness
+interpretation, data expectations, and replication target. The control layer
+receives repository events or user entry paths, applies configuration and
+validation rules, and drives the actual execution stages. The execution layer
+performs collection, cleaning, preparation, exploration, mining, and
+evaluation. Beneath that, the fairness--performance synthesis layer combines
+inherited performance summaries with repository-side fairness criteria. Finally,
+the artifacts layer preserves the evidence produced by each stage.
+
+Because the figure is dense, it is placed on its own landscape page at the end
+of the report.
 
 \section{Stage-to-Component Mapping}
 
-Table~\ref{tab:stage_objects} identifies the quantum-side components associated
-with each stage and specifies their operational role within the workflow.
+Table~\ref{tab:stage_objects} maps each stage to the quantum-side components
+used to build and execute it.
 
 \begin{table*}[!t]
 \centering
@@ -140,29 +146,28 @@ Review Delivery / Replication Outputs & notebooks, \texttt{visualizer.py}, share
 \section{Detailed Description of Each Stage}
 
 \subsection{Business Understanding}
-Business Understanding defines the research objective, the fairness criteria,
-the acceptance rules, and the replication target. It establishes what the
-system is expected to optimize and what evidence must be produced before results
-are considered review-ready.
+Business Understanding defines the project objective, the fairness criteria, the
+acceptance rules, and the replication target. This stage determines what counts
+as success and which outputs must exist before work is considered review-ready.
 
 \subsection{Data Understanding}
-Data Understanding defines the structure of the shared-drive data lake, the
-semantics of the saved state, and the assumptions that notebooks and analysis
-scripts make about evaluator outputs. The repository depends on a real upstream
-storage model rather than an isolated local file layout.
+Data Understanding characterizes the shared-drive storage model, the semantics
+of saved state, and the assumptions that notebooks and downstream analysis make
+about evaluator outputs. The repository is not inventing a synthetic storage
+model; it depends on the real upstream data lake.
 
 \subsection{Data Collection Stage}
 \textbf{Components.} The collection stage is built from
 \texttt{LocalBackupManager}, \texttt{GoogleDriveBackupManager}, and the
 registry-based latest-state lookup path listed in Table~\ref{tab:stage_objects}.
 
-\textbf{How they work together.} \texttt{GoogleDriveBackupManager} resolves the
-shared-drive source and identifies the relevant storage root.
-\texttt{LocalBackupManager} provides a local-facing wrapper around that storage
-path. The registry logic then indexes the available saved states and selects the
-latest compatible artifact for the requested component or run. Together, these
-parts convert the shared-drive namespace into a concrete set of executable
-inputs for the downstream pipeline.
+\textbf{Linkage.} \texttt{GoogleDriveBackupManager} resolves the shared-drive
+source and identifies the relevant storage root. \texttt{LocalBackupManager}
+provides the local-facing wrapper around that storage path. The registry logic
+then indexes the available saved states and selects the latest compatible
+artifact for the requested component or run. Together, these parts convert the
+shared-drive namespace into a concrete set of executable inputs for the
+pipeline.
 
 \textbf{Output.} The stage produces source references and retrieved framework or
 model states that can be passed into evaluator-based validation.
@@ -172,11 +177,11 @@ model states that can be passed into evaluator-based validation.
 \texttt{MultiRunEvaluator}, supported by \texttt{\_infer\_models\_from\_state()},
 \texttt{\_\_eq\_\_()}, and \texttt{ensure\_summary\_contract()}.
 
-\textbf{How they work together.} The retrieved state from the collection stage
-is first inspected by \texttt{\_infer\_models\_from\_state()} so that the
-system can recover the model identity and expected evaluator structure.
-\texttt{\_\_eq\_\_()} and related evaluator-side checks verify structural
-compatibility. When evaluator summaries are incomplete or not normalized,
+\textbf{Linkage.} The retrieved state from the collection stage is first
+inspected by \texttt{\_infer\_models\_from\_state()} so that the system can
+recover the model identity and expected evaluator structure. \texttt{\_\_eq\_\_()}
+and related evaluator-side checks verify structural compatibility.
+When evaluator summaries are incomplete or not normalized,
 \texttt{ensure\_summary\_contract()} repairs the summary shape so that later
 analysis stages consume a stable payload. Together, these components transform
 raw retrieved state into evaluator-valid state.
@@ -190,12 +195,12 @@ the evaluator-owned \texttt{scenarios\_stats} and
 \texttt{scenarios\_results} payloads referenced in
 Table~\ref{tab:stage_objects}.
 
-\textbf{How they work together.} \texttt{MultiRunEvaluator} provides the
-scenario summaries and normalized result structures. \texttt{state\_analysis.py}
-then consumes those evaluator outputs and restructures them into flattened
-tables, scenario-oriented summaries, and analysis-ready views. The stage is
-therefore a composition of evaluator-generated summaries plus state-analysis
-postprocessing rather than an independent replacement for evaluator logic.
+\textbf{Linkage.} \texttt{MultiRunEvaluator} provides the scenario summaries
+and normalized result structures. \texttt{state\_analysis.py} then consumes
+those evaluator outputs and restructures them into flattened tables,
+scenario-oriented summaries, and analysis-ready views. The stage is therefore a
+composition of evaluator-generated summaries plus state-analysis postprocessing
+rather than an independent replacement for evaluator logic.
 
 \textbf{Output.} The output is a prepared set of scenario summaries, tables,
 and exploratory artifacts that support mining, notebooks, and reviewer
@@ -206,12 +211,12 @@ inspection.
 \texttt{AllocatorRunner}, \texttt{QuantumExperimentRunner}, and the allocator
 objects responsible for route qubit allocation.
 
-\textbf{How they work together.} The allocator objects define the decision
-logic used within each run. \texttt{QuantumExperimentRunner} executes the
-underlying experiment path and produces run-level outputs and traces.
-\texttt{AllocatorRunner} orchestrates the higher-level execution across
-allocators, scenarios, and configurations. Together, these components produce
-the substantive outputs that the evaluator later summarizes.
+\textbf{Linkage.} The allocator objects define the decision logic used within
+each run. \texttt{QuantumExperimentRunner} executes the underlying experiment
+path and produces run-level outputs and traces. \texttt{AllocatorRunner}
+orchestrates the higher-level execution across allocators, scenarios, and
+configurations. Together, these components produce the substantive outputs that
+the evaluator later summarizes.
 
 \textbf{Output.} The stage produces model outputs, traces, and experiment
 artifacts suitable for scenario-level comparison.
@@ -223,12 +228,11 @@ artifacts suitable for scenario-level comparison.
 \texttt{calculate\_scenario\_performance()}, and
 \texttt{calculate\_scenarios\_performance()}.
 
-\textbf{How they work together.} The evaluator consumes the runner outputs,
-organizes them by scenario, and computes the summary statistics required for
-comparison: winner counts, average gap, average efficiency, oracle reward, and
-related scenario-level measures. This stage is deliberately evaluator-owned so
-that judgment logic remains close to the object that also maintains the state
-contract.
+\textbf{Linkage.} The evaluator consumes the runner outputs, organizes them by
+scenario, and computes the summary statistics required for comparison: winner
+counts, average gap, average efficiency, oracle reward, and related
+scenario-level measures. This stage keeps judgment logic close to the same
+object that also maintains the state contract.
 
 \textbf{Output.} The output is a reviewer-visible performance summary that can
 be consumed directly or passed into the fairness--performance layer.
@@ -239,12 +243,12 @@ fairness--performance component with allocator context, runner outputs,
 evaluator metrics, and visualizer or robustness-plotting consumers such as
 \texttt{QuantumEvaluatorVisualizer}.
 
-\textbf{How they work together.} The runner chain and allocator context define
-how performance was produced. The evaluator computes the inherited performance
-metrics. The fairness--performance component then places those metrics beside the
-fairness criteria defined at the repository level and produces tradeoff views
-that neither the raw runner nor the raw evaluator produces on its own. The
-visualizer path then consumes those combined outputs to generate figures and
+\textbf{Linkage.} The runner chain and allocator context define how
+performance was produced. The evaluator computes the inherited performance
+metrics. The fairness--performance component then places those metrics beside
+the fairness criteria defined at the repository level and produces tradeoff
+views that neither the raw runner nor the raw evaluator produces on its own.
+The visualizer path then consumes those combined outputs to generate figures and
 comparative summaries.
 
 \textbf{Output.} The output is a set of tradeoff tables, comparative plots, and
@@ -254,10 +258,10 @@ review-facing fairness-versus-performance summaries.
 \textbf{Components.} The final stage uses notebooks, \texttt{visualizer.py},
 shared-drive exports, and \texttt{pipeline\_manifest.json}.
 
-\textbf{How they work together.} The prior stages generate the saved state,
-metrics, fairness summaries, and plots. The notebook and visualizer path turns
-those into human-readable artifacts. The manifest records provenance for the
-run. Shared-drive export keeps the outputs accessible to collaborators and later
+\textbf{Linkage.} The prior stages generate the saved state, metrics,
+fairness summaries, and plots. The notebook and visualizer path turns those
+into human-readable artifacts. The manifest records provenance for the run.
+Shared-drive export keeps the outputs accessible to collaborators and later
 reanalysis.
 
 \textbf{Output.} The output is a set of figures, tables, rerunnable notebook
@@ -266,7 +270,7 @@ artifacts, and provenance records that support review and replication.
 \section{User Workflow: Setup, Run, Interpret, and Share}
 
 \subsection{Setup and Installation}
-Users can enter through three supported paths.
+Users can interact with the system through three supported paths.
 
 \textbf{Notebook path.} Open the shared notebook, mount Google Drive, install
 dependencies in the notebook runtime, and run the relevant cells.
@@ -275,22 +279,25 @@ dependencies in the notebook runtime, and run the relevant cells.
 install dependencies from \texttt{requirements.txt}, and run the required
 scripts or notebooks.
 
-\textbf{GCP path.} Provision or enter the VM, run the startup script, and then
+\textbf{GCP path.} Provision or enter a VM, run the startup script, and then
 use the batch or dynamic runner scripts for longer experiments.
 
 \subsection{How the User Runs the System}
-Once setup is complete, the user selects a stage or full workflow. In the local
-path, this usually means running the quick validation or full review path. In
-the notebook path, it means configuring an experiment and executing the
-evaluator-backed workflow. In the GCP path, it means invoking startup and batch
-scripts and letting the run complete remotely.
+Once setup is complete, the user chooses a stage or full workflow. In the local
+path, that usually means running the quick test or full validation script. In
+the notebook path, it means configuring an experiment in the notebook and
+executing the evaluator-backed workflow. In the GCP path, it means invoking the
+startup and batch scripts and allowing the run to complete remotely.
+
+These paths remain different entry points into the same inherited execution
+structure. They do not define different systems.
 
 \subsection{How the User Interprets Results}
-Results are interpreted through the same artifact conventions used by the
+The user interprets results through the same artifact conventions used by the
 upstream project. Framework-state and model-state outputs are written under the
-shared data lake, typically in day-partitioned directories. Notebooks,
-visualizers, evaluator summaries, and fairness--performance tables then consume
-those saved artifacts to generate comparisons and plots.
+shared data lake, often in day-partitioned directories. Notebooks and visualizer
+logic then consume those results to generate plots, scenario comparisons, and
+summary tables.
 
 \subsection{How the User Shares Results}
 Because the data lake is shared-drive based, completed runs can be made visible
