@@ -1,117 +1,115 @@
+% architecture_diagram.tex — fixed and widened (draft1)
+% Requires in parent document:
+% \usepackage{tikz}
+% \usetikzlibrary{positioning,arrows.meta,fit,backgrounds}
+% \definecolor{phase1blue}{RGB}{52,152,219}
+% \definecolor{phase2green}{RGB}{46,204,113}
+% \definecolor{phase3orange}{RGB}{230,126,34}
+% \definecolor{phase4purple}{RGB}{155,89,182}
+% \definecolor{quantumteal}{RGB}{22,160,133}
+
 \begin{tikzpicture}[
-font=\sffamily\small,>=Latex,
-layerband/.style={rectangle,rounded corners,inner sep=12pt,line width=0.5pt,draw=black!35},
-event/.style={rectangle,draw=black,rounded corners,minimum height=1.15cm,text width=4.4cm,align=center,fill=gray!8,line width=0.55pt},
-control/.style={rectangle,draw=black,rounded corners,minimum height=1.25cm,text width=4.8cm,align=center,line width=0.55pt},
-context/.style={rectangle,draw=black,rounded corners,minimum height=1.45cm,text width=5.7cm,align=center,line width=0.6pt},
-stage/.style={rectangle,draw=black,rounded corners,minimum height=1.7cm,text width=4.2cm,align=center,line width=0.6pt},
-sourcebox/.style={rectangle,draw=black,rounded corners,minimum height=1.2cm,text width=4.2cm,align=center,fill=gray!6,line width=0.55pt},
-artifact/.style={rectangle,draw=black,rounded corners,minimum height=1.1cm,text width=4.0cm,align=center,line width=0.5pt},
-decision/.style={rectangle,draw=black,rounded corners,minimum height=1.25cm,text width=4.4cm,align=center,fill=gray!12,line width=0.6pt},
-flow/.style={->,line width=0.9pt},
-trace/.style={->,dashed,line width=0.7pt},
-lab/.style={font=\scriptsize,align=center}]
+  font=\sffamily\small,
+  >=Latex,
+  phase/.style={rectangle, draw, rounded corners, minimum height=0.82cm, text width=3.0cm, align=center, line width=0.55pt, font=\sffamily\scriptsize\bfseries},
+  stage/.style={rectangle, draw=black, rounded corners, minimum height=1.55cm, text width=3.35cm, align=center, line width=0.55pt},
+  support/.style={rectangle, draw=black, rounded corners, minimum height=0.9cm, text width=3.85cm, align=center, fill=gray!10, line width=0.5pt, font=\sffamily\scriptsize},
+  store/.style={rectangle, draw=black, rounded corners, minimum height=0.98cm, text width=4.3cm, align=center, fill=gray!8, line width=0.5pt, font=\sffamily\scriptsize},
+  qobj/.style={rectangle, draw=quantumteal!70, rounded corners, minimum height=1.18cm, text width=3.35cm, align=center, fill=quantumteal!8, line width=0.70pt, font=\sffamily\tiny\itshape},
+  datalake/.style={rectangle, draw=quantumteal!80, rounded corners=6pt, minimum height=1.08cm, text width=9.2cm, align=center, fill=quantumteal!12, line width=0.85pt, font=\sffamily\scriptsize},
+  arrow/.style={->, line width=0.85pt},
+  ctrl/.style={->, dashed, gray, line width=0.60pt},
+  phase2stage/.style={->, dotted, line width=0.60pt, gray!70},
+  inherit/.style={-{Latex[length=2.5mm,width=1.9mm]}, double=quantumteal!30, draw=quantumteal!70, double distance=1.15pt, line width=0.60pt}
+]
 
-% High-level context
-\node[context,fill=phase1blue!16] (bu) at (10.0,7.4)
-{\textbf{Business Understanding}\\\scriptsize research objective, fairness criteria,\\\scriptsize acceptance rules, replication target};
-\node[context,fill=phase1blue!16] (du) at (35.0,7.4)
-{\textbf{Data Understanding}\\\scriptsize shared-drive quantum data lake,\\\scriptsize state semantics, notebook expectations};
+\node[font=\sffamily\scriptsize\itshape, gray] at (-3.1, 6.3) {CRISP-DM:};
+\node[phase, fill=phase1blue!18]   (ph-du)  at (0.0,  6.3) {Data\\Understanding};
+\node[phase, fill=phase1blue!18]   (ph-du2) at (4.4,  6.3) {Data\\Understanding};
+\node[phase, fill=phase2green!18]  (ph-dp)  at (8.8,  6.3) {Data\\Preparation};
+\node[phase, fill=phase2green!18]  (ph-du3) at (13.2, 6.3) {Data\\Understanding};
+\node[phase, fill=phase3orange!18] (ph-mod) at (17.6, 6.3) {Modeling};
+\node[phase, fill=phase3orange!18] (ph-ev)  at (22.0, 6.3) {Evaluation};
+\node[phase, fill=phase4purple!18] (ph-dep) at (26.4, 6.3) {Deployment};
 
-% Control layer
-\node[event] (push) at (2.0,4.6)
-{\textbf{Repository events}\\push, pull request,\\changed analysis code};
-\node[event] (entry) at (11.5,4.6)
-{\textbf{User entry paths}\\CLI, notebooks, local scripts,\\Colab or GCP runs};
-\node[control,fill=phase2green!16] (policy) at (21.0,4.6)
-{\textbf{Control policy}\\thresholds, seeds, run rules,\\merge and fairness criteria};
-\node[control,fill=phase2green!16] (orch) at (31.0,4.6)
-{\textbf{Orchestration path}\\run ordering, resume logic,\\manifest and execution control};
-\node[control,fill=phase2green!16] (val) at (41.0,4.6)
-{\textbf{Validation layer}\\unit tests, smoke checks,\\CI mirror of local merge-check};
-\node[decision] (gate) at (51.0,4.6)
-{\textbf{Merge / review decision}\\accept, revise, or reject\\based on executable evidence};
+\node[support, fill=phase1blue!12]   (config) at (0.0,  4.0)
+  {\textbf{Configuration}\\seed $\cdot$ split $\cdot$ bias\\fairness threshold};
+\node[support, fill=phase2green!12]  (cli)    at (13.2, 4.0)
+  {\textbf{CLI Interface}\\one command per stage\\\texttt{run-all}, \texttt{merge-check}};
+\node[support, fill=phase4purple!12] (tests)  at (26.4, 4.0)
+  {\textbf{Validation Layer}\\unit tests $\cdot$ smoke run\\CI merge gate};
 
-% Execution layer
-\node[sourcebox] (source) at (2.0,1.2)
-{\textbf{Inherited source layer}\\shared-drive quantum storage\\\scriptsize notebooks and scripts read here};
-\node[stage,fill=phase3orange!16] (collect) at (10.0,1.2)
-{\textbf{Data Collection}\\\scriptsize backup managers, registry,\\\scriptsize latest state retrieval};
-\node[stage,fill=phase3orange!16] (clean) at (18.0,1.2)
-{\textbf{Data Cleaning}\\\scriptsize evaluator validation,\\\scriptsize schema and contract checks};
-\node[stage,fill=phase3orange!16] (prep) at (26.0,1.2)
-{\textbf{Data Preparation /}\\\textbf{Exploration}\\\scriptsize state\_analysis transforms,\\\scriptsize scenario summaries};
-\node[stage,fill=phase3orange!16] (model) at (34.0,1.2)
-{\textbf{Modeling / Mining}\\\scriptsize runner- and notebook-driven\\\scriptsize model outputs and traces};
-\node[stage,fill=phase3orange!16] (eval) at (42.0,1.2)
-{\textbf{Evaluation}\\\scriptsize evaluator winner logic,\\\scriptsize utility and scenario metrics};
+\node[stage, fill=phase1blue!15]   (collect)  at (0.0,  1.4)
+  {\textbf{1.~Data}\\\textbf{Collection}\\quantum datalake\\\scriptsize raw JSON};
+\node[stage, fill=phase1blue!15]   (clean)    at (4.4,  1.4)
+  {\textbf{2.~Data}\\\textbf{Cleaning}\\schema $\cdot$ remove invalids\\\scriptsize clean JSON};
+\node[stage, fill=phase2green!15]  (prepare)  at (8.8,  1.4)
+  {\textbf{3.~Data}\\\textbf{Preparation}\\det.\ train/test split\\\scriptsize train+test JSON};
+\node[stage, fill=phase2green!15]  (explore)  at (13.2, 1.4)
+  {\textbf{4.~Exploration}\\\textbf{/ Visualization}\\group + completeness\\\scriptsize CSV + SVG};
+\node[stage, fill=phase3orange!15] (mine)     at (17.6, 1.4)
+  {\textbf{5.~Data Mining}\\lightweight model\\\scriptsize predictions JSON};
+\node[stage, fill=phase3orange!15] (evaluate) at (22.0, 1.4)
+  {\textbf{6.~Evaluation}\\utility + fairness\\\scriptsize metrics JSON};
+\node[stage, fill=phase4purple!15] (post)     at (26.4, 1.4)
+  {\textbf{7.~Results}\\\textbf{Postprocessing}\\final tables + SVG\\\scriptsize CSV + figure};
 
-% Fairness-performance layer
-\node[stage,fill=phase4purple!14] (fp) at (34.0,-2.5)
-{\textbf{Fairness--Performance}\\\textbf{Synthesis Layer}\\\scriptsize combines allocator context,\\\scriptsize runner outputs, evaluator summaries,\\\scriptsize and state\_analysis tables};
-\node[stage,fill=phase4purple!14] (deliver) at (50.0,-2.5)
-{\textbf{Review Delivery /}\\\textbf{Replication Outputs}\\\scriptsize notebooks, figures, exports,\\\scriptsize manifest and shared results};
+\node[font=\sffamily\scriptsize\itshape, text=quantumteal!80, align=center] at (-3.1, -1.0) {Quantum\\object:};
+\node[qobj] (qo1) at (0.0,  -1.0) {LocalBackupManager /\\GoogleDriveBackupManager\\build\_registry()\\get\_latest\_state()};
+\node[qobj] (qo2) at (4.4,  -1.0) {MultiRunEvaluator\\\_infer\_models\_from\_state()\\\_\_eq\_\_ contract};
+\node[qobj] (qo3) at (8.8,  -1.0) {state\_analysis\\scenarios\_stats\\train/test split};
+\node[qobj] (qo4) at (13.2, -1.0) {state\_analysis\\display\_experiment\\\_conditions()};
+\node[qobj] (qo5) at (17.6, -1.0) {QuantumExperimentRunner\\run\_experiment()\\reward traces};
+\node[qobj] (qo6) at (22.0, -1.0) {MultiRunEvaluator\\calculate\_scenario\\\_winner()};
+\node[qobj] (qo7) at (26.4, -1.0) {visualizer.py\\final charts\\CSV export};
 
-% Artifacts layer
-\node[artifact,fill=phase4purple!8] (a0) at (2.0,-6.0) {drive paths\\source references};
-\node[artifact,fill=phase4purple!8] (a1) at (10.0,-6.0) {retrieved states\\raw experiment inputs};
-\node[artifact,fill=phase4purple!8] (a2) at (18.0,-6.0) {cleaned states\\validated records};
-\node[artifact,fill=phase4purple!8] (a3) at (26.0,-6.0) {prepared tables\\scenario summaries};
-\node[artifact,fill=phase4purple!8] (a4) at (34.0,-6.0) {mined outputs\\predictions or traces};
-\node[artifact,fill=phase4purple!8] (a5) at (42.0,-6.0) {utility / fairness\\evaluation evidence};
-\node[artifact,fill=phase4purple!8] (a6) at (50.0,-6.0) {tradeoff tables, figures, notebooks,\\\texttt{pipeline\_manifest.json}};
+\draw[inherit] (collect.south)  -- (qo1.north);
+\draw[inherit] (clean.south)    -- (qo2.north);
+\draw[inherit] (prepare.south)  -- (qo3.north);
+\draw[inherit] (explore.south)  -- (qo4.north);
+\draw[inherit] (mine.south)     -- (qo5.north);
+\draw[inherit] (evaluate.south) -- (qo6.north);
+\draw[inherit] (post.south)     -- (qo7.north);
 
-% Main flow
-\draw[flow] (push.north east) -- ++(1.6,0.9) -| (policy.north west);
-\draw[flow] (entry.east) -- (orch.west);
-\draw[flow] (policy.east) -- (orch.west);
-\draw[flow] (orch.east) -- (val.west);
-\draw[flow] (val.east) -- (gate.west);
-\draw[flow] (orch.south) -- ++(0,-0.9) -| (collect.north);
-\draw[flow] (source.east) -- (collect.west);
-\draw[flow] (collect.east) -- (clean.west);
-\draw[flow] (clean.east) -- (prep.west);
-\draw[flow] (prep.east) -- (model.west);
-\draw[flow] (model.east) -- (eval.west);
-\draw[flow] (eval.south) -- ++(0,-0.55) -| (fp.north east);
-\draw[flow] (fp.east) -- (deliver.west);
-\draw[flow] (deliver.north) -- ++(0,1.0) -| (gate.south);
+\node[datalake] (lake) at (6.2, -3.8)
+  {\textbf{Quantum Data Lake --- Google Shared Drive}\\
+   \texttt{quantum\_data\_lake/\{component\}/day\_YYYYMMDD/}\\
+   {\scriptsize folder ID: \texttt{12mZyGQHD\_\_G54g2yCYIyWfXydhO3DxIt}}};
+\node[store] (manifest) at (21.0, -3.8)
+  {\textbf{Pipeline Manifest}\\config copy $\cdot$ stage outputs\\summary metadata};
+\draw[arrow, draw=quantumteal!70] (lake.north) -| (qo1.south);
 
-% Context and cross-layer traces
-\draw[trace] (bu.south) -- ++(0,-0.8) -| (policy.north);
-\draw[trace] (du.south) -- ++(0,-0.8) -| (source.north);
-\draw[trace] (du.south) -- ++(0,-0.8) -| (collect.north);
-\draw[trace] (entry.south) -- ++(0,-1.0) -| (deliver.north);
-\draw[trace] (model.south) -- ++(0,-0.7) -| (fp.north west);
-\draw[trace] (eval.south) -- ++(0,-0.9) -| (fp.north east);
-\draw[trace] (orch.south) -- ++(0,-2.2) -| (fp.north);
+\draw[arrow] (collect)  -- (clean);
+\draw[arrow] (clean)    -- (prepare);
+\draw[arrow] (prepare)  -- (explore);
+\draw[arrow] (explore)  -- (mine);
+\draw[arrow] (mine)     -- (evaluate);
+\draw[arrow] (evaluate) -- (post);
 
-% Artifact traces
-\draw[trace] (source.south) -- (a0.north);
-\draw[trace] (collect.south) -- (a1.north);
-\draw[trace] (clean.south) -- (a2.north);
-\draw[trace] (prep.south) -- (a3.north);
-\draw[trace] (model.south) -- (a4.north);
-\draw[trace] (eval.south) -- (a5.north);
-\draw[trace] (deliver.south) -- (a6.north);
-\draw[trace] (a6.north) -- ++(0,0.8) -| (gate.south);
+\draw[arrow] (post.south) -- ++(0,-0.50) -| (manifest.east);
+\draw[ctrl]  (collect.south) -- ++(0,-0.50) -- ++(0,-2.30) -| (manifest.west);
 
-% Layer bands
-\begin{scope}[on background layer]
-\node[layerband,fill=phase1blue!8,fit=(bu)(du)] (ctxband) {};
-\node[layerband,fill=phase2green!8,fit=(push)(gate)] (ctrlband) {};
-\node[layerband,fill=phase3orange!8,fit=(source)(eval)] (execband) {};
-\node[layerband,fill=phase4purple!12,fit=(fp)(deliver)] (fpband) {};
-\node[layerband,fill=phase4purple!6,fit=(a0)(a6)] (artband) {};
-\end{scope}
+\draw[ctrl] (config.south) -- (collect.north);
+\draw[ctrl] (cli.south)    -- (explore.north);
+\draw[ctrl] (tests.south)  -- (post.north);
 
-% Layer labels placed away from arrow traffic
-\node[font=\small, text=phase1blue!80!black] at (7.0,8.9) {High-level CRISP-DM context};
-\node[font=\small, text=phase2green!60!black] at (25.0,6.0) {Control Layer};
-\node[font=\small, text=phase3orange!70!black] at (7.5,2.85) {Execution Layer};
-\node[font=\small, text=phase4purple!75!black] at (13.5,-0.85) {Fairness--Performance Layer};
-\node[font=\small, text=phase4purple!75!black] at (7.0,-4.5) {Artifacts Layer};
+\draw[phase2stage] (ph-du.south)  -- (collect.north);
+\draw[phase2stage] (ph-du2.south) -- (clean.north);
+\draw[phase2stage] (ph-dp.south)  -- (prepare.north);
+\draw[phase2stage] (ph-du3.south) -- (explore.north);
+\draw[phase2stage] (ph-mod.south) -- (mine.north);
+\draw[phase2stage] (ph-ev.south)  -- (evaluate.north);
+\draw[phase2stage] (ph-dep.south) -- (post.north);
 
-\node[lab] at (26.5,-7.95)
-{\textbf{Interpretation:} the executable workflow starts with collection from the shared-drive source layer, passes through evaluator and state-analysis stages, then enters a fairness--performance synthesis layer that compares fairness criteria against inherited performance metrics before review delivery and replication.};
+\node[font=\scriptsize\itshape, align=center, gray] at (13.2, -5.75) {
+  Each stage writes deterministic artifacts under
+  \texttt{results/fast\_review/<nn\_stage\_name>/}
+};
+
+\node[stage, fill=phase1blue!15, text width=2.2cm, minimum height=0.48cm, font=\sffamily\tiny] (leg1) at (-4.2, 2.2) {Data Understanding};
+\node[stage, fill=phase2green!15, text width=2.2cm, minimum height=0.48cm, font=\sffamily\tiny] (leg2) at (-4.2, 1.4) {Data Preparation};
+\node[stage, fill=phase3orange!15, text width=2.2cm, minimum height=0.48cm, font=\sffamily\tiny] (leg3) at (-4.2, 0.6) {Modeling / Eval.};
+\node[stage, fill=phase4purple!15, text width=2.2cm, minimum height=0.48cm, font=\sffamily\tiny] (leg4) at (-4.2, -0.2) {Deployment};
+\node[font=\sffamily\tiny\itshape, gray] at (-4.2, -0.95) {CRISP-DM color key};
+
 \end{tikzpicture}
