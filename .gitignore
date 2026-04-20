@@ -74,3 +74,7 @@ architecture_report/draft2/
 
 # Allow alternate name for submission
 !proposal.pdf
+
+# Architecture working drafts (keep local; do not track)
+architecture_report/draft1/
+architecture_report/draft2/
