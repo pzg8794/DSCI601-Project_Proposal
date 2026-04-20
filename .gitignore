@@ -58,6 +58,32 @@ approach/*.md
 
 # Shareable report folders (track only final deliverables and canonical sources)
 approach_report/draft/
+
+# Exclude all non-.pdf, .tex, .bib files in report directories
+architecture_report/*
+!architecture_report/**/*.pdf
+!architecture_report/**/*.tex
+!architecture_report/**/*.bib
+
+approach_report/*
+!approach_report/**/*.pdf
+!approach_report/**/*.tex
+!approach_report/**/*.bib
+
+proposal_report/*
+!proposal_report/**/*.pdf
+!proposal_report/**/*.tex
+!proposal_report/**/*.bib
+
+survey_report/*
+!survey_report/**/*.pdf
+!survey_report/**/*.tex
+!survey_report/**/*.bib
+
+ethics_fairness_report/*
+!ethics_fairness_report/**/*.pdf
+!ethics_fairness_report/**/*.tex
+!ethics_fairness_report/**/*.bib
 approach_report/draft2/
 approach_report/*.md
 !approach_report/CHANGES.md
