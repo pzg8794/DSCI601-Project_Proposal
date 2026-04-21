@@ -17,8 +17,9 @@
 | Approach / Methodology | 1--2 pages | `Approach and Methodology` | Explains the shared missing-context routing model, reuses the approach write-up's four-phase domain/pipeline diagram, and justifies the main design decisions. | Complete |
 | Implementation | 1--3 pages | `Implementation and Reproducibility` | Describes the quantum workflow, notebook/local/GCP paths, state/data-lake layer, evaluator/runner/visualizer architecture, CRISP+ML review package, and reuses the architecture report's system diagram. | Complete |
 | Data Sets | 0.5--1 page | `Data Sets and Experimental Inputs` | Describes the quantum routing testbed outputs, reviewer-safe synthetic CRISP+ML dataset, and planned clinical diagnostic simulation. | Complete |
-| Results | 1--3 pages, bonus if present | `Preliminary Results and Current Validation Evidence` | Includes cautious preliminary validation evidence: reproducible package execution and current quantum-routing grounding, without overstating unfinished scientific results. | Included as preliminary/bonus |
-| Future Work | 0.5 pages | `Future Work` | Lists concrete next-semester tasks: quantum fairness adapter, clinical simulator, mitigation mechanism, transfer analysis, and final experiments. | Complete |
+| Ethics / Fairness | Integrated requirement | `Ethics, Fairness, Privacy, and Security` | Expands fairness from a metric into an ethical design requirement covering clinical harm, service equity, privacy, security, reproducibility, and accountability. | Complete |
+| Results | 1--3 pages, bonus if present | `Preliminary Results and Current Validation Evidence` | Includes cautious preliminary validation evidence, integrated deliverable progress, expected final figures, and current quantum-routing grounding without overstating unfinished scientific results. | Included as preliminary/bonus |
+| Future Work | 0.5 pages | `Future Work` | Lists concrete next-semester tasks: quantum fairness adapter, clinical simulator, mitigation mechanism, transfer analysis, final experiments, and limitations discussion. | Complete |
 | Conclusion | 0.5--1 page | `Conclusion` | Summarizes current semester accomplishments and expected impact. | Complete |
 | References | No page limit | `References` | Uses the survey bibliography and cites representative state-of-the-art work. | Complete |
 
@@ -59,6 +60,11 @@
 - **Rubric target:** charts/plots/visualizations or preliminary results with discussion.
 - **Draft response:** includes validation evidence and a compact table rather than claiming final results. This is appropriate because final scientific results are still incomplete.
 
+### Ethics and Fairness Integration
+
+- **Project target:** fairness is central to the project and should not appear only as a post-hoc metric.
+- **Draft response:** adds a dedicated ethics/fairness section describing clinical harm, quantum service equity, privacy/security considerations, reproducibility/accountability, and how these concerns alter implementation.
+
 ## What Was Done to Meet the Requirements
 
 1. Created a standalone rough-draft report directory so the Overleaf/paper repo has a clean deliverable package.
@@ -76,3 +82,12 @@
 - Added the architecture report's CRISP-DM review and replication pipeline diagram as a full-width architecture figure.
 - Copied `architecture_diagram.tex` into the rough-draft report directory so the rough draft compiles as a standalone Overleaf/report package.
 - Updated the report text and checklist so the rough draft clearly reflects the already completed approach and architecture write-ups.
+
+## Comprehensive Expansion Update
+
+- Expanded the introduction to clarify that the rough draft consolidates proposal, survey, approach, architecture, ethics, and code-review work into a preliminary final-paper structure.
+- Expanded related work with offline policy evaluation, estimator/fairness concerns, and a literature-role table.
+- Expanded methodology with a planned mitigation strategy covering fairness-regularized updates, missingness-aware context augmentation, and calibration/thresholding.
+- Expanded implementation with a reviewer recreation path and clearer notebook/local/GCP/Drive execution explanation.
+- Added a full ethics/fairness/privacy/security section because ethics is a major paper component, not a side note.
+- Expanded preliminary validation evidence and future work so the rough draft reads closer to a mostly complete final-paper draft.
