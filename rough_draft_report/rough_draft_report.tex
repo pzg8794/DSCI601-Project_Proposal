@@ -59,8 +59,8 @@ environment grounded in prior hybrid-bandit experiments and a planned
 simulation-first diagnostic workflow. Work completed so far includes the
 related-work synthesis, domain model, architecture specification, quantum-first
 execution plan, and a reproducible CRISP+ML code-review package with unit
-tests and merge validation. The expected contribution is a reproducible method
-for measuring and mitigating time-evolving fairness disparities while
+tests and merge validation. The contribution is a reproducible method for
+measuring and mitigating time-evolving fairness disparities while
 preserving utility under non-stationarity and limited context.
 \end{abstract}
 
@@ -110,8 +110,8 @@ implementation and reproducibility architecture. Section~V summarizes the data
 sets and experimental inputs. Section~VI gives preliminary validation evidence.
 Sections~VII and VIII describe future work and conclusions.
 
-The rough-draft contribution is therefore not a claim that the final fairness
-results are complete. Instead, it consolidates the work into a single preliminary
+This rough draft does not claim that the final fairness results are complete.
+Instead, it consolidates the work into a single preliminary
 final-paper structure. That consolidation is important because the project is
 cross-domain. The organizing idea used throughout this draft is
 that both domains are sequential routing systems whose fairness risk emerges
@@ -198,7 +198,7 @@ both clinical and quantum-resource routing domains.
 \toprule
 \textbf{Literature area} & \textbf{Role in this rough draft} \\
 \midrule
-Bandit foundations & partial feedback, quest, regret \& baselines \\
+Bandit foundations & partial feedback, regret \& baselines \\
 Contextual bandits & model side data \& missing-context sensitivity \\
 Fairness definitions & outcome gaps, FNR/FPR \& service equity \\
 Non-stationarity & shift scenarios \& time-based disparity curves \\
@@ -705,11 +705,11 @@ hide the value choices that shape the experiment.
 \toprule
 \textbf{Requirement} & \textbf{Implementation response} \\
 \midrule
-No aggregate-only suits & utility, subgroup disparity metrics \\
+No aggregate-only reporting & utility, subgroup disparity metrics \\
 Expose context quality & log missingness, noise, delay \& measurement assumptions \\
 Support accountability & preserve seeds, configs, states, manifests \& run provenance \\
-Protect sensitive data & simulation-first data till approved data are appropriate \\
-Run security relevance & quantum routing under unreliable, or adversarial conditions \\
+Protect sensitive data & simulation-first data until approved data are available \\
+Run security relevance & quantum routing under unreliable or adversarial conditions \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -736,12 +736,12 @@ evidence required to justify deployment or to reject a policy as unsafe.
 
 \section{Results and Current Validation Evidence}
 \subsection{Quantum Preliminary Results}
-Full scientific results are not complete yet, but the implementation foundation
+The final scientific results are not yet complete, but the implementation foundation
 has been validated. The rough-draft code package compiles and runs through the
 complete CRISP+ML lifecycle, and the merge-check path currently passes ten
 unit tests covering collection, cleaning, preparation, exploration, mining,
 evaluation, postprocessing, CLI behavior, and manifest generation. This is not
-claimed as a final scientific result; it is reproducibility evidence showing
+ a final scientific result; it is reproducibility evidence showing
 that the project has an executable review harness and that the architecture is
 ready for the next experimental phase.
 
@@ -910,7 +910,7 @@ fairness-aware Synthetic LowGC augmentation, and subgroup-aware EQUITAS auditing
 \toprule
 \textbf{Evidence source} & \textbf{Current quantitative signal} & \textbf{Why it matters} & \textbf{How it feeds this paper} \\
 \midrule
-EQUITAS corpus & dataset expanded from 10 to 20 RNA sequences, including 10 Synthetic LowGC sequences & makes clinical-like context gaps measurable in a controlled biomedical proxy task & informs the missingness and group-representation design of the project simulator \\
+EQUITAS corpus & dataset expanded from 10 to 20 RNA sequences, including 10 Synthetic LowGC sequences & makes clinical-like context gaps measurable in a controlled biomedical proxy task & informs the missingness and group-representation design of the planned simulator \\
 Enhanced Nussinov tuning & Optuna search over 30 trials produced an optimized objective of 56.44 and mean predicted-pair output of 66.07 $\pm$ 46.36 & shows that richer structural context can materially change diagnostic-relevant prediction behavior & motivates comparing lower-context and richer-context decision policies \\
 Context ablation & thermodynamic/context-aware scoring reported 61.36 $\pm$ 44.21 predicted pairs versus 14.96 $\pm$ 10.45 without that context & directly supports the rough draft's context-gain thesis in the clinical testbed & anchors the clinical side of the cross-testbed context-gain comparison \\
 Fairness audit & post-augmentation mitigation achieved 6/6 algorithm compliance with the 80\% rule, DI ratios of 1.000, and +0.805 average DI improvement & demonstrates that representation/context repair can improve fairness indicators, not only utility & supplies preliminary fairness evidence before final sequential bandit experiments \\
