@@ -58,7 +58,7 @@
 ### Preliminary Results (Bonus 10%)
 
 - **Rubric target:** charts/plots/visualizations or preliminary results with discussion.
-- **Draft response:** now includes a dedicated preliminary-results table tied to the GA quantum manuscript and validated master datasets, plus discussion of what those results already show and what the fairness layer will add.
+- **Draft response:** now includes GA-derived preliminary-results tables plus a publication-style multi-panel context-spectrum figure that mirrors the stronger visual style used in the quantum manuscript, together with discussion of what those results already show and what the fairness layer will add.
 
 ### Ethics and Fairness Integration
 
@@ -94,3 +94,4 @@
 - Added detailed quantum dataset coverage from `GA-Work/Validated_Logs`, including row/column counts and external testbed slices.
 - Upgraded the results section from generic validation language to real preliminary GA results so the report can legitimately target the preliminary-results bonus.
 - Reframed the preliminary results around the paper's core context thesis: no-context, context, and predictive-context model families are now compared directly in a dedicated context-spectrum table and figure.
+- Replaced the rough-draft-only bar chart with a stronger GA-style multi-panel figure and added a cross-testbed uplift table so the preliminary-results section better matches the quality of the underlying quantum paper.

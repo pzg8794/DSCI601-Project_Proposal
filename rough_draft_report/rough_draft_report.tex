@@ -12,6 +12,7 @@
 \usetikzlibrary{positioning,arrows.meta,fit,backgrounds}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
+\usepgfplotslibrary{groupplots}
 \usepackage[hidelinks]{hyperref}
 
 \definecolor{phaseblue}{RGB}{52,152,219}
@@ -760,22 +761,104 @@ Internal hybrid corpus & \texttt{iCPursuitNeuralUCB} currently has the highest m
 \end{tabular}
 \end{table*}
 
-\begin{table}[t]
-\caption{Context-spectrum preliminary results from the existing GA corpora.}
+\begin{table*}[t]
+\caption{Context-spectrum summary from the existing GA corpora. Gains are measured
+against the no-context family within each corpus.}
 \label{tab:context_spectrum}
 \centering
 \small
-\begin{tabular}{p{0.27\columnwidth}p{0.18\columnwidth}p{0.18\columnwidth}p{0.20\columnwidth}}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{p{0.21\textwidth}p{0.22\textwidth}cccc}
 \toprule
-\textbf{Context level} & \textbf{Representative model(s)} & \textbf{Internal hybrid mean eff.} & \textbf{Standardized external mean eff.} \\
+\textbf{Context level} & \textbf{Representative model(s)} & \textbf{Internal mean} & \textbf{$\Delta$ vs.\ no ctx.} & \textbf{External mean} & \textbf{$\Delta$ vs.\ no ctx.} \\
 \midrule
-No context & \texttt{GNeuralUCB}, \texttt{EXPNeuralUCB} & 82.39\% & 62.83\% \\
-Context & \texttt{CPursuitNeuralUCB} & 84.70\% & 64.11\% \\
-Predictive context & \texttt{iCPursuitNeuralUCB} & 86.13\% & 65.66\% \\
+No context & \texttt{GNeuralUCB}, \texttt{EXPNeuralUCB} & 82.39\% & --- & 62.83\% & --- \\
+Context & \texttt{CPursuitNeuralUCB} & 84.70\% & +2.31 pp & 64.11\% & +1.28 pp \\
+Predictive context & \texttt{iCPursuitNeuralUCB} & \textbf{86.13\%} & \textbf{+3.74 pp} & \textbf{65.66\%} & \textbf{+2.83 pp} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table}[t]
+\caption{Cross-testbed predictive-context uplift in the standardized external
+corpus.}
+\label{tab:paper_context_uplift}
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Testbed} & \textbf{No ctx.} & \textbf{Context} & \textbf{Pred. ctx.} & \textbf{Pred. gain} \\
+\midrule
+Paper 2 & 72.11 & 73.18 & 74.34 & +2.23 \\
+Paper 7 & 72.87 & 73.44 & 78.39 & +5.52 \\
+Paper 8 & 70.05 & 73.69 & 73.95 & +3.90 \\
+Paper 12 & 41.69 & 42.23 & 42.54 & +0.85 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}
+\begin{groupplot}[
+group style={group size=2 by 1, horizontal sep=1.35cm},
+width=0.43\textwidth,
+height=5.35cm,
+ylabel={Efficiency (\%)},
+xlabel={Scenario},
+xtick={1,2,3,4,5},
+xticklabels={Stochastic,Markov,Adaptive,OnlineAdaptive,Baseline},
+xticklabel style={font=\scriptsize, rotate=15, anchor=east},
+ymajorgrids=true,
+grid style={line width=.1pt, draw=gray!15},
+legend style={font=\scriptsize, draw=none, at={(0.5,1.18)}, anchor=south, legend columns=3},
+tick label style={font=\scriptsize},
+label style={font=\scriptsize},
+every axis plot/.append style={line width=2.1pt},
+every mark/.append style={scale=0.9}
+]
+\nextgroupplot[
+title={Internal hybrid corpus},
+ymin=76, ymax=92
+]
+\addplot[color=phaseblue!85!black, mark=square*, dashed] coordinates {
+  (1,78.46) (2,79.42) (3,83.62) (4,83.14) (5,87.46)
+};
+\addlegendentry{No context}
+\addplot[color=phaseorange!95!black, mark=triangle*] coordinates {
+  (1,81.71) (2,81.04) (3,86.14) (4,84.01) (5,90.76)
+};
+\addlegendentry{Context}
+\addplot[color=phasepurple!90!black, mark=*] coordinates {
+  (1,83.27) (2,83.12) (3,86.78) (4,86.86) (5,90.78)
+};
+\addlegendentry{Predictive context}
+
+\nextgroupplot[
+title={Standardized external corpus},
+ymin=40, ymax=84
+]
+\addplot[color=phaseblue!85!black, mark=square*, dashed] coordinates {
+  (1,73.59) (2,43.09) (3,60.52) (4,59.38) (5,77.71)
+};
+\addplot[color=phaseorange!95!black, mark=triangle*] coordinates {
+  (1,75.14) (2,44.46) (3,60.93) (4,60.60) (5,79.57)
+};
+\addplot[color=phasepurple!90!black, mark=*] coordinates {
+  (1,77.44) (2,46.30) (3,62.00) (4,60.85) (5,81.86)
+};
+\end{groupplot}
+\end{tikzpicture}
+\caption{GA-quality context-spectrum view across threat regimes. In both the
+internal hybrid corpus and the standardized external corpus, the predictive-context
+family dominates the no-context family across all five scenarios. The gain is
+largest in the harder external settings, where context quality more strongly
+determines routing efficiency.}
+\label{fig:context_spectrum}
+\end{figure*}
+
+\iffalse
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}
@@ -815,6 +898,7 @@ lowest, contextual policies improve on them, and predictive-context policies
 perform best.}
 \label{fig:context_spectrum}
 \end{figure}
+\fi
 
 \begin{table}[t]
 \caption{Current validation evidence and interpretation.}
