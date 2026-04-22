@@ -87,7 +87,7 @@ when context is missing or degraded. This matters in clinical workflows because
 false-negative or delayed-escalation gaps can produce direct harm. It also
 matters in quantum-network routing because future communication systems will
 allocate scarce probabilistic resources among competing flows; fairness in
-success probability and latency is therefore a service-quality issue rather
+success probability and latency is a service-quality issue rather
 than a purely normative add-on.
 
 The project uses two complementary testbeds. The first is an existing
@@ -111,11 +111,9 @@ sets and experimental inputs. Section~VI gives preliminary validation evidence.
 Sections~VII and VIII describe future work and conclusions.
 
 The rough-draft contribution is therefore not a claim that the final fairness
-results are complete. Instead, it consolidates the semester's proposal, survey,
-approach, architecture, ethics, and code-review work into a single preliminary
+results are complete. Instead, it consolidates the work into a single preliminary
 final-paper structure. That consolidation is important because the project is
-cross-domain: without a shared vocabulary, the clinical and quantum portions can
-look like separate projects. The organizing idea used throughout this draft is
+cross-domain. The organizing idea used throughout this draft is
 that both domains are sequential routing systems whose fairness risk emerges
 from unequal context quality. The clinical system routes diagnostic attention;
 the quantum system routes probabilistic network resources. Both require
@@ -464,7 +462,7 @@ CRISP+ML package & provides small deterministic pipeline, tests, and merge check
 Table~\ref{tab:implementation} summarizes the software entities. The quantum
 workflow relies on evaluator and runner objects that save framework state,
 model state, and analysis outputs. These state layers support interruption
-recovery and replication. The CRISP+ML package in this DSCI601 repository is
+recovery and replication. The CRISP+ML package in its own repository is
 a reviewer-safe implementation harness that mirrors the project methodology:
 data collection, cleaning, preparation, exploration, mining, evaluation, and
 postprocessing. It exposes command-line stages through \texttt{python -m
@@ -595,15 +593,14 @@ Paper 12 standardized slice & 2,400 & 30 & 100 nodes, 426 edges, 4 paths & fusio
 \end{table*}
 
 Table~\ref{tab:datasets} summarizes the main datasets already available in the
-GA work tree. The project is therefore not starting from an empty experimental
-state. Instead, it inherits a validated quantum-routing corpus that already
+quantum framework work tree. The project inherits a validated quantum-routing corpus that already
 contains scenario-level and experiment-level outputs for four external testbeds
 and for the internal hybrid framework. These corpora are stored under
-\texttt{/Users/pitergarcia/DataScience/Semester4/GA-Work/Validated\_Logs} and
+\textit{/Users/pitergarcia/DataScience/Semester4/GA-Work/Validated\_Logs} and
 are paired with a shared Drive data lake whose top-level folders are
 \texttt{model\_state} and \texttt{framework\_state}. This matters because the
 final fairness-aware paper can build directly on preserved runner/evaluator
-artifacts rather than rerunning the entire quantum study from scratch.
+artifacts.
 
 \begin{table}[t]
 \caption{Planned data fields and fairness role.}
@@ -654,7 +651,7 @@ run count, frame configuration, capacity semantics, scale, model identity,
 reward, regret, Oracle-relative efficiency, retries, failures, misses below
 threshold, and scenario winners. In practical terms, this means the current
 paper can confidently claim access to real experimental data and preliminary
-results, not only a future plan. The main extension still needed is the
+results. The main extension still needed is the
 fairness layer itself: group or flow labels, subgroup disparity summaries, and
 time-evolving fairness metrics must be added on top of the already preserved
 performance corpus.
@@ -748,7 +745,7 @@ while final cross-domain fairness results remain future work.
 \label{tab:prelim_results}
 \centering
 \small
-\begin{tabular}{p{0.24\textwidth}p{0.17\textwidth}p{0.15\textwidth}p{0.34\textwidth}}
+\begin{tabular}{p{0.10\textwidth}p{0.28\textwidth}p{0.25\textwidth}p{0.27\textwidth}}
 \toprule
 \textbf{Evidence source} & \textbf{Current quantitative signal} & \textbf{Why it matters} & \textbf{How it feeds this paper} \\
 \midrule
@@ -850,7 +847,7 @@ ymin=40, ymax=84
 };
 \end{groupplot}
 \end{tikzpicture}
-\caption{GA-quality context-spectrum view across threat regimes. In both the
+\caption{Quantum-quality context-spectrum view across threat regimes. In both the
 internal hybrid corpus and the standardized external corpus, the predictive-context
 family dominates the no-context family across all five scenarios. The gain is
 largest in the harder external settings, where context quality more strongly
@@ -939,20 +936,20 @@ Just as importantly, the current results can already be organized according to
 the project's core scientific claim: \emph{context quality matters}. Rather
 than treating the preliminary evidence as a list of algorithm names,
 Table~\ref{tab:context_spectrum} and Figure~\ref{fig:context_spectrum} recast
-the existing GA evidence into a three-level spectrum. The no-context condition
+the existing quantum framework work as evidence into a three-level spectrum. The no-context condition
 captures reward-only or non-context baselines, the context condition captures
 methods that use observed contextual structure, and the predictive-context
 condition captures the informative or forecasting-aware extension. In both the
 internal and external corpora, performance rises as the method family moves
 from no context to context to predictive context. That pattern is exactly what
-motivates the DSCI601 extension: if richer context already improves utility,
+motivates our work extension: if richer context already improves utility,
 the next question is whether fairness-aware and missingness-aware context
 handling can also improve equity.
 
 The external standardized corpus also shows that results vary by testbed
 structure. Mean efficiencies for \texttt{iCPursuitNeuralUCB} are currently
 about 74.34\% on Paper~2, 78.39\% on Paper~7, 73.95\% on Paper~8, and 42.54\%
-on Paper~12. This matters for the DSCI601 project because it already suggests
+on Paper~12. This matters for our work because it already suggests
 that fairness conclusions should not be tied to a single network topology or
 threat setting. A fairness-aware extension that appears successful in one
 testbed but fails in another would still be a useful scientific finding.
@@ -986,7 +983,7 @@ it would suggest that the shared framework is useful for diagnosing differences
 between domains even when a single mitigation rule does not generalize.
 
 \section{Future Work}
-Next semester will focus on completing the experimental contribution. First,
+Next, the focus will be on completing the experimental contribution. First,
 the quantum fairness adapter will connect evaluator and runner outputs to
 service-equity metrics such as success-probability and latency gaps. This will
 turn the existing quantum-routing performance infrastructure into a
@@ -1011,8 +1008,7 @@ This semester established the foundation for a reproducible fairness-aware
 contextual bandit project. The work completed so far includes a related-work
 survey, a shared missing-context domain model, an approach and architecture
 writeup, a cleaned code-review repository, documented notebook/local/GCP
-execution paths, and a runnable CRISP+ML validation package. The project is
-therefore positioned to move from design and infrastructure into final
+execution paths, and a runnable CRISP+ML validation package. The project is positioned to move from design and infrastructure into final
 experiments. Its expected impact is a practical framework for measuring and
 mitigating fairness disparities in sequential decision systems where context
 is incomplete, non-stationary, and unequally distributed across groups.
@@ -1022,8 +1018,7 @@ complete experimental results. However, the structure needed for those results
 is now in place: the literature gap is defined, the domain model is explicit,
 the architecture is reproducible, the data contracts are identified, and the
 ethical requirements are stated as part of the technical design. That makes the
-remaining work a focused execution task rather than a redefinition of the
-project.
+remaining work a focused execution task.
 
 \bibliographystyle{IEEEtran}
 \bibliography{rough_draft_references}
