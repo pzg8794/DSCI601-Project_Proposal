@@ -249,8 +249,8 @@ and reliability of context available to the policy.
 \node[phase3, right=0.65cm of ctx]  (pol) {Policy Family\\MAB / CMAB / iCMAB};
 \node[phase3, right=0.65cm of pol]  (act) {Routing\\Action};
 \node[phase4, below=0.55cm of act]  (fb)  {Partial Feedback\\and Reward};
-\node[phase4, right=0.65cm of act]  (log) {Utility + Fairness\\Logger};
-\node[phase4, below=0.55cm of log]  (mit) {Mitigation +\\Comparison Loop};
+\node[phase4, right=0.65cm of act]  (log) {Utility / Regret /\\Fairness Logger};
+\node[phase4, below=0.55cm of log]  (mit) {Mitigation /\\Tradeoff Loop};
 
 \draw[arr] (clin)--(env); \draw[arr] (quant)--(env);
 \draw[arr] (env)--(ctx);  \draw[arr] (deg)--(ctx);
@@ -303,14 +303,14 @@ and reliability of context available to the policy.
 \node[det, below=0.15cm of C] (Cd) {Domain: clinical\\or quantum\\Topology, scenarios,\\algo family, seeds};
 \node[mod, right=0.5cm of C] (E) {3.~EVALUATOR};
 \node[det, below=0.15cm of E] (Ed) {Orchestrates runs\\captures layered state};
-\node[det2, below=0.1cm of Ed] (Env) {\textbf{Env. (Phase~2):}\\missing / noisy /\\delayed context};
+\node[det2, below=0.1cm of Ed] (Env) {\textbf{Env. (Phase~2):}\\inject missing / noisy /\\delayed context};
 \node[mod, right=0.5cm of E] (R) {4.~RUNNER};
 \node[det, below=0.15cm of R] (Rd) {Batch + parallel\\per-seed Oracle\\disparity tracking\\allocator dispatch};
 \node[mod, right=0.5cm of R] (M) {5.~MODEL};
 \node[det, below=0.15cm of M] (Md) {\textbf{Domain (Ph.~1):}\\clinical sim or\\quantum network\\(4 paths, 35-qubits)};
 \node[det3, below=0.1cm of Md] (Alg) {\textbf{Policy (Ph.~3):}\\MAB / CMAB / iCMAB\\EXP3 / hybrid};
 \node[mod, right=0.5cm of M] (V) {6.~VISUALIZER};
-\node[det4, below=0.15cm of V] (Vd) {\textbf{Output (Ph.~4):}\\utility \& fairness\\curves, disparity\\trajectories,\\heatmaps};
+\node[det4, below=0.15cm of V] (Vd) {\textbf{Output (Ph.~4):}\\reward / regret,\\fairness gaps,\\tradeoff curves,\\heatmaps};
 \draw[arr] (A)--(C); \draw[arr] (C)--(E);
 \draw[arr] (E)--(R); \draw[arr] (R)--(M); \draw[arr] (M)--(V);
 \draw[darr] (C.north) to[bend left=30] node[lbl,above=1pt]{config} (E.north);
@@ -328,12 +328,7 @@ and reliability of context available to the policy.
 \node[anchor=north west, inner sep=5pt, font=\scriptsize\bfseries, text=phase1blue]
   at (bbox.north west) {\textbf{Operational expansion: modular evaluation framework}};
 \end{tikzpicture}}
-\caption{Shared domain model and operational evaluation framework adapted from
-the approach write-up. The top panel shows the four project phases:
-environment/testbed, context observation, routing decision, and
-evaluation/mitigation. The bottom panel expands the testbed interface into the
-allocator, configuration, evaluator, runner, model, and visualizer layers used
-to run both clinical simulation and quantum routing experiments.}
+\caption{Shared domain model and operational evaluation framework. The top panel isolates the causal chain that can generate unfair outcomes in both domains: the environment defines the routing problem, missing/noisy/delayed information perturbs only the context stage, the policy family acts on the degraded observation, and utility--fairness logging plus mitigation occur only after partial feedback is received. Clinical actions map to test ordering, retesting, or escalation; quantum actions map to route or allocator decisions. The bottom panel expands the implementation stack and highlights the three experimental intervention points used throughout the project: context degradation in the evaluator environment, policy-family choice in the model layer, and utility--fairness tradeoff analysis in the visualizer.}
 \label{fig:domain_model}
 \end{figure*}
 
@@ -345,7 +340,10 @@ Phase 4 evaluates both performance and fairness, then feeds mitigation or
 updated policy information back into future decisions. This model is useful
 because it makes the failure point explicit: if context is systematically
 lower-quality for one group or flow class, the learning process can convert
-measurement inequity into repeated allocation inequity.
+measurement inequity into repeated allocation inequity. It also clarifies where
+the experiments intervene: missingness is injected before the policy sees the
+state, while mitigation is evaluated only after utility and disparity have been
+logged.
 
 At round $t$, the learner receives an observed context vector
 $\tilde{\mathbf{x}}_t$, which may differ from the latent complete context
@@ -813,24 +811,23 @@ Paper 12 & 41.69 & 42.23 & 42.54 & +0.85 \\
 \centering
 \begin{tikzpicture}
 \begin{groupplot}[
-group style={group size=2 by 1, horizontal sep=1.35cm},
-width=0.43\textwidth,
-height=5.35cm,
-ylabel={Efficiency (\%)},
-xlabel={Scenario},
+group style={group size=2 by 2, horizontal sep=1.15cm, vertical sep=1.05cm},
+width=0.42\textwidth,
+height=4.25cm,
 xtick={1,2,3,4,5},
-xticklabels={Stochastic,Markov,Adaptive,OnlineAdaptive,Baseline},
+xticklabels={Stoch.,Markov,Adaptive,Online-Adap.,Baseline},
 xticklabel style={font=\scriptsize, rotate=15, anchor=east},
 ymajorgrids=true,
-grid style={line width=.1pt, draw=gray!15},
-legend style={font=\scriptsize, draw=none, at={(0.5,1.18)}, anchor=south, legend columns=3},
+grid style={line width=.1pt, draw=gray!18},
 tick label style={font=\scriptsize},
 label style={font=\scriptsize},
-every axis plot/.append style={line width=2.1pt},
-every mark/.append style={scale=0.9}
+legend style={font=\scriptsize, draw=none, at={(0.5,1.18)}, anchor=south, legend columns=5},
+every axis plot/.append style={line width=1.95pt},
+every mark/.append style={scale=0.85}
 ]
 \nextgroupplot[
-title={Internal hybrid corpus},
+title={Internal hybrid: absolute efficiency},
+ylabel={Efficiency (\%)},
 ymin=76, ymax=92
 ]
 \addplot[color=phaseblue!85!black, mark=square*, dashed] coordinates {
@@ -847,7 +844,22 @@ ymin=76, ymax=92
 \addlegendentry{Predictive context}
 
 \nextgroupplot[
-title={Standardized external corpus},
+title={Internal hybrid: uplift over no context},
+ylabel={Gain (pp)},
+ymin=0, ymax=5.5
+]
+\addplot[color=phaseorange!95!black, mark=triangle*, dashed] coordinates {
+  (1,3.25) (2,1.62) (3,2.52) (4,0.87) (5,3.30)
+};
+\addlegendentry{Ctx uplift}
+\addplot[color=phasepurple!90!black, mark=*, dashed] coordinates {
+  (1,4.81) (2,3.70) (3,3.16) (4,3.72) (5,3.32)
+};
+\addlegendentry{Pred. uplift}
+
+\nextgroupplot[
+title={External corpus: absolute efficiency},
+ylabel={Efficiency (\%)},
 ymin=40, ymax=84
 ]
 \addplot[color=phaseblue!85!black, mark=square*, dashed] coordinates {
@@ -859,16 +871,25 @@ ymin=40, ymax=84
 \addplot[color=phasepurple!90!black, mark=*] coordinates {
   (1,77.44) (2,46.30) (3,62.00) (4,60.85) (5,81.86)
 };
+
+\nextgroupplot[
+title={External corpus: uplift over no context},
+ylabel={Gain (pp)},
+ymin=0, ymax=4.5
+]
+\addplot[color=phaseorange!95!black, mark=triangle*, dashed] coordinates {
+  (1,1.55) (2,1.37) (3,0.41) (4,1.22) (5,1.86)
+};
+\addplot[color=phasepurple!90!black, mark=*, dashed] coordinates {
+  (1,3.85) (2,3.21) (3,1.48) (4,1.47) (5,4.15)
+};
 \end{groupplot}
 \end{tikzpicture}
-\caption{Quantum-quality context-spectrum view across threat regimes. In both the
-internal hybrid corpus and the standardized external corpus, the predictive-context
-family dominates the no-context family across all five scenarios. The gain is
-largest in the harder external settings, where context quality more strongly
-determines routing efficiency.}
+\caption{Quantum context-spectrum results decomposed into absolute performance and marginal uplift. The left column shows the absolute efficiency trajectories for no-context, contextual, and predictive-context families in the internal and external corpora. The right column shows how much contextual and predictive context improve over the corresponding no-context baseline in each scenario. This makes the scientific point explicit: richer context helps everywhere, but the size of the gain is scenario dependent and is usually largest for the predictive-context family.}
 \label{fig:context_spectrum}
-
 \end{figure*}
+
+Figure~\ref{fig:context_spectrum} is more informative than the earlier version because it separates absolute routing quality from the incremental value of added context. The uplift panels show that predictive context is consistently the strongest improvement family, while the size of the gain varies materially by threat regime rather than remaining constant across scenarios.
 
 \subsection{Clinical Preliminary Results}
 The clinical side contributes preliminary evidence from the EQUITAS
