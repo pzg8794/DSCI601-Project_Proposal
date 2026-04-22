@@ -10,6 +10,8 @@
 \usepackage[table]{xcolor}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta,fit,backgrounds}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 \usepackage[hidelinks]{hyperref}
 
 \definecolor{phaseblue}{RGB}{52,152,219}
@@ -759,6 +761,62 @@ Internal hybrid corpus & \texttt{iCPursuitNeuralUCB} currently has the highest m
 \end{table*}
 
 \begin{table}[t]
+\caption{Context-spectrum preliminary results from the existing GA corpora.}
+\label{tab:context_spectrum}
+\centering
+\small
+\begin{tabular}{p{0.27\columnwidth}p{0.18\columnwidth}p{0.18\columnwidth}p{0.20\columnwidth}}
+\toprule
+\textbf{Context level} & \textbf{Representative model(s)} & \textbf{Internal hybrid mean eff.} & \textbf{Standardized external mean eff.} \\
+\midrule
+No context & \texttt{GNeuralUCB}, \texttt{EXPNeuralUCB} & 82.39\% & 62.83\% \\
+Context & \texttt{CPursuitNeuralUCB} & 84.70\% & 64.11\% \\
+Predictive context & \texttt{iCPursuitNeuralUCB} & 86.13\% & 65.66\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.95\columnwidth,
+    height=0.54\columnwidth,
+    ybar,
+    bar width=11pt,
+    ymin=0, ymax=100,
+    ylabel={Efficiency (\%)},
+    symbolic x coords={No Context,Context,Predictive Context},
+    xtick=data,
+    xticklabel style={font=\scriptsize, align=center},
+    ylabel style={font=\scriptsize},
+    legend style={font=\scriptsize, at={(0.5,1.02)}, anchor=south, legend columns=2, draw=none},
+    ymajorgrids=true,
+    grid style={dashed,gray!30},
+    enlarge x limits=0.18
+]
+\addplot[fill=phase2green!60, draw=phase2green!80!black] coordinates {
+    (No Context,82.39)
+    (Context,84.70)
+    (Predictive Context,86.13)
+};
+\addplot[fill=phase4purple!60, draw=phase4purple!80!black] coordinates {
+    (No Context,62.83)
+    (Context,64.11)
+    (Predictive Context,65.66)
+};
+\legend{Internal hybrid corpus,Standardized external corpus}
+\end{axis}
+\end{tikzpicture}
+\caption{Preliminary result viewed as a context spectrum. Across both the
+internal hybrid corpus and the standardized external corpus, richer context is
+associated with higher Oracle-normalized efficiency: no-context baselines are
+lowest, contextual policies improve on them, and predictive-context policies
+perform best.}
+\label{fig:context_spectrum}
+\end{figure}
+
+\begin{table}[t]
 \caption{Current validation evidence and interpretation.}
 \label{tab:validation}
 \centering
@@ -792,6 +850,20 @@ hybrid corpus, the strongest current average efficiency belongs to
 \texttt{EXPNeuralUCB} (81.95\%). These are not yet fairness results, but they
 are meaningful preliminary results: they identify the current utility frontier
 and expose which policy families are worth extending first.
+
+Just as importantly, the current results can already be organized according to
+the project's core scientific claim: \emph{context quality matters}. Rather
+than treating the preliminary evidence as a list of algorithm names,
+Table~\ref{tab:context_spectrum} and Figure~\ref{fig:context_spectrum} recast
+the existing GA evidence into a three-level spectrum. The no-context condition
+captures reward-only or non-context baselines, the context condition captures
+methods that use observed contextual structure, and the predictive-context
+condition captures the informative or forecasting-aware extension. In both the
+internal and external corpora, performance rises as the method family moves
+from no context to context to predictive context. That pattern is exactly what
+motivates the DSCI601 extension: if richer context already improves utility,
+the next question is whether fairness-aware and missingness-aware context
+handling can also improve equity.
 
 The external standardized corpus also shows that results vary by testbed
 structure. Mean efficiencies for \texttt{iCPursuitNeuralUCB} are currently

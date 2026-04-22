@@ -18,7 +18,7 @@
 | Implementation | 1--3 pages | `Implementation and Reproducibility` | Describes the quantum workflow, notebook/local/GCP paths, state/data-lake layer, evaluator/runner/visualizer architecture, CRISP+ML review package, and reuses the architecture report's system diagram. | Complete |
 | Data Sets | 0.5--1 page | `Data Sets and Experimental Inputs` | Now documents the inherited GA quantum corpora in detail: master dataset row counts, column counts, testbed/topology coverage, allocator/scenario/model dimensions, shared Drive data-lake state folders, plus planned clinical simulation data. | Complete |
 | Ethics / Fairness | Integrated requirement | `Ethics, Fairness, Privacy, and Security` | Expands fairness from a metric into an ethical design requirement covering clinical harm, service equity, privacy, security, reproducibility, and accountability. | Complete |
-| Results | 1--3 pages, bonus if present | `Results and Current Validation Evidence` | Uses real preliminary GA quantum results and validated master datasets as bonus-worthy preliminary evidence while clearly framing fairness-layer results as the next step. | Included as preliminary/bonus |
+| Results | 1--3 pages, bonus if present | `Results and Current Validation Evidence` | Uses real preliminary GA quantum results and validated master datasets as bonus-worthy preliminary evidence, and now frames them explicitly as a context spectrum from no context to context to predictive context using a dedicated table and graph. | Included as preliminary/bonus |
 | Future Work | 0.5 pages | `Future Work` | Lists concrete next-semester tasks: quantum fairness adapter, clinical simulator, mitigation mechanism, transfer analysis, final experiments, and limitations discussion. | Complete |
 | Conclusion | 0.5--1 page | `Conclusion` | Summarizes current semester accomplishments and expected impact. | Complete |
 | References | No page limit | `References` | Uses the survey bibliography and cites representative state-of-the-art work. | Complete |
@@ -93,3 +93,4 @@
 - Expanded preliminary validation evidence and future work so the rough draft reads closer to a mostly complete final-paper draft.
 - Added detailed quantum dataset coverage from `GA-Work/Validated_Logs`, including row/column counts and external testbed slices.
 - Upgraded the results section from generic validation language to real preliminary GA results so the report can legitimately target the preliminary-results bonus.
+- Reframed the preliminary results around the paper's core context thesis: no-context, context, and predictive-context model families are now compared directly in a dedicated context-spectrum table and figure.
