@@ -913,40 +913,65 @@ Clinical bioinformatics & 14.96 pairs & 66.07 pairs & +51.11 pairs \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
 \begin{tikzpicture}
-\begin{axis}[
-    width=0.95\columnwidth,
-    height=5.0cm,
-    ybar,
-    bar width=13pt,
-    ymin=0, ymax=470,
-    ylabel={Outcome index (lower context = 100)},
-    symbolic x coords={Quantum,Clinical},
-    xtick=data,
-    xticklabel style={font=\scriptsize},
-    ymajorgrids=true,
-    grid style={line width=.1pt, draw=gray!18},
-    legend style={font=\scriptsize, draw=none, at={(0.5,1.04)}, anchor=south, legend columns=2},
-    enlarge x limits=0.35,
-    nodes near coords,
-    nodes near coords style={font=\tiny, /pgf/number format/fixed, /pgf/number format/precision=1}
+\begin{groupplot}[
+group style={group size=2 by 1, horizontal sep=1.35cm},
+width=0.43\textwidth,
+height=5.35cm,
+xtick=data,
+xticklabel style={font=\scriptsize, rotate=18, anchor=east},
+tick label style={font=\scriptsize},
+label style={font=\scriptsize},
+ymajorgrids=true,
+grid style={line width=.1pt, draw=gray!18},
+legend style={font=\scriptsize, draw=none, at={(0.5,1.18)}, anchor=south, legend columns=3},
+every axis plot/.append style={line width=2pt},
+every mark/.append style={scale=0.9}
 ]
-\addplot[fill=phaseblue!65, draw=phaseblue!90!black] coordinates {(Quantum,100) (Clinical,100)};
-\addlegendentry{Lower context}
-\addplot[fill=phasepurple!65, draw=phasepurple!90!black] coordinates {(Quantum,104.5) (Clinical,441.6)};
-\addlegendentry{Richer context}
-\end{axis}
+\nextgroupplot[
+title={Quantum routing: context-enrichment trajectory},
+ylabel={Oracle-normalized efficiency (\%)},
+symbolic x coords={No ctx.,Observed ctx.,Predictive ctx.},
+ymin=60, ymax=90
+]
+\addplot[color=phaseblue!85!black, mark=square*, dashed] coordinates {
+  (No ctx.,82.39) (Observed ctx.,84.70) (Predictive ctx.,86.13)
+};
+\addlegendentry{Internal hybrid}
+\addplot[color=phaseorange!95!black, mark=triangle*] coordinates {
+  (No ctx.,62.83) (Observed ctx.,64.11) (Predictive ctx.,65.66)
+};
+\addlegendentry{Std. external}
+\node[anchor=north west, font=\scriptsize, align=left,
+      fill=white, fill opacity=0.85, text opacity=1, rounded corners=2pt]
+  at (rel axis cs:0.03,0.97)
+  {Best-over-baseline gain:\\Internal +3.74 pp\\External +2.83 pp};
+
+\nextgroupplot[
+title={Clinical proxy: context and mitigation trajectory},
+ylabel={Predicted-pair output},
+symbolic x coords={No ctx.,Context-aware,Tuned+aug.},
+ymin=0, ymax=130
+]
+\addplot[color=phasepurple!90!black, mark=*, error bars/.cd, y dir=both, y explicit] coordinates {
+  (No ctx.,14.96) +- (0,10.45)
+  (Context-aware,61.36) +- (0,44.21)
+  (Tuned+aug.,66.07) +- (0,46.36)
+};
+\addlegendentry{Clinical proxy}
+\node[anchor=north west, font=\scriptsize, align=left,
+      fill=white, fill opacity=0.85, text opacity=1, rounded corners=2pt]
+  at (rel axis cs:0.03,0.97)
+  {Fairness audit at final stage:\\6/6 algorithms pass 80\% rule\\Mean DI improvement: +0.805};
+\end{groupplot}
 \end{tikzpicture}
-\caption{Cross-testbed aggregate context-gain comparison. Values are normalized
-within each testbed so the lower-context condition equals 100; the graph compares
-the effect of adding context regardless of the specific approach used. Quantum
-uses Oracle-normalized efficiency from the routing corpus, while the clinical
-proxy uses predicted-pair output from the EQUITAS RNA-structure evidence
-base.}
+\caption{Cross-testbed context-enrichment trajectories. The left panel shows that quantum-routing performance improves monotonically as the policy moves from no context to observed context to predictive context, with consistent gains in both the internal hybrid corpus and the standardized external corpus. The right panel separates two clinical effects that the previous normalized bar chart hid: restoring domain-relevant context produces the large primary gain (14.96 to 61.36 predicted pairs), while tuning and fairness-oriented augmentation provide a smaller secondary improvement (66.07 at the final stage) together with improved parity indicators. This presentation is more informative than a single normalized index because it distinguishes pure context recovery from later mitigation or refinement.}
 \label{fig:cross_testbed_context_gain}
-\end{figure}
+\end{figure*}
+
+Figure~\ref{fig:cross_testbed_context_gain} provides a more scientific cross-testbed view than a single normalized bar chart. It shows that quantum gains are steady and incremental across context levels, whereas the clinical proxy is dominated by a large first-stage recovery when domain-relevant context is restored and then a smaller second-stage gain associated with tuning and fairness-aware augmentation.
 
 \iffalse
 \begin{figure}[t]
