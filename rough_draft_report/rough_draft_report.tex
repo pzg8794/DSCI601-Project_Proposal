@@ -910,7 +910,7 @@ fairness-aware Synthetic LowGC augmentation, and subgroup-aware EQUITAS auditing
 \toprule
 \textbf{Evidence source} & \textbf{Current quantitative signal} & \textbf{Why it matters} & \textbf{How it feeds this paper} \\
 \midrule
-EQUITAS corpus & dataset expanded from 10 to 20 RNA sequences, including 10 Synthetic LowGC sequences & makes clinical-like context gaps measurable in a controlled biomedical proxy task & informs the missingness and group-representation design of the DSCI601 simulator \\
+EQUITAS corpus & dataset expanded from 10 to 20 RNA sequences, including 10 Synthetic LowGC sequences & makes clinical-like context gaps measurable in a controlled biomedical proxy task & informs the missingness and group-representation design of the project simulator \\
 Enhanced Nussinov tuning & Optuna search over 30 trials produced an optimized objective of 56.44 and mean predicted-pair output of 66.07 $\pm$ 46.36 & shows that richer structural context can materially change diagnostic-relevant prediction behavior & motivates comparing lower-context and richer-context decision policies \\
 Context ablation & thermodynamic/context-aware scoring reported 61.36 $\pm$ 44.21 predicted pairs versus 14.96 $\pm$ 10.45 without that context & directly supports the rough draft's context-gain thesis in the clinical testbed & anchors the clinical side of the cross-testbed context-gain comparison \\
 Fairness audit & post-augmentation mitigation achieved 6/6 algorithm compliance with the 80\% rule, DI ratios of 1.000, and +0.805 average DI improvement & demonstrates that representation/context repair can improve fairness indicators, not only utility & supplies preliminary fairness evidence before final sequential bandit experiments \\
