@@ -637,6 +637,18 @@ escalation signals, and injected missingness or measurement noise. This design
 allows controlled evaluation of false-negative and false-positive gaps before
 moving to any approved open or sensitive clinical data.
 
+The clinical side also has current preliminary evidence from the ISTE780
+EQUITAS bioinformatics project~\cite{garcia2025equitable_bioinformatics},
+which is used here as a diagnostic-relevant source package rather than as a
+replacement for the planned DSCI601 simulator. The source package centers on
+RNA secondary-structure prediction with fairness auditing over sequence type,
+length, and GC-content groups. Its current corpus contains 20 RNA sequences
+after fairness-aware augmentation, including tRNA, rRNA, miRNA, synthetic
+controls, and 10 targeted Synthetic LowGC sequences added to repair
+under-representation. These assets provide an existing clinical-context
+example for the rough draft while the final sequential diagnostic testbed
+remains simulation-first.
+
 Table~\ref{tab:data_fields} summarizes the common schema. The schema is broad
 enough to support both testbeds but narrow enough to keep analysis comparable:
 each record has a decision context, a chosen action, an outcome, and a
@@ -715,15 +727,18 @@ who receives successful service. The shared framework does not solve every
 privacy or security problem, but it creates an evaluation structure where those
 assumptions can be varied and documented rather than ignored.
 
-The ethical standard for the final paper is therefore stronger than
-``the algorithm works.'' The final system should make visible when a policy is
-accurate but inequitable, robust but unfair to a service class, or fairer only
-because it sacrifices too much utility to be operationally useful. This
-tradeoff framing is important for applied data science: fairness is not a
-decorative metric but part of the evidence required to justify deployment or to
-reject a policy as unsafe.
+The ISTE780/EQUITAS preliminary evidence reinforces the same ethical point:
+under-represented sequence contexts, such as low-GC examples, required explicit
+augmentation and re-auditing before fairness claims were defensible. The ethical
+standard for the final paper is therefore stronger than ``the algorithm works.''
+The final system should make visible when a policy is accurate but inequitable,
+robust but unfair to a service class, or fairer only because it sacrifices too
+much utility to be operationally useful. This tradeoff framing is important for
+applied data science: fairness is not a decorative metric but part of the
+evidence required to justify deployment or to reject a policy as unsafe.
 
 \section{Results and Current Validation Evidence}
+\subsection{Quantum Preliminary Results}
 Full scientific results are not complete yet, but the implementation foundation
 has been validated. The rough-draft code package compiles and runs through the
 complete CRISP+ML lifecycle, and the merge-check path currently passes ten
@@ -853,7 +868,86 @@ family dominates the no-context family across all five scenarios. The gain is
 largest in the harder external settings, where context quality more strongly
 determines routing efficiency.}
 \label{fig:context_spectrum}
+
 \end{figure*}
+
+\subsection{Clinical Preliminary Results}
+The clinical side contributes preliminary evidence from the ISTE780/EQUITAS
+bioinformatics source package. This evidence is not presented as final
+patient-level validation; instead, it supplies a concrete diagnostic-relevant
+case showing why context availability matters. In this setting, lower context
+corresponds to structure prediction without thermodynamic/context-aware scoring,
+while richer context corresponds to Nussinov/MFE feature augmentation,
+fairness-aware Synthetic LowGC augmentation, and subgroup-aware EQUITAS auditing.
+
+\begin{table*}[t]
+\caption{Preliminary clinical results from the ISTE780/EQUITAS bioinformatics evidence package.}
+\label{tab:clinical_prelim_results}
+\centering
+\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{p{0.17\textwidth}p{0.28\textwidth}p{0.24\textwidth}p{0.23\textwidth}}
+\toprule
+\textbf{Evidence source} & \textbf{Current quantitative signal} & \textbf{Why it matters} & \textbf{How it feeds this paper} \\
+\midrule
+EQUITAS corpus & dataset expanded from 10 to 20 RNA sequences, including 10 Synthetic LowGC sequences & makes clinical-like context gaps measurable in a controlled biomedical proxy task & informs the missingness and group-representation design of the DSCI601 simulator \\
+Enhanced Nussinov tuning & Optuna search over 30 trials produced an optimized objective of 56.44 and mean predicted-pair output of 66.07 $\pm$ 46.36 & shows that richer structural context can materially change diagnostic-relevant prediction behavior & motivates comparing lower-context and richer-context decision policies \\
+Context ablation & thermodynamic/context-aware scoring reported 61.36 $\pm$ 44.21 predicted pairs versus 14.96 $\pm$ 10.45 without that context & directly supports the rough draft's context-gain thesis in the clinical testbed & anchors the clinical side of the cross-testbed context-gain comparison \\
+Fairness audit & post-augmentation mitigation achieved 6/6 algorithm compliance with the 80\% rule, DI ratios of 1.000, and +0.805 average DI improvement & demonstrates that representation/context repair can improve fairness indicators, not only utility & supplies preliminary fairness evidence before final sequential bandit experiments \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table}[t]
+\caption{Aggregate context-gain comparison across the two preliminary evidence bases.}
+\label{tab:cross_testbed_context_gain}
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{p{0.28\columnwidth}ccc}
+\toprule
+\textbf{Testbed} & \textbf{Lower ctx.} & \textbf{Richer ctx.} & \textbf{Gain} \\
+\midrule
+Quantum routing & 82.39\% & 86.13\% & +3.74 pp \\
+Clinical bioinformatics & 14.96 pairs & 66.07 pairs & +51.11 pairs \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.95\columnwidth,
+    height=5.0cm,
+    ybar,
+    bar width=13pt,
+    ymin=0, ymax=470,
+    ylabel={Outcome index (lower context = 100)},
+    symbolic x coords={Quantum,Clinical},
+    xtick=data,
+    xticklabel style={font=\scriptsize},
+    ymajorgrids=true,
+    grid style={line width=.1pt, draw=gray!18},
+    legend style={font=\scriptsize, draw=none, at={(0.5,1.04)}, anchor=south, legend columns=2},
+    enlarge x limits=0.35,
+    nodes near coords,
+    nodes near coords style={font=\tiny, /pgf/number format/fixed, /pgf/number format/precision=1}
+]
+\addplot[fill=phaseblue!65, draw=phaseblue!90!black] coordinates {(Quantum,100) (Clinical,100)};
+\addlegendentry{Lower context}
+\addplot[fill=phasepurple!65, draw=phasepurple!90!black] coordinates {(Quantum,104.5) (Clinical,441.6)};
+\addlegendentry{Richer context}
+\end{axis}
+\end{tikzpicture}
+\caption{Cross-testbed aggregate context-gain comparison. Values are normalized
+within each testbed so the lower-context condition equals 100; the graph compares
+the effect of adding context regardless of the specific approach used. Quantum
+uses Oracle-normalized efficiency from the routing corpus, while the clinical
+proxy uses predicted-pair output from the ISTE780/EQUITAS RNA-structure evidence
+base.}
+\label{fig:cross_testbed_context_gain}
+\end{figure}
 
 \iffalse
 \begin{figure}[t]

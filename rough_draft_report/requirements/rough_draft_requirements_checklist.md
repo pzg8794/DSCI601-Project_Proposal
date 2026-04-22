@@ -95,3 +95,12 @@
 - Upgraded the results section from generic validation language to real preliminary GA results so the report can legitimately target the preliminary-results bonus.
 - Reframed the preliminary results around the paper's core context thesis: no-context, context, and predictive-context model families are now compared directly in a dedicated context-spectrum table and figure.
 - Replaced the rough-draft-only bar chart with a stronger GA-style multi-panel figure and added a cross-testbed uplift table so the preliminary-results section better matches the quality of the underlying quantum paper.
+
+## Clinical Preliminary Results and Cross-Testbed Context-Gain Update
+
+- Preserved the user's rough-draft structure and quantum preliminary-results section as the baseline.
+- Added ISTE780/EQUITAS as current clinical evidence while keeping the DSCI601 clinical simulator explicitly simulation-first and future-facing.
+- Added a clinical preliminary-results subsection with source, quantitative signal, importance, and final-paper role.
+- Added a cross-testbed aggregate context-gain table and normalized TikZ/pgfplots figure comparing lower context versus richer context for quantum and clinical evidence.
+- Added an ethics bridge sentence connecting the clinical evidence to the paper's claim that unequal context quality is an ethical risk.
+- Verified the separate ISTE780 Drive mirror remains outside the paper repo at `/Users/pitergarcia/DataScience/Semester5/DSCI601/ISTE780-clinical-drive-mirror`.
