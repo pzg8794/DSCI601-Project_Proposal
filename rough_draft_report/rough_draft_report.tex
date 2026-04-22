@@ -572,6 +572,36 @@ comparisons, winner summaries, efficiency measures, and scenario-level
 statistics. These artifacts are stored locally or in a shared Drive data lake
 depending on the execution path.
 
+\begin{table*}[t]
+\caption{Primary quantum datasets and corpora used by the project.}
+\label{tab:datasets}
+\centering
+\small
+\begin{tabular}{p{0.19\textwidth}p{0.11\textwidth}p{0.11\textwidth}p{0.12\textwidth}p{0.37\textwidth}}
+\toprule
+\textbf{Corpus} & \textbf{Rows} & \textbf{Cols} & \textbf{Scope} & \textbf{Use in this project} \\
+\midrule
+Hybrid master dataset & 4,920 & 30 & internal hybrid framework & fairness-layer extension on top of allocator, scenario, reward, regret, and efficiency summaries \\
+Standardized external papers corpus & 8,060 & 32 & Papers 2, 7, 8, and 12 at 4K/2K & cross-testbed comparison baseline for adding fairness and transfer analysis \\
+Paper 2 standardized slice & 2,450 & 30 & 15 nodes, 51 edges, 8 paths & stochastic-noise external benchmark \\
+Paper 7 standardized slice & 1,710 & 30 & 50 nodes, 141 edges, 15 paths & dense-network external benchmark \\
+Paper 8 standardized slice & 1,500 & 30 & 20 nodes, 19 edges, 8 paths & compact RL-routing external benchmark \\
+Paper 12 standardized slice & 2,400 & 30 & 100 nodes, 426 edges, 4 paths & fusion-network external benchmark \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+Table~\ref{tab:datasets} summarizes the main datasets already available in the
+GA work tree. The project is therefore not starting from an empty experimental
+state. Instead, it inherits a validated quantum-routing corpus that already
+contains scenario-level and experiment-level outputs for four external testbeds
+and for the internal hybrid framework. These corpora are stored under
+\texttt{/Users/pitergarcia/DataScience/Semester4/GA-Work/Validated\_Logs} and
+are paired with a shared Drive data lake whose top-level folders are
+\texttt{model\_state} and \texttt{framework\_state}. This matters because the
+final fairness-aware paper can build directly on preserved runner/evaluator
+artifacts rather than rerunning the entire quantum study from scratch.
+
 \begin{table}[t]
 \caption{Planned data fields and fairness role.}
 \label{tab:data_fields}
@@ -614,6 +644,25 @@ fairness-relevant group or flow label. This design supports cross-domain
 transfer analysis because the policy-update and mitigation logic can operate
 over comparable artifact contracts even when the domain-specific feature
 semantics differ.
+
+The existing quantum corpora already expose many of the fields the fairness
+layer needs. The master datasets record allocator, scenario, scenario category,
+run count, frame configuration, capacity semantics, scale, model identity,
+reward, regret, Oracle-relative efficiency, retries, failures, misses below
+threshold, and scenario winners. In practical terms, this means the current
+paper can confidently claim access to real experimental data and preliminary
+results, not only a future plan. The main extension still needed is the
+fairness layer itself: group or flow labels, subgroup disparity summaries, and
+time-evolving fairness metrics must be added on top of the already preserved
+performance corpus.
+
+For the clinical side, the project remains simulation-first. The final clinical
+dataset will mirror the structure of the quantum corpus: context quality,
+action choice, binary or graded outcome, cost/delay information, and fairness-
+relevant group annotation. This keeps the cross-domain comparison meaningful.
+One dataset is not meant to imitate the domain semantics of the other; rather,
+both are designed to satisfy the same artifact contract so that the same
+evaluation and mitigation logic can be applied to both.
 
 \section{Ethics, Fairness, Privacy, and Security}
 Ethics is central to the project because the system is explicitly about
@@ -674,7 +723,7 @@ tradeoff framing is important for applied data science: fairness is not a
 decorative metric but part of the evidence required to justify deployment or to
 reject a policy as unsafe.
 
-\section{Preliminary Results and Current Validation Evidence}
+\section{Results and Current Validation Evidence}
 Full scientific results are not complete yet, but the implementation foundation
 has been validated. The rough-draft code package compiles and runs through the
 complete CRISP+ML lifecycle, and the merge-check path currently passes ten
@@ -690,6 +739,24 @@ remaining task is to extend those performance and robustness outputs with
 explicit service-equity metrics and fairness-aware mitigation. Thus, current
 progress is strongest on infrastructure, methodology, and reproducibility,
 while final cross-domain fairness results remain future work.
+
+\begin{table*}[t]
+\caption{Preliminary quantum results available before fairness-layer extension.}
+\label{tab:prelim_results}
+\centering
+\small
+\begin{tabular}{p{0.24\textwidth}p{0.17\textwidth}p{0.15\textwidth}p{0.34\textwidth}}
+\toprule
+\textbf{Evidence source} & \textbf{Current quantitative signal} & \textbf{Why it matters} & \textbf{How it feeds this paper} \\
+\midrule
+Threat-aware quantum manuscript & pursuit--neural hybrids outperform non-contextual baselines by roughly 18--24 percentage points in scenario-aggregated efficiency & shows that context-rich routing materially improves utility under realistic threats & establishes the performance baseline to which the fairness layer will be added \\
+Threat-aware quantum manuscript & worst-case performance floors remain above 85\% under stochastic threats for the strongest hybrid family & suggests the best policies remain stable in benign-but-noisy settings & provides a natural starting point for testing whether fairness can be improved without breaking robust utility \\
+Threat-aware quantum manuscript & replay-capacity increases can trigger 22--30 percentage-point efficiency collapses under adaptive adversaries & shows that resource policy, not only algorithm choice, shapes deployment quality & motivates fairness-aware evaluation of allocator and capacity decisions, not just bandit model choice \\
+Standardized external corpus & 8,060 rows across 4 testbeds, 4 allocators, 5 threat scenarios, 3 scales, and 5 routing models including Oracle & demonstrates breadth of already available quantum evidence & supports cross-testbed fairness benchmarking once subgroup/service labels are defined \\
+Internal hybrid corpus & \texttt{iCPursuitNeuralUCB} currently has the highest mean efficiency in the internal hybrid dataset (86.13\%) & identifies the strongest current utility baseline in the internal framework & provides the leading candidate for fairness-aware extension and ablation \\
+\bottomrule
+\end{tabular}
+\end{table*}
 
 \begin{table}[t]
 \caption{Current validation evidence and interpretation.}
@@ -713,6 +780,35 @@ Table~\ref{tab:validation} frames the current evidence conservatively. It
 supports reproducibility and readiness, not final claims about which policy is
 fairest. The final paper will replace or extend this table with empirical
 curves, statistical summaries, and domain-specific fairness results.
+
+Table~\ref{tab:prelim_results} makes the current evidence more concrete. The
+rough draft can already report real quantum results because the project builds
+on an existing validated experiment corpus and an associated manuscript. In the
+standardized 4K/2K external corpus, the four inherited testbeds contribute
+8,060 rows of model--scenario--allocator--scale evaluations. In the internal
+hybrid corpus, the strongest current average efficiency belongs to
+\texttt{iCPursuitNeuralUCB} (86.13\%), followed by
+\texttt{CPursuitNeuralUCB} (84.70\%), \texttt{GNeuralUCB} (82.83\%), and
+\texttt{EXPNeuralUCB} (81.95\%). These are not yet fairness results, but they
+are meaningful preliminary results: they identify the current utility frontier
+and expose which policy families are worth extending first.
+
+The external standardized corpus also shows that results vary by testbed
+structure. Mean efficiencies for \texttt{iCPursuitNeuralUCB} are currently
+about 74.34\% on Paper~2, 78.39\% on Paper~7, 73.95\% on Paper~8, and 42.54\%
+on Paper~12. This matters for the DSCI601 project because it already suggests
+that fairness conclusions should not be tied to a single network topology or
+threat setting. A fairness-aware extension that appears successful in one
+testbed but fails in another would still be a useful scientific finding.
+
+From the standpoint of the rough-draft requirement, these results answer the
+most important preliminary question: does the system already do something real
+and measurable? Yes. The inherited quantum framework already executes correctly,
+produces large validated datasets, distinguishes strong and weak model
+families, and supports claims about robustness, efficiency, and configuration
+effects. The new contribution of the final paper is to attach an explicit
+fairness layer to those same data and test whether the best utility policies
+also behave equitably under missing context.
 
 The most important current result is that the research workflow has converged
 into a coherent experiment plan. Earlier pieces of the semester work existed as
