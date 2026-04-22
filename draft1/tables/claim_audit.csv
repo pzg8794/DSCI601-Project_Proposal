@@ -1,0 +1,6 @@
+claim,status,evidence_action
+"Project studies completed dual-domain fairness experiments",unsupported,"Rewrite as framework plus inherited quantum evidence and planned clinical simulator"
+"Merge-check currently passes the full validation path",partial,"Rewrite to say the repository contains a merge-check path and tests unless logs are attached"
+"Preliminary quantum numbers are current DSCI601 fairness results",unsupported,"Attribute them as inherited prior quantum-routing evidence"
+"Clinical simulator is already implemented",unsupported,"Move to future work"
+"Reproducibility scaffold exists",supported,"Keep and strengthen with exact commands and artifact expectations"
