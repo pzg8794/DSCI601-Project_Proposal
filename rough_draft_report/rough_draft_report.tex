@@ -630,7 +630,14 @@ same operations needed by the final project: cleaning missing context,
 preparing train/test artifacts, producing predictions, computing group
 metrics, and writing final summaries.
 
-The clinical side now has a preliminary evidence base from the ISTE780
+The planned clinical diagnostic testbed will also be simulation-first. Its
+records will represent patient or case contexts, protected or fairness-relevant
+groups, diagnostic action choices, observed outcomes, test costs, delay or
+escalation signals, and injected missingness or measurement noise. This design
+allows controlled evaluation of false-negative and false-positive gaps before
+moving to any approved open or sensitive clinical data.
+
+The clinical side also has a preliminary evidence base from the ISTE780
 EQUITAS bioinformatics project~\cite{garcia2025equitable_bioinformatics}. That
 project uses RNA secondary-structure prediction as a diagnostic-relevant proxy
 for context-sensitive biomedical decision support. The current clinical corpus
@@ -639,10 +646,7 @@ rRNA, miRNA, synthetic controls, and 10 targeted Synthetic LowGC sequences added
 to correct under-representation. It records sequence type, length, GC-content
 bins, structural features, predicted-pair outputs, algorithm identity, and
 fairness-audit fields. The DSCI601 clinical simulator will extend this evidence
-base into a sequential diagnostic workflow with patient/case contexts,
-protected or fairness-relevant groups, diagnostic action choices, observed
-outcomes, test costs, delay or escalation signals, and injected missingness or
-measurement noise.
+base into the planned sequential diagnostic workflow.
 
 Table~\ref{tab:data_fields} summarizes the common schema. The schema is broad
 enough to support both testbeds but narrow enough to keep analysis comparable:
@@ -663,14 +667,18 @@ fairness layer itself: group or flow labels, subgroup disparity summaries, and
 time-evolving fairness metrics must be added on top of the already preserved
 performance corpus.
 
-For the clinical side, current evidence should be interpreted as preliminary
-and diagnostic-relevant rather than as final patient-level validation. The
-EQUITAS corpus demonstrates that richer biomedical context and fairness-aware
-augmentation can be measured now; the final DSCI601 clinical testbed will add
-the missing sequential decision layer. This keeps the cross-domain comparison
-meaningful. One dataset is not meant to imitate the domain semantics of the
-other; rather, both are designed to satisfy the same artifact contract so that
-the same evaluation and mitigation logic can be applied to both.
+For the clinical side, the project remains simulation-first. The final clinical
+dataset will mirror the structure of the quantum corpus: context quality,
+action choice, binary or graded outcome, cost/delay information, and fairness-
+relevant group annotation. Current clinical evidence should be interpreted as
+preliminary and diagnostic-relevant rather than as final patient-level
+validation. The EQUITAS corpus demonstrates that richer biomedical context and
+fairness-aware augmentation can be measured now; the final DSCI601 clinical
+testbed will add the missing sequential decision layer. This keeps the
+cross-domain comparison meaningful. One dataset is not meant to imitate the
+domain semantics of the other; rather, both are designed to satisfy the same
+artifact contract so that the same evaluation and mitigation logic can be
+applied to both.
 
 \section{Ethics, Fairness, Privacy, and Security}
 Ethics is central to the project because the system is explicitly about

@@ -104,4 +104,10 @@
 - Added clinical dataset coverage: 20 RNA sequences after fairness-aware augmentation, including 10 Synthetic LowGC sequences for under-represented context repair.
 - Added clinical preliminary results: Optuna-tuned Enhanced Nussinov evidence, context-aware predicted-pair improvement, 6/6 80% rule compliance, DI ratios of 1.000, and +0.805 average DI improvement.
 - Added a cross-testbed aggregate context-gain comparison that normalizes each testbed to its lower-context baseline so quantum and clinical evidence can be compared without pretending their raw metrics are identical.
-- Created a local Drive mirror at `/Users/pitergarcia/DataScience/Semester5/DSCI601/clinical_drive_mirror` and prepared it as a separate git repository with a README and manifest.
+- Created a local Drive mirror at `/Users/pitergarcia/DataScience/Semester5/DSCI601/ISTE780-clinical-drive-mirror` and prepared it as a separate git repository with a README and manifest.
+
+
+## Preservation Fix
+
+- Restored the previously written simulation-first clinical dataset paragraphs that were replaced during the clinical-results merge.
+- Kept the ISTE780/EQUITAS evidence as additive support rather than replacing the planned DSCI601 clinical-testbed framing.
