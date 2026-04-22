@@ -194,16 +194,16 @@ both clinical and quantum-resource routing domains.
 \label{tab:related_map}
 \centering
 \small
-\begin{tabular}{p{0.33\columnwidth}p{0.57\columnwidth}}
+\begin{tabular}{p{0.29\columnwidth}p{0.65\columnwidth}}
 \toprule
 \textbf{Literature area} & \textbf{Role in this rough draft} \\
 \midrule
-Bandit foundations & define partial feedback, exploration, regret, and baselines \\
-Contextual bandits & model side information and missing-context sensitivity \\
-Fairness definitions & specify outcome gaps such as FNR/FPR and service equity \\
-Non-stationarity & motivates shift scenarios and time-evolving disparity curves \\
-Clinical bias studies & motivate subgroup error monitoring and proxy-risk caution \\
-Quantum routing & provides resource-scarce routing testbed and stateful simulator \\
+Bandit foundations & partial feedback, quest, regret \& baselines \\
+Contextual bandits & model side data \& missing-context sensitivity \\
+Fairness definitions & outcome gaps, FNR/FPR \& service equity \\
+Non-stationarity & shift scenarios \& time-based disparity curves \\
+Clinical bias studies & subgroup error monitor \& proxy-risk caution \\
+Quantum routing & resource-scarce routing testbed \& stateful simulator \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -441,20 +441,20 @@ and validation scripts. The GCP path uses startup and dynamic-runner scripts
 for larger allocator and time-scale experiments.
 
 \begin{table}[t]
-\caption{Implementation layers and reproducibility role.}
+\caption{Implementation layers and the role of reproducibility.}
 \label{tab:implementation}
 \centering
 \small
-\begin{tabular}{p{0.31\columnwidth}p{0.59\columnwidth}}
+\begin{tabular}{p{0.32\columnwidth}p{0.65\columnwidth}}
 \toprule
 \textbf{Layer} & \textbf{Role} \\
 \midrule
-Configuration & fixed seeds, scenario settings, run scales, and output roots \\
-Collection / state access & retrieves shared Drive framework and model states \\
-Runner / allocator & executes quantum routing actions and qubit allocation \\
-Evaluator & computes scenario winners, reward, efficiency, and gap summaries \\
-Visualizer / analysis & generates plots, summaries, and review-facing tables \\
-CRISP+ML package & provides small deterministic pipeline, tests, and merge checks \\
+Configuration & fixed seeds, settings, run scales \& output roots \\
+Collection/state access & retrieves Drive framework \& model states \\
+Runner/allocator & executes routing actions \& qubit allocation \\
+Evaluator & winners, reward, efficiency, \& gap summaries \\
+Visualizer/analysis & plots, summaries \& review-facing tables \\
+CRISP+ML package & a deterministic pipeline, tests \& merge checks \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -486,15 +486,15 @@ allocator and supports broader cross-scenario analysis.
 \label{tab:crisp}
 \centering
 \small
-\begin{tabular}{p{0.31\columnwidth}p{0.59\columnwidth}}
+\begin{tabular}{p{0.24\columnwidth}p{0.67\columnwidth}}
 \toprule
 \textbf{Lifecycle stage} & \textbf{Concrete artifact} \\
 \midrule
-Data collection & synthetic fairness-style raw records and metadata \\
-Data cleaning & validated, normalized records with missingness handling \\
-Data preparation & train/test artifacts and model-ready feature table \\
-Data exploration & summary statistics and group/context diagnostics \\
-Data mining & lightweight deterministic model or bandit-style run \\
+Data collection & synthetic fairness-style raw records \& metadata \\
+Data cleaning & validated, normalized data \& context handling \\
+Data preparation & train/test artifacts \& model-ready feature table \\
+Data exploration & summary statistics \& group/context diagnostics \\
+Data mining & light deterministic model/bandit-style run \\
 Evaluation & utility metrics and group-disparity summaries \\
 Presentation & final table, manifest, and visualization artifact \\
 \bottomrule
@@ -578,7 +578,7 @@ depending on the execution path.
 \label{tab:datasets}
 \centering
 \small
-\begin{tabular}{p{0.19\textwidth}p{0.11\textwidth}p{0.11\textwidth}p{0.12\textwidth}p{0.37\textwidth}}
+\begin{tabular}{p{0.25\textwidth}p{0.04\textwidth}p{0.03\textwidth}p{0.22\textwidth}p{0.35\textwidth}}
 \toprule
 \textbf{Corpus} & \textbf{Rows} & \textbf{Cols} & \textbf{Scope} & \textbf{Use in this project} \\
 \midrule
@@ -607,21 +607,21 @@ artifacts.
 \label{tab:data_fields}
 \centering
 \small
-\begin{tabular}{p{0.29\columnwidth}p{0.61\columnwidth}}
+\begin{tabular}{p{0.25\columnwidth}p{0.66\columnwidth}}
 \toprule
 \textbf{Field type} & \textbf{Purpose} \\
 \midrule
-Group / flow label & defines subgroup or service class for disparity metrics \\
-Context features & patient/test signals or link/load/fidelity estimates \\
-Missingness flags & identify degraded, delayed, or unavailable context \\
-Action choice & selected test, escalation, model, route, or allocator decision \\
-Outcome / reward & diagnostic success, routing success, latency, or utility \\
-Oracle / baseline & supports regret, gap, and mitigation comparison \\
+Group/flow label & subgroup or service class for disparity metrics \\
+Context features & patient/test signals, link/load/fidelity estimates \\
+Missingness flags & degraded, delayed, or unavailable context \\
+Action choice & test, escalation, model, route/allocator decision \\
+Outcome/reward & diagnostic \& routing success, latency, or utility \\
+Oracle/baseline & regret, gap \& mitigation comparison \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The DSCI601 code-review package uses a small synthetic dataset that preserves
+The code-review package uses a small synthetic dataset that preserves
 the shape of the final fairness problem without requiring private data. Each
 record includes a group label, signal feature, contextual feature, binary
 outcome, missingness flag, and invalid-record flag. The dataset is deliberately
@@ -637,10 +637,9 @@ escalation signals, and injected missingness or measurement noise. This design
 allows controlled evaluation of false-negative and false-positive gaps before
 moving to any approved open or sensitive clinical data.
 
-The clinical side also has current preliminary evidence from the ISTE780
+The clinical side also has current preliminary evidence from the
 EQUITAS bioinformatics project~\cite{garcia2025equitable_bioinformatics},
-which is used here as a diagnostic-relevant source package rather than as a
-replacement for the planned DSCI601 simulator. The source package centers on
+which is used here as a diagnostic-relevant source package. The source package centers on
 RNA secondary-structure prediction with fairness auditing over sequence type,
 length, and GC-content groups. Its current corpus contains 20 RNA sequences
 after fairness-aware augmentation, including tRNA, rRNA, miRNA, synthetic
@@ -688,7 +687,7 @@ route fewer resources toward it. That is not merely a statistical artifact; it
 is a mechanism by which historical under-measurement becomes future
 under-allocation.
 
-The project therefore treats fairness as a design requirement rather than as a
+The project treats fairness as a design requirement rather than as a
 post-hoc report. Fairness affects how experiments are built, how artifacts are
 logged, and how results are interpreted. The evaluation must report subgroup
 metrics, not only average reward or average efficiency. It must preserve
@@ -704,15 +703,15 @@ hide the value choices that shape the experiment.
 \label{tab:ethics}
 \centering
 \small
-\begin{tabular}{p{0.33\columnwidth}p{0.57\columnwidth}}
+\begin{tabular}{p{0.34\columnwidth}p{0.58\columnwidth}}
 \toprule
 \textbf{Requirement} & \textbf{Implementation response} \\
 \midrule
-Avoid aggregate-only claims & report utility beside subgroup disparity metrics \\
-Expose context quality & log missingness, noise, delay, and measurement assumptions \\
-Support accountability & preserve seeds, configs, states, manifests, and run provenance \\
-Protect sensitive data & use simulation-first clinical data until approved data are appropriate \\
-Handle security relevance & study quantum routing under unreliable/adversarial conditions \\
+No aggregate-only suits & utility, subgroup disparity metrics \\
+Expose context quality & log missingness, noise, delay \& measurement assumptions \\
+Support accountability & preserve seeds, configs, states, manifests \& run provenance \\
+Protect sensitive data & simulation-first data till approved data are appropriate \\
+Run security relevance & quantum routing under unreliable, or adversarial conditions \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -727,14 +726,14 @@ who receives successful service. The shared framework does not solve every
 privacy or security problem, but it creates an evaluation structure where those
 assumptions can be varied and documented rather than ignored.
 
-The ISTE780/EQUITAS preliminary evidence reinforces the same ethical point:
+The EQUITAS preliminary evidence reinforces the same ethical point:
 under-represented sequence contexts, such as low-GC examples, required explicit
 augmentation and re-auditing before fairness claims were defensible. The ethical
 standard for the final paper is therefore stronger than ``the algorithm works.''
 The final system should make visible when a policy is accurate but inequitable,
 robust but unfair to a service class, or fairer only because it sacrifices too
 much utility to be operationally useful. This tradeoff framing is important for
-applied data science: fairness is not a decorative metric but part of the
+applied data science: fairness is part of the
 evidence required to justify deployment or to reject a policy as unsafe.
 
 \section{Results and Current Validation Evidence}
@@ -872,7 +871,7 @@ determines routing efficiency.}
 \end{figure*}
 
 \subsection{Clinical Preliminary Results}
-The clinical side contributes preliminary evidence from the ISTE780/EQUITAS
+The clinical side contributes preliminary evidence from the EQUITAS
 bioinformatics source package. This evidence is not presented as final
 patient-level validation; instead, it supplies a concrete diagnostic-relevant
 case showing why context availability matters. In this setting, lower context
@@ -886,7 +885,7 @@ fairness-aware Synthetic LowGC augmentation, and subgroup-aware EQUITAS auditing
 \centering
 \small
 \setlength{\tabcolsep}{5pt}
-\begin{tabular}{p{0.17\textwidth}p{0.28\textwidth}p{0.24\textwidth}p{0.23\textwidth}}
+\begin{tabular}{p{0.07\textwidth}p{0.35\textwidth}p{0.26\textwidth}p{0.25\textwidth}}
 \toprule
 \textbf{Evidence source} & \textbf{Current quantitative signal} & \textbf{Why it matters} & \textbf{How it feeds this paper} \\
 \midrule
@@ -1022,8 +1021,7 @@ standardized 4K/2K external corpus, the four inherited testbeds contribute
 hybrid corpus, the strongest current average efficiency belongs to
 \texttt{iCPursuitNeuralUCB} (86.13\%), followed by
 \texttt{CPursuitNeuralUCB} (84.70\%), \texttt{GNeuralUCB} (82.83\%), and
-\texttt{EXPNeuralUCB} (81.95\%). These are not yet fairness results, but they
-are meaningful preliminary results: they identify the current utility frontier
+\texttt{EXPNeuralUCB} (81.95\%). These are meaningful preliminary results: they identify the current utility frontier
 and expose which policy families are worth extending first.
 
 Just as importantly, the current results can already be organized according to
@@ -1059,9 +1057,7 @@ also behave equitably under missing context.
 
 The most important current result is that the research workflow has converged
 into a coherent experiment plan. Earlier pieces of the semester work existed as
-separate deliverables: a proposal, a related-work survey, an approach write-up,
-an architecture report, an ethics/fairness report, and a code-review package.
-This rough draft integrates those pieces into a single project narrative. The
+separate deliverables. This rough draft integrates those pieces into a single project narrative. The
 implementation now has a reviewer-safe CRISP+ML path, a quantum-first execution
 path, a state-management strategy, and a defined fairness layer. This reduces
 the risk that final experiments will produce isolated performance numbers
