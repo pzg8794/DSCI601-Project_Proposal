@@ -1,0 +1,3 @@
+domain,current_status,context,action,reward,fairness_metric,mitigation_target
+quantum_routing,implemented_corpus,"link/load/fidelity or route context, possibly incomplete","route or allocator choice","efficiency, success probability, latency","service-quality gaps across flow classes","fairness-aware routing update or context repair"
+clinical_simulation,planned_simulator,"patient or case signals, possibly delayed/noisy/missing","test, retest, escalation, or model choice","diagnostic utility, delay, cost","false-negative, false-positive, or delay gaps across groups","missingness-aware update, calibration, or fairness regularization"
