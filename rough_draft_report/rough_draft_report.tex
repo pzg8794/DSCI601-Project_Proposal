@@ -637,17 +637,6 @@ escalation signals, and injected missingness or measurement noise. This design
 allows controlled evaluation of false-negative and false-positive gaps before
 moving to any approved open or sensitive clinical data.
 
-The clinical side also has a preliminary evidence base from the ISTE780
-EQUITAS bioinformatics project~\cite{garcia2025equitable_bioinformatics}. That
-project uses RNA secondary-structure prediction as a diagnostic-relevant proxy
-for context-sensitive biomedical decision support. The current clinical corpus
-contains 20 RNA sequences after fairness-aware augmentation, including tRNA,
-rRNA, miRNA, synthetic controls, and 10 targeted Synthetic LowGC sequences added
-to correct under-representation. It records sequence type, length, GC-content
-bins, structural features, predicted-pair outputs, algorithm identity, and
-fairness-audit fields. The DSCI601 clinical simulator will extend this evidence
-base into the planned sequential diagnostic workflow.
-
 Table~\ref{tab:data_fields} summarizes the common schema. The schema is broad
 enough to support both testbeds but narrow enough to keep analysis comparable:
 each record has a decision context, a chosen action, an outcome, and a
@@ -670,15 +659,10 @@ performance corpus.
 For the clinical side, the project remains simulation-first. The final clinical
 dataset will mirror the structure of the quantum corpus: context quality,
 action choice, binary or graded outcome, cost/delay information, and fairness-
-relevant group annotation. Current clinical evidence should be interpreted as
-preliminary and diagnostic-relevant rather than as final patient-level
-validation. The EQUITAS corpus demonstrates that richer biomedical context and
-fairness-aware augmentation can be measured now; the final DSCI601 clinical
-testbed will add the missing sequential decision layer. This keeps the
-cross-domain comparison meaningful. One dataset is not meant to imitate the
-domain semantics of the other; rather, both are designed to satisfy the same
-artifact contract so that the same evaluation and mitigation logic can be
-applied to both.
+relevant group annotation. This keeps the cross-domain comparison meaningful.
+One dataset is not meant to imitate the domain semantics of the other; rather,
+both are designed to satisfy the same artifact contract so that the same
+evaluation and mitigation logic can be applied to both.
 
 \section{Ethics, Fairness, Privacy, and Security}
 Ethics is central to the project because the system is explicitly about
@@ -731,15 +715,13 @@ who receives successful service. The shared framework does not solve every
 privacy or security problem, but it creates an evaluation structure where those
 assumptions can be varied and documented rather than ignored.
 
-The clinical preliminary evidence reinforces this ethical claim: low-GC and
-other under-represented sequence categories required explicit augmentation and
-re-auditing before fairness claims were defensible. The ethical standard for the
-final paper is therefore stronger than ``the algorithm works.'' The final
-system should make visible when a policy is accurate but inequitable, robust but
-unfair to a service class, or fairer only because it sacrifices too much utility
-to be operationally useful. This tradeoff framing is important for applied data
-science: fairness is not a decorative metric but part of the evidence required
-to justify deployment or to reject a policy as unsafe.
+The ethical standard for the final paper is therefore stronger than
+``the algorithm works.'' The final system should make visible when a policy is
+accurate but inequitable, robust but unfair to a service class, or fairer only
+because it sacrifices too much utility to be operationally useful. This
+tradeoff framing is important for applied data science: fairness is not a
+decorative metric but part of the evidence required to justify deployment or to
+reject a policy as unsafe.
 
 \section{Results and Current Validation Evidence}
 Full scientific results are not complete yet, but the implementation foundation
@@ -751,7 +733,6 @@ claimed as a final scientific result; it is reproducibility evidence showing
 that the project has an executable review harness and that the architecture is
 ready for the next experimental phase.
 
-\subsection{Quantum Preliminary Results}
 The quantum side has an existing experimental foundation from prior
 threat-aware routing work~\cite{garcia2026threat_aware_quantum_routing}. The
 remaining task is to extend those performance and robustness outputs with
@@ -874,87 +855,47 @@ determines routing efficiency.}
 \label{fig:context_spectrum}
 \end{figure*}
 
-
-\subsection{Clinical Preliminary Results}
-The clinical testbed has preliminary evidence from the ISTE780 EQUITAS
-bioinformatics project~\cite{garcia2025equitable_bioinformatics}. This work is
-not yet the final sequential diagnostic simulator, but it supplies the clinical
-side of the paper with a concrete diagnostic-relevant setting: RNA structural
-prediction under uneven sequence/context representation. In that setting,
-``lower context'' corresponds to simpler or less context-rich prediction
-signals, while ``richer context'' corresponds to Nussinov/MFE feature
-augmentation, fairness-aware synthetic low-GC augmentation, and subgroup-aware
-EQUITAS auditing.
-
-\begin{table*}[t]
-\caption{Preliminary clinical results from the EQUITAS bioinformatics testbed.}
-\label{tab:clinical_prelim_results}
-\centering
-\small
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{p{0.17\textwidth}p{0.28\textwidth}p{0.24\textwidth}p{0.23\textwidth}}
-\toprule
-\textbf{Evidence source} & \textbf{Current quantitative signal} & \textbf{Why it matters} & \textbf{How it feeds this paper} \\
-\midrule
-EQUITAS project corpus & dataset expanded from 10 to 20 RNA sequences, including 10 Synthetic LowGC sequences for fairness-aware augmentation & establishes that clinical-like context gaps can be made explicit and corrected in a controlled biomedical proxy task & provides the diagnostic-side dataset pattern for missingness-aware simulation \\
-Enhanced Nussinov tuning & Optuna search over 30 trials produced an optimized objective of 56.44 and mean predicted-pair output of 66.07 $\pm$ 46.36 & shows that richer structural context can materially change diagnostic-relevant prediction behavior & motivates comparing lower-context and richer-context policies in the clinical simulator \\
-Ablation evidence & thermodynamic/context-aware scoring reported 61.36 $\pm$ 44.21 predicted pairs versus 14.96 $\pm$ 10.45 without that context & directly supports the paper's context-gain thesis in the clinical testbed & anchors the clinical side of the cross-testbed context-gain comparison \\
-EQUITAS fairness audit & post-augmentation mitigation achieved 6/6 algorithm compliance with the 80\% rule, DI ratios of 1.000, and +0.805 average DI improvement & demonstrates that representation/context repair can improve fairness indicators, not only utility & supplies preliminary fairness evidence before final sequential bandit experiments \\
-\bottomrule
-\end{tabular}
-\end{table*}
-
-\begin{table}[t]
-\caption{Aggregate context-gain comparison used for the cross-testbed visual.}
-\label{tab:cross_testbed_context_gain}
-\centering
-\small
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{lccc}
-\toprule
-\textbf{Testbed} & \textbf{Lower ctx.} & \textbf{Richer ctx.} & \textbf{Gain} \\
-\midrule
-Quantum routing & 82.39\% & 86.13\% & +3.74 pp \\
-Clinical bioinformatics & 14.96 pairs & 66.07 pairs & +51.11 pairs \\
-\bottomrule
-\end{tabular}
-\end{table}
-
+\iffalse
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
     width=0.95\columnwidth,
-    height=5.0cm,
+    height=0.54\columnwidth,
     ybar,
-    bar width=13pt,
-    ymin=0, ymax=470,
-    ylabel={Outcome index (lower context = 100)},
-    symbolic x coords={Quantum,Clinical},
+    bar width=11pt,
+    ymin=0, ymax=100,
+    ylabel={Efficiency (\%)},
+    symbolic x coords={No Context,Context,Predictive Context},
     xtick=data,
-    xticklabel style={font=\scriptsize},
+    xticklabel style={font=\scriptsize, align=center},
+    ylabel style={font=\scriptsize},
+    legend style={font=\scriptsize, at={(0.5,1.02)}, anchor=south, legend columns=2, draw=none},
     ymajorgrids=true,
-    grid style={line width=.1pt, draw=gray!18},
-    legend style={font=\scriptsize, draw=none, at={(0.5,1.04)}, anchor=south, legend columns=2},
-    enlarge x limits=0.35,
-    nodes near coords,
-    nodes near coords style={font=\tiny, /pgf/number format/fixed, /pgf/number format/precision=1}
+    grid style={dashed,gray!30},
+    enlarge x limits=0.18
 ]
-\addplot[fill=phaseblue!65, draw=phaseblue!90!black] coordinates {(Quantum,100) (Clinical,100)};
-\addlegendentry{Lower context}
-\addplot[fill=phasepurple!65, draw=phasepurple!90!black] coordinates {(Quantum,104.5) (Clinical,441.6)};
-\addlegendentry{Richer context}
+\addplot[fill=phase2green!60, draw=phase2green!80!black] coordinates {
+    (No Context,82.39)
+    (Context,84.70)
+    (Predictive Context,86.13)
+};
+\addplot[fill=phase4purple!60, draw=phase4purple!80!black] coordinates {
+    (No Context,62.83)
+    (Context,64.11)
+    (Predictive Context,65.66)
+};
+\legend{Internal hybrid corpus,Standardized external corpus}
 \end{axis}
 \end{tikzpicture}
-\caption{Cross-testbed aggregate context-gain comparison. Values are normalized
-within each testbed so the lower-context condition equals 100; the graph compares
-the effect of adding context regardless of the specific approach used. Quantum
-uses Oracle-normalized efficiency, while the clinical proxy uses predicted-pair
-output from the EQUITAS RNA-structure evidence base.}
-\label{fig:cross_testbed_context_gain}
+\caption{Preliminary result viewed as a context spectrum. Across both the
+internal hybrid corpus and the standardized external corpus, richer context is
+associated with higher Oracle-normalized efficiency: no-context baselines are
+lowest, contextual policies improve on them, and predictive-context policies
+perform best.}
+\label{fig:context_spectrum}
 \end{figure}
-
-
+\fi
 
 \begin{table}[t]
 \caption{Current validation evidence and interpretation.}

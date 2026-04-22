@@ -16,9 +16,9 @@
 | Related Work | 0.75--1.5 pages | `Related Work` | Condenses the related-work survey into grouped categories: bandits, fairness, missing context/non-stationarity, clinical fairness, and quantum routing. | Complete |
 | Approach / Methodology | 1--2 pages | `Approach and Methodology` | Explains the shared missing-context routing model, reuses the approach write-up's four-phase domain/pipeline diagram, and justifies the main design decisions. | Complete |
 | Implementation | 1--3 pages | `Implementation and Reproducibility` | Describes the quantum workflow, notebook/local/GCP paths, state/data-lake layer, evaluator/runner/visualizer architecture, CRISP+ML review package, and reuses the architecture report's system diagram. | Complete |
-| Data Sets | 0.5--1 page | `Data Sets and Experimental Inputs` | Now documents the inherited GA quantum corpora in detail: master dataset row counts, column counts, testbed/topology coverage, allocator/scenario/model dimensions, shared Drive data-lake state folders, plus current ISTE780/EQUITAS clinical evidence, the Drive source package, and planned clinical simulation data. | Complete |
+| Data Sets | 0.5--1 page | `Data Sets and Experimental Inputs` | Now documents the inherited GA quantum corpora in detail: master dataset row counts, column counts, testbed/topology coverage, allocator/scenario/model dimensions, shared Drive data-lake state folders, plus planned clinical simulation data. | Complete |
 | Ethics / Fairness | Integrated requirement | `Ethics, Fairness, Privacy, and Security` | Expands fairness from a metric into an ethical design requirement covering clinical harm, service equity, privacy, security, reproducibility, and accountability. | Complete |
-| Results | 1--3 pages, bonus if present | `Results and Current Validation Evidence` | Uses real preliminary GA quantum results and validated master datasets as bonus-worthy preliminary evidence, and now frames them explicitly as a context spectrum from no context to context to predictive context using dedicated tables and graphs, including a clinical preliminary-results table and cross-testbed aggregate context-gain figure. | Included as preliminary/bonus |
+| Results | 1--3 pages, bonus if present | `Results and Current Validation Evidence` | Uses real preliminary GA quantum results and validated master datasets as bonus-worthy preliminary evidence, and now frames them explicitly as a context spectrum from no context to context to predictive context using a dedicated table and graph. | Included as preliminary/bonus |
 | Future Work | 0.5 pages | `Future Work` | Lists concrete next-semester tasks: quantum fairness adapter, clinical simulator, mitigation mechanism, transfer analysis, final experiments, and limitations discussion. | Complete |
 | Conclusion | 0.5--1 page | `Conclusion` | Summarizes current semester accomplishments and expected impact. | Complete |
 | References | No page limit | `References` | Uses the survey bibliography and cites representative state-of-the-art work. | Complete |
@@ -58,7 +58,7 @@
 ### Preliminary Results (Bonus 10%)
 
 - **Rubric target:** charts/plots/visualizations or preliminary results with discussion.
-- **Draft response:** now includes GA-derived quantum preliminary-results tables, ISTE780/EQUITAS clinical preliminary-results evidence, a publication-style multi-panel context-spectrum figure, and a cross-testbed context-gain figure that mirrors the stronger visual style used in the quantum manuscript, together with discussion of what those results already show and what the fairness layer will add.
+- **Draft response:** now includes GA-derived preliminary-results tables plus a publication-style multi-panel context-spectrum figure that mirrors the stronger visual style used in the quantum manuscript, together with discussion of what those results already show and what the fairness layer will add.
 
 ### Ethics and Fairness Integration
 
@@ -95,19 +95,3 @@
 - Upgraded the results section from generic validation language to real preliminary GA results so the report can legitimately target the preliminary-results bonus.
 - Reframed the preliminary results around the paper's core context thesis: no-context, context, and predictive-context model families are now compared directly in a dedicated context-spectrum table and figure.
 - Replaced the rough-draft-only bar chart with a stronger GA-style multi-panel figure and added a cross-testbed uplift table so the preliminary-results section better matches the quality of the underlying quantum paper.
-
-
-## Clinical Preliminary Results Update
-
-- Pulled the latest paper repo state before editing so the rough draft reflects the newest user edits.
-- Used the Drive `Project` folder as the clinical evidence package and treated `ISTE780-Equitable_Bioinformatics_Enhancing_Diagnosis_w_RNA_and_Biomarker_Data` as the authoritative clinical source.
-- Added clinical dataset coverage: 20 RNA sequences after fairness-aware augmentation, including 10 Synthetic LowGC sequences for under-represented context repair.
-- Added clinical preliminary results: Optuna-tuned Enhanced Nussinov evidence, context-aware predicted-pair improvement, 6/6 80% rule compliance, DI ratios of 1.000, and +0.805 average DI improvement.
-- Added a cross-testbed aggregate context-gain comparison that normalizes each testbed to its lower-context baseline so quantum and clinical evidence can be compared without pretending their raw metrics are identical.
-- Created a local Drive mirror at `/Users/pitergarcia/DataScience/Semester5/DSCI601/ISTE780-clinical-drive-mirror` and prepared it as a separate git repository with a README and manifest.
-
-
-## Preservation Fix
-
-- Restored the previously written simulation-first clinical dataset paragraphs that were replaced during the clinical-results merge.
-- Kept the ISTE780/EQUITAS evidence as additive support rather than replacing the planned DSCI601 clinical-testbed framing.
