@@ -1,6 +1,120 @@
 # Rough Draft Report Addendum: Fairness Framework Implementation Update
 
-**Purpose:** Update the rough draft package with the latest implementation status without destructively rewriting the large LaTeX draft.
+**Purpose:** Update the rough draft package with the latest implementation status and clarify the research-methodology framing behind the architecture.
+
+---
+
+## Why This Methodology Matters
+
+The professor's architecture feedback suggests that the paper needs to make the early methodology phases more explicit. In this project, **Business Understanding** and **Data Understanding** are not generic project-management labels. They are research-design steps.
+
+### Business Understanding means harm/problem formulation
+
+For this project, Business Understanding means identifying the shared harm mechanism across the target applications:
+
+> clinical diagnostic systems and quantum-network routing systems both allocate scarce resources under uncertainty, and both can repeatedly harm the groups or flows whose context is least reliable.
+
+That is the reason the two domains belong together. The shared problem is not simply "two domains use bandits." The shared problem is that both domains make sequential routing decisions from partial feedback, and unequal context quality can convert measurement or service uncertainty into repeated allocation harm.
+
+In clinical settings, the harm can appear as delayed escalation, under-testing, false negatives, or uneven diagnostic attention. In quantum routing, the harm appears as degraded service quality: lower success probability, longer latency, or less reliable access for some flow classes. These harms differ ethically, but the decision structure is the same.
+
+### Data Understanding means evidence mechanism identification
+
+Data Understanding means identifying which recorded patterns make the shared harm mechanism measurable.
+
+In the clinical setting, those patterns include:
+
+- site
+- cohort
+- service line
+- group
+- action
+- allocation label
+- latency
+- reward
+- success
+- EQUITAS audit/mitigation fields
+
+In the quantum setting, those patterns include:
+
+- testbed
+- scenario
+- allocator
+- route or model choice
+- success
+- latency
+- reward
+- oracle gap or efficiency
+- evaluator state
+
+The point is not merely to inspect data. The point is to identify which data fields explain the commonality between domains and which fields expose the paths that harm or mediate outcomes most strongly.
+
+### Stronger paper wording
+
+Use wording like this in the architecture and rough draft:
+
+> Business Understanding identifies the shared harm mechanism: both clinical and quantum systems route scarce resources under uncertainty, and unequal context quality can produce repeated allocation harm. Data Understanding identifies the measurable patterns that make that harm testable: group, site, service-line, latency, reward, success, scenario, allocator, and evaluator-state fields. These phases justify the cross-domain architecture because they connect the ethical problem, the observed data, the experimental interventions, and the reporting artifacts.
+
+---
+
+## How the Architecture Interacts With Target Applications
+
+The architecture should be described as an application-facing contract, not as a disconnected pipeline diagram.
+
+Each target application supplies:
+
+1. an environment or saved state source,
+2. a model or policy family,
+3. an allocator/action mechanism,
+4. an evaluator-facing outcome record.
+
+The framework then normalizes those outputs into shared fairness/reporting artifacts.
+
+```text
+application environment or saved state
+  -> runner / model / allocator decision path
+  -> evaluator or adapter normalization
+  -> canonical outcome and fairness state
+  -> default and fairness reporting datasets
+  -> visualizer outputs, report manifests, and validation hubs
+```
+
+### Quantum interaction
+
+Legacy quantum experiments keep their original runner/evaluator/allocator path. The fairness layer attaches as a sidecar and extracts fairness-compatible states without rewriting the old experiment code. This is why the framework can test Paper2, Paper5, Paper7, Paper8, Paper12, and default/no-testbed paths while preserving old behavior.
+
+### Clinical interaction
+
+Clinical experiments run through the embedded clinical path:
+
+```text
+ClinicalExperimentEvaluator
+  -> ClinicalExperimentRunner
+  -> ClinicalEnvironment
+  -> clinical allocator
+  -> clinical model object
+  -> EQUITAS mediator
+  -> fairness states
+```
+
+The clinical path proves that a non-quantum environment can be plugged into the same architecture while producing comparable fairness/reporting artifacts.
+
+---
+
+## Architecture Figure Feedback
+
+The architecture figure received formatting feedback because it spilled off the page and the connections were visually rough.
+
+Recommended response in the next figure revision:
+
+- make the main figure an evidence-flow view, not a full component graph;
+- reduce the scale conservatively, around `0.90\linewidth` in landscape mode;
+- move low-level object names into a table instead of cramming them into the figure;
+- explicitly state in the caption that detailed implementation mappings are provided in the stage-to-component table;
+- emphasize the application contract:
+  `environment -> runner/model/allocator -> evaluator/adapter -> canonical states -> reporting/validation`.
+
+The architecture report has already been updated in this direction by resizing the figure and clarifying that the figure is a high-level evidence-flow diagram, while the detailed implementation mapping belongs in the table.
 
 ---
 
@@ -122,9 +236,12 @@ The next full LaTeX revision should update these places:
 
 2. **Introduction**
    - Clarify that the clinical setting is now implemented as a synthetic, non-PHI clinical fixture path.
+   - Add the stronger harm-mechanism framing for Business Understanding and Data Understanding.
    - Keep final-results caveat.
 
 3. **Approach and Methodology**
+   - Add the application contract:
+     `environment -> runner/model/allocator -> evaluator/adapter -> canonical states -> reporting/validation`.
    - Add the clinical execution chain:
      `ClinicalExperimentEvaluator -> ClinicalExperimentRunner -> ClinicalEnvironment -> allocator -> EQUITAS -> states`.
    - Clarify that quantum remains legacy-compatible and sidecar-based.
