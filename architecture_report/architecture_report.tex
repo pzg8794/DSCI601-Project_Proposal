@@ -56,10 +56,11 @@ This work describes the project's architecture as a reproducible, CRISP-DM-align
 
 The inherited quantum workflow reuses the same shared-drive storage, notebook path, evaluator logic, runner path, and state-analysis conventions that already produce reproducible artifacts in the upstream project. The work treats replication as part of the architecture itself rather than as a separate appendix.
 
-The architecture is organized around five interacting concerns: high-level CRISP-DM context, a control layer that governs execution and validation, an execution layer that performs collection through evaluation, a fairness--performance synthesis layer, and an artifacts layer that preserves provenance and reviewer-visible evidence.
+The current implementation extends that inherited workflow into a multi-environment fairness framework. Legacy quantum runs remain compatibility-first: the old runner, evaluator, allocator, and state paths still execute the quantum experiments, while fairness analysis attaches as a governed sidecar. In parallel, the clinical path is now embedded as a real experiment path with a clinical environment, runner, evaluator, allocator, model registry, and EQUITAS mediation seam. Both domains now feed the same canonical fairness, reporting, and validation layers.
 
-Operationally, the architecture also depends on three repository-side mechanisms that make the workflow reviewable as software: a configuration-controlled execution path, a local validation and merge-check path, and a manifest-based provenance record. These mechanisms allow another party to reproduce a run from a fixed configuration, execute the same validation logic locally, and inspect the exact artifacts
-written by the workflow.
+The architecture is organized around six interacting concerns: high-level CRISP-DM context, a control layer that governs execution and validation, an execution layer that performs collection through evaluation, an environment adapter and sidecar layer that normalizes quantum and clinical outcomes, a fairness--performance reporting layer, and an artifacts layer that preserves provenance and reviewer-visible evidence.
+
+Operationally, the architecture also depends on four repository-side mechanisms that make the workflow reviewable as software: a configuration-controlled execution path, a local validation and merge-check path, a manifest-based provenance record, and path-scoped CI smoke gates. These mechanisms allow another party to reproduce a run from a fixed configuration, execute the same validation logic locally, and inspect the exact artifacts written by the workflow.
 
 \begin{table}[ht!]
 \centering
@@ -70,46 +71,46 @@ written by the workflow.
 \toprule
 \textbf{CRISP-DM Phase} & \textbf{Realized in this architecture} \\
 \midrule
-Business Understanding & project objective, fairness criteria, and replication target \\
-Data Understanding & collection, cleaning, and exploration over shared-drive quantum state \\
-Data Preparation & preparation and restructuring by evaluators and \texttt{state\_analysis.py} \\
-Modeling & runner- and allocator-driven modeling/mining path \\
-Evaluation & evaluator metrics plus fairness--performance synthesis \\
-Deployment & review delivery stage, notebook replication, shared-drive exports, and \texttt{pipeline\_manifest.json} provenance record \\
+Business Understanding & project objective, fairness criteria, clinical/quantum comparison target, and replication target \\
+Data Understanding & collection, cleaning, and exploration over shared-drive quantum state plus synthetic clinical fixture state \\
+Data Preparation & preparation and restructuring by evaluators, \texttt{state\_analysis.py}, and \texttt{StateReporting} profiles \\
+Modeling & legacy quantum runner/allocator path plus embedded clinical runner/model/allocator path \\
+Evaluation & evaluator metrics, governed fairness summaries, model-stratified summaries, and EQUITAS audit/mitigation fields \\
+Deployment & review delivery stage, notebook replication, shared-drive exports, \texttt{report\_manifest.json}, validation hubs, and CI smoke gates \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \section{Recreating the System and Replicating Results}
-To allow users to recreate the software and replicate results, the architecture supports three entry paths.
+To allow users to recreate the software and replicate results, the architecture supports four entry paths.
 
 \begin{table}[ht!]
 \centering
-\caption{Supported execution and replication paths inherited from the quantum project}
+\caption{Supported execution and replication paths}
 \label{tab:paths}
 \begin{tabular}{p{1.8cm}p{2.8cm}p{2.7cm}}
 \toprule
 \textbf{Path} & \textbf{How it is started} & \textbf{Purpose} \\
 \midrule
-Colab / shared notebook & open shared notebook, mount Drive, run notebook cells & fastest replication of presented results \\
-Local installation & clone repo, create virtual environment, install dependencies, run scripts or notebooks & development and reproducible local validation \\
+Notebook path & open a quantum, clinical, or reporting notebook and run the shared-runner cells & fastest replication and inspection of presented results \\
+Local installation & clone repo, create virtual environment, set \texttt{PYTHONPATH}, run scripts or notebooks & development and reproducible local validation \\
 GCP VM / batch path & startup script plus batch runner scripts & large runs, longer runs, remote replication \\
+CI smoke path & GitHub Actions path-scoped workflows & guards old quantum smokes, clinical smokes, reporting, notebooks, and validation contracts \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The shared notebook is the fastest route to result replication because it already mounts the Drive, installs dependencies, loads saved evaluator or framework state, and writes results back to the same shared infrastructure. The local path remains necessary because a reviewer or developer must also be able to install the software, run tests, and inspect outputs without relying on Colab. The GCP path extends the same architecture to a remote execution context for larger or longer runs. These paths are different entry points into the same inherited execution structure.
+The shared notebook is the fastest route to result replication because it can load saved evaluator or framework state and produce the same reporting artifacts. The local path remains necessary because a reviewer or developer must also be able to run tests and inspect outputs without relying on Colab. The GCP path extends the same architecture to a remote execution context for larger or longer runs. The CI path protects regressions by running old-pipeline quantum fairness smokes, clinical fairness smokes, reporting tests, notebook hygiene checks, and validation-hub tests when experiment-impacting files change.
 
 \section{System Architecture}
 
-Figure~\ref{fig:architecture_draft2} presents the architecture as a technical summary of the full workflow. At the highest level, \textit{Business and Data Understanding} remain in an architectural context that defines the project objective, fairness interpretation, data expectations, and replication target. The \textit{control layer} receives repository events or user entry paths, applies configuration and
-validation rules, and drives the actual execution stages. The \textit{execution layer} performs collection, cleaning, preparation, exploration, mining, and evaluation. Beneath that, the \textit{fairness--performance synthesis layer} combines inherited performance summaries with repository-side fairness criteria. Finally, the artifacts layer preserves the evidence produced by each stage.
+Figure~\ref{fig:architecture_draft2} presents the architecture as a technical summary of the full workflow. At the highest level, \textit{Business and Data Understanding} remain in an architectural context that defines the project objective, fairness interpretation, data expectations, and replication target. The \textit{control layer} receives repository events or user entry paths, applies configuration and validation rules, and drives the actual execution stages. The \textit{execution layer} performs collection, cleaning, preparation, exploration, mining, and evaluation. A governed adapter and sidecar layer then normalizes outcomes across quantum and clinical settings. Beneath that, the \textit{fairness--performance reporting layer} combines inherited performance summaries with canonical fairness records, default/fairness master datasets, visualizer artifacts, report manifests, and validation hubs. Finally, the artifacts layer preserves the evidence produced by each stage.
 
 In operational terms, the \textit{control layer} is realized through configuration, orchestration, and validation entry points that correspond to the repository's local review behavior. The same logic that governs stage ordering, reproducibility, and merge validation is what allows the architecture to be inspected and rerun consistently by reviewers and collaborators.
 
 \begin{table*}[!t]
 \centering
-\caption{Stage-to-component mapping for the inherited review and replication workflow}
+\caption{Stage-to-component mapping for the current review and replication workflow}
 \label{tab:stage_objects}
 \small
 \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.7cm} >{\raggedright\arraybackslash}p{4.7cm} >{\raggedright\arraybackslash}p{4.3cm} >{\raggedright\arraybackslash}p{5.0cm}}
@@ -119,31 +120,31 @@ In operational terms, the \textit{control layer} is realized through configurati
 \midrule
 
 \rowcolor{phase1blue!12}
-Data Collection & \textit{LocalBackupManager}, \textit{GoogleDriveBackupManager}, registry build / latest-state lookup & resolves shared-drive paths and retrieves matching framework or model state from \textit{quantum\_data\_lake/} & notebooks, local scripts, and GCP runs begin by scanning the registry and loading compatible saved state \\
+Data Collection & \textit{LocalBackupManager}, \textit{GoogleDriveBackupManager}, registry build / latest-state lookup, clinical fixture builder & resolves shared-drive quantum state and produces synthetic clinical fixture records without PHI & notebooks, local scripts, and CI smokes begin by loading compatible state or generating fixture records \\
 \midrule
 
 \rowcolor{phase1blue!12}
-Data Cleaning & \textit{MultiRunEvaluator}, \textit{\_infer\_models\_from\_state()}, \textit{\_\_eq\_\_()}, \textit{ensure\_summary\_contract()} & validates state compatibility, normalizes scenario storage, and repairs missing evaluator summary payloads when needed & collection outputs are filtered into evaluator-valid state before analysis, plotting, or summary generation \\
+Data Cleaning & \textit{MultiRunEvaluator}, \textit{OutcomeRecordResolver}, adapter normalization, summary-contract repair & validates quantum state compatibility and converts quantum/clinical dictionaries into canonical outcome records & collection outputs are filtered into evaluator-valid and fairness-valid records before analysis, plotting, or reporting \\
 \midrule
 
 \rowcolor{phase2green!12}
-Data Preparation / Exploration & \textit{state\_analysis.py}, evaluator \textit{scenarios\_stats}, evaluator \textit{scenarios\_results} payloads & consumes evaluator-produced summaries and restructures them into flattened or scenario-oriented tables & notebooks and scripts use these outputs for master datasets, scenario summaries, and replication-ready tables \\
+Data Preparation / Exploration & \textit{state\_analysis.py}, \textit{StateAnalysis}, \textit{QuantumStateAnalysis}, \textit{ClinicalStateAnalysis}, \textit{StateReporting} & restructures evaluator outputs into default and fairness master datasets with shared schemas & notebooks and validation hubs use these outputs for tables, figure provenance, and cross-domain comparisons \\
 \midrule
 
 \rowcolor{phase3orange!12}
-Modeling / Mining & \textit{AllocatorRunner}, \textit{QuantumExperimentRunner}, allocator objects & executes runs, assigns route qubit allocations, and produces model-level outputs, traces, and experiment artifacts & local, notebook, and GCP paths use the runner chain to generate comparable outputs across scenarios \\
+Modeling / Mining & \textit{QuantumExperimentRunner}, \textit{ClinicalExperimentRunner}, allocator objects, clinical model registry, bandit-style models & executes quantum runs through the legacy path and clinical runs through the embedded clinical environment/model path & local, notebook, CI, and GCP paths generate comparable model-level outputs across environments \\
 \midrule
 
 \rowcolor{phase3orange!12}
-Evaluation & \textit{MultiRunEvaluator.calculate\_scenario\_winner()}, \textit{calculate\_scenario\_performance()}, \textit{calculate\_scenarios\_performance()} & computes winner counts, average gap, average efficiency, oracle reward, and scenario-level summaries & turns raw runner outputs into reviewer-visible performance evidence and comparison payloads \\
+Evaluation & \textit{MultiRunEvaluator}, \textit{ClinicalExperimentEvaluator}, \textit{FairnessEvaluationService}, \textit{FairnessWorkflow} & computes performance summaries, normalizes outcomes, builds fairness summaries, and persists governed artifacts & turns raw runner outputs into performance evidence, fairness evidence, and reproducible sidecar artifacts \\
 \midrule
 
 \rowcolor{phase4purple!14}
-Fairness--Performance Synthesis & repository-side fairness--performance component, allocator context, evaluator metrics, runner outputs, \textit{QuantumEvaluatorVisualizer}, robustness plotting path & combines inherited performance metrics with fairness criteria and produces tradeoff views & used after evaluation to generate fairness-versus-performance tables, plots, and reviewer-facing comparisons \\
+Fairness--Performance Reporting & \textit{FairnessByModelSummaryBuilder}, \textit{EquitasFairnessMediator}, \textit{ExperimentVisualizer}, \textit{ClinicalExperimentVisualizer}, \textit{ReportManifestBuilder} & combines performance metrics with fairness fields, EQUITAS mediation context, model-stratified summaries, figures, and manifest lineage & generates default/fairness datasets, clinical figures, report manifests, and validation-hub inputs \\
 \midrule
 
 \rowcolor{phase4purple!10}
-Review Delivery / Replication Outputs & notebooks, \textit{visualizer.py}, shared drive exports, \textit{pipeline\_manifest.json} & publishes figures, tables, notebook-ready outputs, and provenance artifacts & collaborators rerun notebooks and inspect shared-drive artifacts to reproduce, interpret, and share results \\
+Review Delivery / Replication Outputs & notebooks, shared runners, \textit{report\_manifest.json}, validation hubs, CI artifacts & publishes figures, tables, notebook-ready outputs, and provenance artifacts & collaborators rerun notebooks, inspect report manifests, and validate claims against generated artifacts \\
 \bottomrule
 \end{tabularx}
 \end{table*}
@@ -153,55 +154,46 @@ Review Delivery / Replication Outputs & notebooks, \textit{visualizer.py}, share
 \subsection{Business \& Data Understanding}
 Business Understanding defines the project objective, fairness criteria, acceptance rules, and the replication target. This stage determines what counts as success and which outputs must exist before work is considered review-ready.
 
-Data Understanding characterizes the shared-drive storage model, the semantics of saved state, and the assumptions that notebooks and downstream analysis make about evaluator outputs. The repository relies on the real upstream data lake.
+Data Understanding characterizes the shared-drive storage model, the semantics of saved quantum state, the synthetic clinical fixture assumptions, and the assumptions that notebooks and downstream analysis make about evaluator outputs. The repository relies on the real upstream quantum data lake for legacy quantum compatibility and uses synthetic clinical fixtures to avoid PHI while testing clinical fairness behavior.
 
 \subsection{Data Collection Stage}
-The collection stage is built from \texttt{LocalBackupManager}, \texttt{GoogleDriveBackupManager}, and the registry-based \textit{latest-state} lookup path listed in Table~\ref{tab:stage_objects}.
-\texttt{GoogleDriveBackupManager} resolves the shared-drive source and identifies the relevant storage root. \texttt{LocalBackupManager}
-provides the local-facing wrapper around that storage path. The registry logic then indexes the available saved states and selects the latest compatible artifact for the requested component or run. Together, these parts convert the shared-drive namespace into a concrete set of executable inputs for the pipeline. This stage produces source references and retrieved framework or model states that can be passed into evaluator-based validation.
+The collection stage is built from \texttt{LocalBackupManager}, \texttt{GoogleDriveBackupManager}, the registry-based \textit{latest-state} lookup path, and the clinical fixture/evaluator builders listed in Table~\ref{tab:stage_objects}. \texttt{GoogleDriveBackupManager} resolves the shared-drive source and identifies the relevant storage root. \texttt{LocalBackupManager} provides the local-facing wrapper around that storage path. The registry logic then indexes available saved states and selects compatible artifacts. For clinical runs, the fixture builder creates controlled non-PHI clinical records. Together, these parts convert either the shared-drive namespace or the clinical fixture definition into concrete executable inputs for the pipeline.
 
 \subsection{Data Cleaning Stage}
-The cleaning stage is centered on \texttt{MultiRunEvaluator}, supported by \texttt{\_infer\_models\_from\_state()}, \texttt{\_\_eq\_\_()}, and \texttt{ensure\_summary\_contract()}.
-The retrieved state from the collection stage is first inspected by \texttt{\_infer\_models\_from\_state()} so that the system can recover the model identity and expected evaluator structure. \texttt{\_\_eq\_\_()} and related evaluator-side checks verify structural compatibility.
-When evaluator summaries are incomplete or not normalized, \texttt{ensure\_summary\_contract()} repairs the summary shape so that later
-analysis stages consume a stable payload. Together, these components transform the raw retrieved state into an evaluator-valid state. The output is a cleaned and contract-consistent evaluator state that downstream analysis can trust.
+The cleaning stage is centered on \texttt{MultiRunEvaluator}, adapter normalization, and canonical outcome resolution. Retrieved quantum state is inspected for model identity and evaluator structure, while adapter-side resolvers convert raw state dictionaries into canonical outcome records. When evaluator summaries are incomplete or not normalized, summary-contract repair keeps downstream consumers stable. The output is a cleaned and contract-consistent evaluator or outcome state that downstream analysis can trust.
 
 \subsection{Data Preparation and Exploration Stage}
-This stage is built from \texttt{state\_analysis.py} and the evaluator-owned \texttt{scenarios\_stats} and \texttt{scenarios\_results} payloads referenced in Table~\ref{tab:stage_objects}.
-\texttt{MultiRunEvaluator} provides the scenario summaries and normalized result structures. \texttt{state\_analysis.py} then consumes
-those evaluator outputs and restructures them into flattened tables, scenario-oriented summaries, and analysis-ready views. This stage is a composition of evaluator-generated summaries plus state-analysis postprocessing. The output is a prepared set of scenario summaries, tables, and exploratory artifacts that support mining, notebooks, and reviewer inspection.
+This stage now includes both the inherited \texttt{state\_analysis.py} workflow and the generalized \texttt{StateReporting} object model. The inherited state-analysis code continues to support master datasets and validation for existing quantum outputs. The newer state-reporting layer adds an abstract \texttt{StateAnalysis} contract with \texttt{QuantumStateAnalysis} and \texttt{ClinicalStateAnalysis} children. \texttt{StateReporting} can emit default reporting datasets that preserve legacy performance methodology and fairness reporting datasets that include group, site, cohort, action, allocation, and EQUITAS fields. The result is a single reporting workflow that can produce comparable tables even when some fields are null in one domain.
 
 \subsection{Modeling and Mining Stage}
-The mining stage is implemented through \texttt{AllocatorRunner}, \texttt{QuantumExperimentRunner}, and the allocator objects responsible for route qubit allocation. The allocator objects define the decision logic used within each run. \texttt{QuantumExperimentRunner} executes the underlying experiment path and produces run-level outputs and traces. \texttt{AllocatorRunner} orchestrates the higher-level execution across allocators, scenarios, and configurations. Together, these components produce the substantive outputs that the evaluator later summarizes. This stage produces model outputs, traces, and experiment artifacts suitable for scenario-level comparison.
+The mining stage is implemented through two execution families. Legacy quantum experiments still use \texttt{QuantumExperimentRunner}, \texttt{MultiRunEvaluator}, and the allocator objects responsible for route qubit allocation. Clinical experiments now use \texttt{ClinicalExperimentEvaluator}, \texttt{ClinicalExperimentRunner}, \texttt{ClinicalEnvironment}, clinical allocator objects, and a clinical model registry containing \texttt{Oracle}, \texttt{ClinicalBaseline}, \texttt{FairAllocatorV1}, and \texttt{ClinicalBanditUCB}. This design keeps the old quantum runner intact while proving that the framework can plug in a non-quantum environment and compare model families through the same fairness/reporting surface.
 
 \subsection{Evaluation Stage}
-The evaluation stage is owned by \texttt{MultiRunEvaluator}, particularly through \texttt{calculate\_scenario\_winner()}, \texttt{calculate\_scenario\_performance()}, and \texttt{calculate\_scenarios\_performance()}. The evaluator consumes the runner outputs, organizes them by scenario, and computes the summary statistics required for comparison: winner counts, average gap, average efficiency, oracle reward, and related scenario-level measures. This stage keeps judgment logic close to the same object that also maintains the state contract. The output is a reviewer-visible performance summary that can be consumed directly or passed into the fairness--performance layer.
+The evaluation stage is owned by evaluator and workflow objects. On the quantum side, \texttt{MultiRunEvaluator} computes winner counts, average gap, average efficiency, oracle reward, and scenario-level measures. On the clinical side, \texttt{ClinicalExperimentEvaluator} runs model decisions through the clinical environment and allocator/EQUITAS path, then exposes fairness states. \texttt{FairnessEvaluationService} and \texttt{FairnessWorkflow} normalize those states, build governed fairness summaries, and persist sidecar artifacts. The output is a reviewer-visible performance and fairness record that can be consumed directly or passed into reporting.
 
-\subsection{Fairness--Performance Synthesis Layer}
-This new layer combines a repository-side fairness--performance component with allocator context, runner outputs, evaluator metrics, and visualizer or robustness-plotting consumers such as \texttt{QuantumEvaluatorVisualizer}. The runner chain and allocator context define how performance was produced. The evaluator computes the inherited performance metrics. The fairness--performance component then places those metrics beside the fairness criteria defined at the repository level and produces tradeoff views that neither the raw runner nor the raw evaluator produces on its own. The visualizer path then consumes those combined outputs to generate figures and comparative summaries. The output is a set of tradeoff tables, comparative plots, and review-facing fairness-versus-performance summaries.
+\subsection{Fairness--Performance Reporting Layer}
+This layer now combines performance metrics, canonical fairness fields, model-stratified summaries, visualizer outputs, and report manifests. \texttt{FairnessByModelSummaryBuilder} records per-model parity gaps and group summaries. \texttt{EquitasFairnessMediator} provides an environment-agnostic audit/mitigation seam with clinical and quantum child mediators. \texttt{ExperimentVisualizer} defines the visualizer contract, while \texttt{ClinicalExperimentVisualizer} renders clinical model-efficiency and latency figures. \texttt{ReportManifestBuilder} ties fairness artifacts, default/fairness master datasets, visualizer outputs, and source lineage into \texttt{report\_manifest.json}. The output is a set of tradeoff tables, comparative plots, validation-hub inputs, and review-facing fairness-versus-performance summaries.
 
 \subsection{Review Delivery and Replication Outputs}
-The final stage uses notebooks, \texttt{visualizer.py}, shared-drive exports, and \texttt{pipeline\_manifest.json}.
-The prior stages generate the saved state, metrics, fairness summaries, and plots. The notebook and visualizer path turns those into human-readable artifacts. The manifest records provenance for the run. Shared-drive export keeps the outputs accessible to collaborators and later
-reanalysis. The output is a set of figures, tables, rerunnable notebook artifacts, and provenance records that support review and replication.
+The final stage uses notebooks, shared runners, visualizers, report manifests, validation hubs, and CI artifacts. The prior stages generate saved state, metrics, fairness summaries, master datasets, and plots. Notebook runners keep logic in reusable code while exposing a transparent interface for users. The clinical reproducibility notebook produces fairness artifacts, default/fairness master datasets, visualizer figures, and \texttt{report\_manifest.json}. The fairness validation hub consumes that manifest to verify preliminary fairness evidence. The output is a set of figures, tables, rerunnable notebook artifacts, and provenance records that support review and replication.
+
+\section{Implemented Validation Gates}
+
+The current system is guarded by two major smoke workflows. The Drive fairness smoke runs the legacy old-pipeline quantum wrapper over the default/no-testbed path plus Paper2, Paper5, Paper7, Paper8, and Paper12. This gate ensures that the fairness sidecar does not break known legacy experiment paths. The clinical fairness smoke runs the embedded clinical evaluator with \texttt{Oracle}, \texttt{ClinicalBaseline}, \texttt{FairAllocatorV1}, and \texttt{ClinicalBanditUCB}, asserts sixteen fairness outcomes, checks model-stratified summaries, and runs focused tests for reporting, visualizers, notebooks, and validation hubs. These gates are path-scoped so expensive checks run when experiment, reporting, notebook, dependency, or workflow code changes, not on unrelated documentation-only edits.
 
 \section{User Workflow}
 
 \subsection{Setup and Installation}
-Users can interact with the system through three supported paths.
-\texttt{Notebook path.} Open the shared notebook, mount Google Drive, install dependencies in the notebook runtime, and run the relevant cells.
-\texttt{Local path.} Clone the repository, create a virtual environment, install dependencies from \texttt{requirements.txt}, and run the required
-scripts or notebooks.
-\texttt{GCP path.} Provision or enter a VM, run the startup script, and then use the batch or dynamic runner scripts for longer experiments.
+Users can interact with the system through four supported paths. \texttt{Notebook path.} Open the quantum, clinical, or reporting notebook and run the shared-runner cells. \texttt{Local path.} Clone the repository, create a virtual environment, set \texttt{PYTHONPATH=Evaluation\_Framework}, and run the required scripts or notebooks. \texttt{GCP path.} Provision or enter a VM, run the startup script, and then use the batch or dynamic runner scripts for longer experiments. \texttt{CI path.} Push or open a pull request that touches experiment-impacting paths and let the scoped workflows validate the corresponding smoke surfaces.
 
 \subsection{How the User Runs the System}
-Once setup is complete, the user chooses a stage or full workflow. In the local path, that usually means running the quick test or full validation script. In the notebook path, it means configuring an experiment in the notebook and executing the evaluator-backed workflow. In the GCP path, it means invoking the startup and batch scripts and allowing the run to complete remotely. These paths are different entry points into the same inherited execution structure.
+Once setup is complete, the user chooses a stage or full workflow. In the local path, that usually means running focused tests, the old-pipeline fairness smoke, or the clinical notebook pipeline. In the notebook path, it means configuring an experiment in a shared runner and executing the evaluator-backed workflow. In the GCP path, it means invoking the startup and batch scripts and allowing the run to complete remotely. These paths are different entry points into the same execution, fairness, reporting, and validation structure.
 
 \subsection{How the User Interprets Results}
-The user interprets results through the same artifact conventions used by the upstream project. Framework-state and model-state outputs are written under the shared data lake, often in day-partitioned directories. Notebooks and visualizer logic then consume those results to generate plots, scenario comparisons, and summary tables. Deterministic stage outputs together with \texttt{pipeline\_manifest.json} preserve the configuration, artifact paths, and provenance of each run, allowing a figure or summary to be traced back to the exact execution path that produced it.
+The user interprets results through shared artifact conventions. Quantum framework-state and model-state outputs remain under the shared data lake. Fairness sidecar outputs are written under \texttt{datalake/fairness/...}. Reporting outputs are written as default and fairness master datasets. Visualizer outputs generate figures and visualization manifests. \texttt{report\_manifest.json} ties those outputs back to the exact source artifacts that produced them. This means a figure, table, or validation claim can be traced to generated data rather than reconstructed manually.
 
 \subsection{How the User Shares Results}
-Because the data lake is shared-drive based, completed runs can be made visible to collaborators without a separate export pipeline. Results written to \texttt{quantum\_data\_lake/}, including framework state, model state, tables, and figures, are already placed in a location that supports team inspection and notebook-based reanalysis.
+Because the data lake is shared-drive based and the reporting layer writes manifest-backed artifacts, completed runs can be made visible to collaborators without a separate export pipeline. Results written to \texttt{quantum\_data\_lake/}, \texttt{datalake/fairness/}, and \texttt{datalake/reports/} support team inspection, notebook-based reanalysis, and future validation-hub or portal interfaces.
 
 \begin{thebibliography}{2}
 
@@ -226,7 +218,7 @@ GitHub repository, 2025--2026.
 \centering
 % \resizebox{0.98\linewidth}{!}{\input{architecture_diagram.tex}}
 \resizebox{1.05\linewidth}{!}{\input{architecture_diagram.tex}}
-\caption{Five-layer architecture of the inherited CRISP-DM review and replication pipeline~\cite{wirth2000crisp}. The top layer defines the Business and Data Understanding context. The second layer is the control layer, consisting of repository events, entry paths, control policy, orchestration, validation, and the merge gate. The third layer is the execution layer, spanning data collection through evaluation and grounded in inherited \texttt{quantum\_project} objects. The fourth layer is the fairness--performance synthesis layer, which combines allocator context, runner outputs, evaluator metrics, and \texttt{state\_analysis} tables. The bottom layer is the artifacts layer, which preserves per-stage provenance outputs and \texttt{pipeline\_manifest.json}.}
+\caption{Updated architecture of the CRISP-DM review and replication pipeline~\cite{wirth2000crisp}. The top layer defines the Business and Data Understanding context. The second layer is the control layer, consisting of repository events, entry paths, control policy, orchestration, validation, and CI smoke gates. The third layer is the execution layer, spanning data collection through evaluation and grounded in inherited quantum objects plus the embedded clinical evaluator path. The fourth layer is the fairness--performance reporting layer, which combines allocator context, runner outputs, evaluator metrics, canonical outcome records, state-reporting datasets, visualizers, and report manifests. The bottom layer is the artifacts layer, which preserves per-stage provenance outputs, \texttt{report\_manifest.json}, validation-hub inputs, and CI-uploaded evidence.}
 \label{fig:architecture_draft2}
 \end{figure}
 \end{landscape}
