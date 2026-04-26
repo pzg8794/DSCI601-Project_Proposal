@@ -1,7 +1,0 @@
-component,status,current_evidence,revision_note
-quantum_routing_corpus,completed,"Inherited prior corpus and manuscript draft available","Keep as preliminary inherited evidence"
-reviewer_safe_pipeline,completed,"README, CLI, stage design, deterministic outputs","Use as reproducibility evidence"
-unit_test_suite,completed,"Repository contains tests and a merge-check path","State that tests exist; attach logs only if executed"
-quantum_fairness_adapter,partial,"Fairness extension is the next direct implementation target","Do not phrase as completed"
-clinical_diagnostic_simulator,planned,"Conceptual design is present; full simulator is not yet implemented","Frame as simulation-first future work"
-cross_domain_fairness_results,planned,"No completed dual-domain fairness result is yet evidenced in the repo set","Remove any language implying completion"
