@@ -6,7 +6,7 @@
 
 ## Why This Methodology Matters
 
-The professor's architecture feedback suggests that the paper needs to make the early methodology phases more explicit. In this project, **Business Understanding** and **Data Understanding** are not generic project-management labels. They are research-design steps.
+The methodology section should make the early research-design phases explicit. In this project, **Business Understanding** and **Data Understanding** are not generic project-management labels. They are research-design steps that connect the motivating harm mechanism, the observable data, the experimental interventions, and the evidence artifacts used for reporting.
 
 ### Business Understanding means harm/problem formulation
 
@@ -16,7 +16,7 @@ For this project, Business Understanding means identifying the shared harm mecha
 
 That is the reason the two domains belong together. The shared problem is not simply "two domains use bandits." The shared problem is that both domains make sequential routing decisions from partial feedback, and unequal context quality can convert measurement or service uncertainty into repeated allocation harm.
 
-In clinical settings, the harm can appear as delayed escalation, under-testing, false negatives, or uneven diagnostic attention. In quantum routing, the harm appears as degraded service quality: lower success probability, longer latency, or less reliable access for some flow classes. These harms differ ethically, but the decision structure is the same.
+In clinical settings, routing includes the distribution of scarce tests, retesting capacity, escalation decisions, diagnostic attention, and model-assisted triage across sites and cohorts. During volatile conditions such as a pandemic, threat, demand, evidence quality, and resource availability can shift rapidly, making the clinical environment chaotic in a way that is structurally similar to quantum routing under noisy links, uncertain entanglement generation, and non-stationary service conditions. In quantum routing, the harm appears as degraded service quality: lower success probability, longer latency, or less reliable access for some flow classes. These harms differ ethically, but the decision structure is the same.
 
 ### Data Understanding means evidence mechanism identification
 
@@ -28,7 +28,8 @@ In the clinical setting, those patterns include:
 - cohort
 - service line
 - group
-- action
+- test distribution and retesting capacity
+- escalation or diagnostic-routing action
 - allocation label
 - latency
 - reward
@@ -37,7 +38,7 @@ In the clinical setting, those patterns include:
 
 In the quantum setting, those patterns include:
 
-- testbed
+- testbed/source environment
 - scenario
 - allocator
 - route or model choice
@@ -53,7 +54,7 @@ The point is not merely to inspect data. The point is to identify which data fie
 
 Use wording like this in the architecture and rough draft:
 
-> Business Understanding identifies the shared harm mechanism: both clinical and quantum systems route scarce resources under uncertainty, and unequal context quality can produce repeated allocation harm. Data Understanding identifies the measurable patterns that make that harm testable: group, site, service-line, latency, reward, success, scenario, allocator, and evaluator-state fields. These phases justify the cross-domain architecture because they connect the ethical problem, the observed data, the experimental interventions, and the reporting artifacts.
+> Business Understanding identifies the shared harm mechanism: both clinical and quantum systems route scarce resources under uncertainty, and unequal context quality can produce repeated allocation harm. Data Understanding identifies the measurable patterns that make that harm testable: group, site, cohort, service line, test distribution, escalation action, latency, reward, success, scenario, allocator, route choice, and evaluator-state fields. These phases justify the cross-domain architecture because they connect the ethical problem, the observed data, the experimental interventions, and the reporting artifacts.
 
 ---
 
@@ -81,7 +82,7 @@ application environment or saved state
 
 ### Quantum interaction
 
-Legacy quantum experiments keep their original runner/evaluator/allocator path. The fairness layer attaches as a sidecar and extracts fairness-compatible states without rewriting the old experiment code. This is why the framework can test Paper2, Paper5, Paper7, Paper8, Paper12, and default/no-testbed paths while preserving old behavior.
+Legacy quantum experiments keep their original runner/evaluator/allocator path. The fairness layer attaches as a sidecar and extracts fairness-compatible states without rewriting the old experiment code. This is why the framework can test the Chaudhary, Liu, Clayton, and other archived legacy quantum testbed paths while preserving old behavior.
 
 ### Clinical interaction
 
@@ -101,11 +102,11 @@ The clinical path proves that a non-quantum environment can be plugged into the 
 
 ---
 
-## Architecture Figure Feedback
+## Architecture Figure Treatment
 
-The architecture figure received formatting feedback because it spilled off the page and the connections were visually rough.
+The architecture figure should be presented as an evidence-flow view rather than as a full implementation graph.
 
-Recommended response in the next figure revision:
+Recommended treatment in the next figure revision:
 
 - make the main figure an evidence-flow view, not a full component graph;
 - reduce the scale conservatively, around `0.90\linewidth` in landscape mode;
@@ -126,7 +127,7 @@ The current implementation now supports:
 
 - legacy quantum old-pipeline fairness extraction as an additive sidecar
 - default/no-testbed quantum smoke coverage
-- Paper2, Paper5, Paper7, Paper8, and Paper12 legacy fairness smokes
+- Chaudhary, Liu, Clayton, and other archived legacy quantum fairness smokes
 - embedded clinical experiment execution through a clinical evaluator, runner, environment, allocator, model registry, and EQUITAS mediation seam
 - governed fairness artifacts under `datalake/fairness/...`
 - default and fairness reporting profiles
@@ -154,7 +155,7 @@ The rough draft currently emphasizes notebooks, local execution, GCP execution, 
 
 Updated description:
 
-> Reproducibility is enforced through three layers: executable notebooks/shared runners, local test commands, and path-scoped CI workflows. The Drive fairness smoke validates old quantum/default and paper-testbed smokes with credentials. The clinical fairness smoke validates the embedded clinical evaluator, fairness artifacts, model-stratified summaries, visualizer outputs, reporting manifests, and validation hub contracts. Reporting artifacts are tied together through `report_manifest.json`, allowing validation notebooks to trace paper-facing claims back to generated datasets, figures, and source fairness artifacts.
+> Reproducibility is enforced through three layers: executable notebooks/shared runners, local test commands, and path-scoped CI workflows. The Drive fairness smoke validates old quantum/default and source-backed legacy quantum smokes with credentials. The clinical fairness smoke validates the embedded clinical evaluator, fairness artifacts, model-stratified summaries, visualizer outputs, reporting manifests, and validation hub contracts. Reporting artifacts are tied together through `report_manifest.json`, allowing validation notebooks to trace paper-facing claims back to generated datasets, figures, and source fairness artifacts.
 
 ---
 
@@ -216,11 +217,7 @@ The rough draft should continue to avoid overstating final scientific results. T
 Specific validated paths:
 
 - old quantum default/no-testbed smoke
-- old quantum Paper2 smoke
-- old quantum Paper5 smoke
-- old quantum Paper7 smoke
-- old quantum Paper8 smoke
-- old quantum Paper12 smoke
+- source-backed legacy quantum smokes, including Chaudhary, Liu, and Clayton testbed paths where source mappings are verified
 - embedded clinical smoke with `Oracle`, `ClinicalBaseline`, `FairAllocatorV1`, and `ClinicalBanditUCB`
 - clinical report package with default/fairness master datasets, visualizer figures, visualization manifest, and `report_manifest.json`
 
@@ -237,6 +234,7 @@ The next full LaTeX revision should update these places:
 2. **Introduction**
    - Clarify that the clinical setting is now implemented as a synthetic, non-PHI clinical fixture path.
    - Add the stronger harm-mechanism framing for Business Understanding and Data Understanding.
+   - Tie clinical routing explicitly to test distribution, retesting capacity, escalation, diagnostic attention, and pandemic-like non-stationarity.
    - Keep final-results caveat.
 
 3. **Approach and Methodology**
@@ -251,6 +249,7 @@ The next full LaTeX revision should update these places:
    - Add report manifests.
    - Add default/fairness reporting profiles.
    - Add validation hubs.
+   - Replace visible PaperX labels with source/author-based testbed labels wherever the source mapping is known.
 
 5. **Preliminary Validation Evidence**
    - Report current validation as smoke/reproducibility evidence:
