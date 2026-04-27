@@ -54,12 +54,15 @@ network routing share the same structural failure mode: policies must choose
 an action from partial feedback, yet the groups or flows with the least
 reliable context can absorb the worst errors. The work develops a reusable
 evaluation framework for non-contextual bandits, contextual bandits, and
-informative contextual bandits across two testbeds: a quantum-routing
-environment grounded in prior hybrid-bandit experiments and a planned
-simulation-first diagnostic workflow. Work completed so far includes the
-related-work synthesis, domain model, architecture specification, quantum-first
-execution plan, and a reproducible CRISP+ML code-review package with unit
-tests and merge validation. The contribution is a reproducible method for
+informative contextual bandits across two executable environment families. The
+quantum path reuses the legacy quantum-routing evaluation stack and saved-state
+paths from the quantum-routing evaluation paper, while the clinical path now
+runs through an embedded synthetic clinical environment with clinical models,
+resource allocation, EQUITAS mediation, and governed fairness artifacts. Work
+completed so far includes the related-work synthesis, domain model,
+architecture specification, embedded clinical evaluator path, legacy quantum
+fairness sidecar, default and fairness reporting datasets, validation-hub
+artifacts, and CI-protected smoke gates. The contribution is a reproducible method for
 measuring and mitigating time-evolving fairness disparities while
 preserving utility under non-stationarity and limited context.
 \end{abstract}
@@ -90,17 +93,22 @@ allocate scarce probabilistic resources among competing flows; fairness in
 success probability and latency is a service-quality issue rather
 than a purely normative add-on.
 
-The project uses two complementary testbeds. The first is an existing
-quantum-routing evaluation stack based on hybrid contextual bandits for
-entanglement routing and qubit allocation~\cite{garcia2026threat_aware_quantum_routing}.
-That testbed already exposes uncertainty, adversarial or non-stationary
-conditions, and stateful evaluator artifacts. The second is a planned
-diagnostic-like simulation motivated by equitable bioinformatics and fairness
-auditing work~\cite{garcia2025equitable_bioinformatics}. The diagnostic
-simulation will model test selection, retesting, and escalation under
-controllable missingness, measurement noise, and group-dependent context
-quality. The two-domain design tests whether fairness mechanisms and
-policy-update strategies transfer across fundamentally different applications.
+The project uses two complementary environment families. The first is an
+existing quantum-routing evaluation stack based on hybrid contextual bandits
+for entanglement routing and qubit allocation~\cite{garcia2026threat_aware_quantum_routing}.
+That stack already exposes uncertainty, adversarial or non-stationary
+conditions, legacy testbed conventions, and stateful evaluator artifacts. The
+second is an embedded clinical simulation motivated by equitable bioinformatics
+and fairness auditing work~\cite{garcia2025equitable_bioinformatics}. The
+clinical environment models the routing of scarce tests, retesting capacity,
+escalation decisions, diagnostic attention, and model-assisted triage across
+sites and cohorts. Under volatile conditions such as a pandemic, threat,
+demand, evidence quality, and resource availability can change rapidly; this
+makes the clinical routing setting structurally comparable to quantum routing
+under noisy links, uncertain entanglement generation, and non-stationary
+service conditions. The two-domain design tests whether fairness mechanisms
+and policy-update strategies transfer across fundamentally different
+applications with the same partial-feedback allocation structure.
 
 The current rough draft reports the mostly completed design and implementation
 foundation rather than final experimental results. The remainder of the paper
@@ -217,10 +225,18 @@ domain-distinct routing systems.
 
 \section{Approach and Methodology}
 \subsection{Shared Missing-Context Routing Model}
-The methodology treats both domains as routing under missing context. In the
-clinical domain, the routed resource is diagnostic attention: tests, retests,
-triage escalation, or model/pipeline selection. In the quantum domain, the
-routed resource is entanglement-generation effort or path capacity. In both
+The methodology treats both domains as routing under missing context. Business
+Understanding identifies the shared harm mechanism: clinical and quantum
+systems route scarce resources under uncertainty, and unequal context quality
+can produce repeated allocation harm. Data Understanding identifies the
+measurable patterns that make that harm testable, including group, site,
+cohort, service line, test distribution, escalation action, latency, reward,
+success, scenario, allocator, route choice, and evaluator-state fields.
+
+In the clinical domain, the routed resource is diagnostic attention: scarce
+tests, retests, triage escalation, model-assisted prioritization, or
+model/pipeline selection. In the quantum domain, the routed resource is
+entanglement-generation effort, qubit allocation, or path capacity. In both
 domains, the policy observes partial context, chooses an action, receives
 partial feedback, and updates. The key experimental variable is the richness
 and reliability of context available to the policy.
@@ -432,11 +448,16 @@ configuration.
 The implementation is designed around reproducibility. The quantum side uses
 three execution paths inherited from the upstream quantum project: notebooks
 for fast interactive replication, a local environment for development and
-testing, and GCP/batch scripts for longer runs. The notebook path supports
-Paper2, Paper7, Paper8, and Paper12-style testbed configurations. The local
-path uses a virtual environment, dependencies from \texttt{requirements.txt},
-and validation scripts. The GCP path uses startup and dynamic-runner scripts
-for larger allocator and time-scale experiments.
+testing, and GCP/batch scripts for longer runs. The notebook and local paths
+support the legacy quantum testbeds and saved-state conventions documented in
+the quantum-routing evaluation paper~\cite{garcia2026threat_aware_quantum_routing}.
+The clinical side now runs through an embedded evaluator path consisting of
+\texttt{ClinicalExperimentEvaluator}, \texttt{ClinicalExperimentRunner},
+\texttt{ClinicalEnvironment}, clinical resource allocation, clinical model
+objects, and EQUITAS mediation. The local path uses a virtual environment,
+dependencies from \texttt{requirements.txt}, and validation scripts. The GCP
+path uses startup and dynamic-runner scripts for larger allocator and
+time-scale experiments.
 
 \begin{table}[t]
 \caption{Implementation layers and the role of reproducibility.}
@@ -531,11 +552,15 @@ quick-run pipeline that a reviewer would execute manually.
 \centering
 \resizebox{0.98\textwidth}{!}{\input{architecture_diagram.tex}}
 \caption{Architecture diagram adapted from the architecture report. The
-workflow connects high-level CRISP-DM context, repository/user entry paths,
-control and validation layers, executable data-processing stages, the
-fairness--performance synthesis layer, and final replication artifacts. This
-diagram clarifies how notebook, local, and cloud execution paths all produce
-auditable evidence for review and final analysis.}
+workflow is an evidence-flow view rather than a full implementation graph. It
+connects problem formulation and data/context understanding to repository/user
+entry paths, control and validation layers, executable data-processing stages,
+the fairness--performance synthesis layer, and final replication artifacts. In
+application terms, each environment supplies a saved-state or simulator source,
+a runner/model/allocator decision path, and evaluator-facing outcomes. The
+framework converts those outcomes into canonical states, default and fairness
+reporting datasets, visualizer outputs, report manifests, and validation-hub
+evidence.}
 \label{fig:architecture}
 \end{figure*}
 
