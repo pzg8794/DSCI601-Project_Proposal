@@ -20,12 +20,8 @@
 \definecolor{phase3orange}{RGB}{230,126,34}
 \definecolor{phase4purple}{RGB}{155,89,182}
 
-% External testbed / paper reference macros.
-% Internal names preserve working terminology; rendered text uses reader-facing references.
-\newcommand{\paperTwo}{Chaudhary \emph{et al.}~\cite{chaudhary2023quantum}\xspace}
-\newcommand{\paperSeven}{Liu \emph{et al.}~\cite{liu2024qbgp}\xspace}
-\newcommand{\paperEight}{Paper 8 reference pending\xspace}
-\newcommand{\paperTwelve}{Clayton \emph{et al.}~\cite{clayton2024quarc}\xspace}
+% External quantum-paper reference macro.
+\newcommand{\quantumPaper}{the quantum-routing evaluation paper~\cite{garcia2026threat_aware_quantum_routing}\xspace}
 
 \title{{\LARGE\textbf{Fairness-Aware Routing in Quantum Networks \& Clinical Settings}}\\
 {\Large\textit{via Multi-Armed, Contextual, and Informative Bandit Methods}}\\
@@ -93,7 +89,7 @@ Deployment / Presentation & Make the evidence reproducible, inspectable, and tra
 
 The architecture interacts with the target applications through an environment contract rather than through a single hard-coded simulator. Each application supplies four things: an environment or saved state source, a model or policy family, an allocator/action mechanism, and an evaluator-facing outcome record. The framework then normalizes those outcomes into a shared fairness/reporting surface.
 
-In the quantum application, the environment is the inherited quantum-routing stack. Quantum experiments continue to use the original runner and evaluator behavior so that source-backed legacy testbeds from \paperTwo, \paperSeven, \paperTwelve, and related archived paths remain valid. The fairness layer does not rewrite those experiments. Instead, a smoke wrapper executes the old path, maps legacy testbed identifiers to source labels, extracts evaluator states, and writes fairness sidecar artifacts under \texttt{datalake/fairness/quantum/...}. This design answers the main compatibility question: the fairness framework can inspect old quantum results without disrupting old quantum runs.
+In the quantum application, the environment is the inherited quantum-routing stack. Quantum experiments continue to use the original runner and evaluator behavior so that legacy quantum testbeds and saved-state paths from \quantumPaper remain valid. The fairness layer does not rewrite those experiments. Instead, a smoke wrapper executes the old path, maps legacy testbed identifiers to source labels, extracts evaluator states, and writes fairness sidecar artifacts under \texttt{datalake/fairness/quantum/...}. This design answers the main compatibility question: the fairness framework can inspect old quantum results without disrupting old quantum runs.
 
 In the clinical application, the environment is an embedded synthetic clinical fixture. The clinical path runs through \texttt{ClinicalExperimentEvaluator}, \texttt{ClinicalExperimentRunner}, \texttt{ClinicalEnvironment}, clinical resource allocation, clinical model objects, and the EQUITAS mediator. The clinical models include \texttt{Oracle}, \texttt{ClinicalBaseline}, \texttt{FairAllocatorV1}, and \texttt{ClinicalBanditUCB}. Each model produces decisions and outcomes that are converted into the same canonical fairness state format used by the quantum sidecar. This design answers the plug-in question: a non-quantum environment can be inserted into the same architecture and evaluated with the same reporting and validation tools.
 
@@ -216,7 +212,7 @@ The final stage uses notebooks, shared runners, visualizers, report manifests, v
 
 \section{Implemented Validation Gates}
 
-The current system is guarded by two major smoke workflows. The Drive fairness smoke runs the legacy old-pipeline quantum wrapper over the default/no-testbed path plus source-backed legacy quantum testbeds, including \paperTwo, \paperSeven, \paperTwelve, and related archived paths where source mappings are verified. This gate ensures that the fairness sidecar does not break known legacy experiment paths. The clinical fairness smoke runs the embedded clinical evaluator with \texttt{Oracle}, \texttt{ClinicalBaseline}, \texttt{FairAllocatorV1}, and \texttt{ClinicalBanditUCB}, asserts sixteen fairness outcomes, checks model-stratified summaries, and runs focused tests for reporting, visualizers, notebooks, and validation hubs. These gates are path-scoped so expensive checks run when experiment, reporting, notebook, dependency, or workflow code changes, not on unrelated documentation-only edits.
+The current system is guarded by two major smoke workflows. The Drive fairness smoke runs the legacy old-pipeline quantum wrapper over the default/no-testbed path plus the legacy quantum testbeds and saved-state paths from \quantumPaper. This gate ensures that the fairness sidecar does not break known legacy experiment paths. The clinical fairness smoke runs the embedded clinical evaluator with \texttt{Oracle}, \texttt{ClinicalBaseline}, \texttt{FairAllocatorV1}, and \texttt{ClinicalBanditUCB}, asserts sixteen fairness outcomes, checks model-stratified summaries, and runs focused tests for reporting, visualizers, notebooks, and validation hubs. These gates are path-scoped so expensive checks run when experiment, reporting, notebook, dependency, or workflow code changes, not on unrelated documentation-only edits.
 
 \section{User Workflow}
 
@@ -232,7 +228,7 @@ The user interprets results through shared artifact conventions. Quantum framewo
 \subsection{How the User Shares Results}
 Because the data lake is shared-drive based and the reporting layer writes manifest-backed artifacts, completed runs can be made visible to collaborators without a separate export pipeline. Results written to \texttt{quantum\_data\_lake/}, \texttt{datalake/fairness/}, and \texttt{datalake/reports/} support team inspection, notebook-based reanalysis, and future validation-hub or portal interfaces.
 
-\begin{thebibliography}{5}
+\begin{thebibliography}{3}
 
 \bibitem{wirth2000crisp}
 R.~Wirth and J.~Hipp,
@@ -246,21 +242,10 @@ P.~Z.~Garcia,
 GitHub repository, 2025--2026.
 [Online]. Available: \url{https://github.com/pzg8794/quantum_project}
 
-\bibitem{chaudhary2023quantum}
-V.~Chaudhary, K.~Li, and K.~Chowdhury,
-``Learning-based Route Selection in Noisy Quantum Communication Networks,''
-in \textit{Proc. IEEE International Conference on Communications (ICC)}, 2023.
-[Online]. Available: \url{https://genesys-lab.org/papers/Quantum_Bandit_ICC2023.pdf}
-
-\bibitem{liu2024qbgp}
-M.~Liu, Z.~Li, K.~Cai, J.~Allcock, S.~Zhang, and J.~C.~S. Lui,
-``Quantum BGP with Online Path Selection via Network Benchmarking,''
-in \textit{IEEE INFOCOM}, 2024.
-
-\bibitem{clayton2024quarc}
-C.~Clayton, X.~Wu, and B.~Bhattacharjee,
-``Efficient Routing on Quantum Networks using Adaptive Clustering,''
-\textit{arXiv preprint arXiv:2410.23007}, 2024.
+\bibitem{garcia2026threat_aware_quantum_routing}
+P.~Z.~Garcia,
+``Threat-Aware Evaluation of Quantum Entanglement Routing and Qubit Allocation via Hybrid Contextual Bandits,''
+unpublished manuscript, Rochester Institute of Technology, 2026.
 
 \end{thebibliography}
 
