@@ -1,19 +1,24 @@
 \section{Introduction}
 
 \subsection{Scientific Merit, Importance, and Challenges}
+
+\subsubsection{Sequential Decision-Making Under Uncertainty}
 Many applied data science systems are sequential decision systems that route
 limited resources under uncertainty. These types of decisions are difficult
 because the system observes only partial feedback. The chosen action reveals an
-outcome, but the unchosen alternatives remain counterfactual. They are also
-fairness critical because the quality of the observed context is often uneven
-across groups. When one group has delayed testing, incomplete history,
-lower-quality measurements, or less representative calibration data, a policy
-optimized only for aggregate reward can hide subgroup errors and compound
-disparities over time.
+outcome, but the unchosen alternatives remain counterfactual.
 
-This work frames that problem as fairness-aware contextual bandit learning.
-At each round, a policy observes context, chooses an action, receives reward
-only for the chosen action, and updates its future decisions. The scientific
+\subsubsection{Fairness Risk From Uneven Context Quality}
+They are also fairness critical because the quality of the observed context is
+often uneven across groups. When one group has delayed testing, incomplete
+history, lower-quality measurements, or less representative calibration data, a
+policy optimized only for aggregate reward can hide subgroup errors and
+compound disparities over time.
+
+\subsubsection{Fairness-Aware Contextual Bandit Framing}
+This work frames that problem as fairness-aware contextual bandit learning. At
+each round, a policy observes context, chooses an action, receives reward only
+for the chosen action, and updates its future decisions. The scientific
 questions focus not only on whether contextual information improves reward, but
 on whether informative context and fairness-aware monitoring reduce disparities
 when context is missing or degraded. This matters in clinical workflows because
@@ -23,32 +28,41 @@ allocate scarce probabilistic resources among competing flows; fairness in
 success probability and latency is a service-quality issue.
 
 \subsection{Overview of the Work and Relationship to Prior Work}
+
+\subsubsection{Two Complementary Environment Families}
 This work studies two complementary environment families. The first is a
 quantum-routing evaluation stack based on hybrid contextual bandits for
 entanglement routing and qubit allocation~\cite{garcia2026threat_aware_quantum_routing}.
 That stack already exposes uncertainty, adversarial or non-stationary
 conditions, legacy testbed conventions, and stateful evaluator artifacts. The
 second is an embedded clinical simulation motivated by equitable bioinformatics
-and fairness auditing work~\cite{garcia2025equitable_bioinformatics}. The
-clinical environment models the routing of scarce tests, retesting capacity,
-escalation decisions, diagnostic attention, and model-assisted triage across
-sites and cohorts. Under volatile conditions, such as a pandemic, threat,
-demand, evidence quality, and resource availability can change rapidly; this
-makes the clinical routing setting structurally comparable to quantum routing
-under noisy links, uncertain entanglement generation, and non-stationary
-service conditions. The two-domain design tests whether fairness mechanisms
-and policy-update strategies transfer across fundamentally different
-applications with the same partial-feedback allocation structure.
+and fairness auditing work~\cite{garcia2025equitable_bioinformatics}.
 
+\subsubsection{Clinical and Quantum Routing Analogy}
+The clinical environment models the routing of scarce tests, retesting
+capacity, escalation decisions, diagnostic attention, and model-assisted triage
+across sites and cohorts. Under volatile conditions, such as a pandemic,
+threat, demand, evidence quality, and resource availability can change
+rapidly; this makes the clinical routing setting structurally comparable to
+quantum routing under noisy links, uncertain entanglement generation, and
+non-stationary service conditions. The two-domain design tests whether fairness
+mechanisms and policy-update strategies transfer across fundamentally
+different applications with the same partial-feedback allocation structure.
+
+\subsubsection{Contribution Relative to Prior Work}
 Across both environments, the central concern is that unequal context quality
 can turn partial feedback into repeated allocation harm. The study therefore
 evaluates performance and fairness as coupled outcomes rather than as separate
 post-hoc measurements.
 
 \subsection{Preliminary Results and Current Evidence}
+
+\subsubsection{Selected MAB Spectrum}
 Here, our MAB spectrum refers to the non-contextual, contextual, and
-informative contextual bandit families evaluated in this work. This study is
-organized around five research questions:
+informative contextual bandit families evaluated in this work.
+
+\subsubsection{Research Questions}
+This study is organized around five research questions:
 
 \begin{itemize}
     \item \textbf{RQ1:} How does context affect performance across our MAB spectrum?
@@ -62,6 +76,7 @@ organized around five research questions:
     \item \textbf{RQ5:} In a non-stationary environment, which group is more likely to be harmed, and why?
 \end{itemize}
 
+\subsubsection{Current Evidence and Claim Boundary}
 The current evidence supports a reproducible framework for studying these
 questions across clinical and quantum routing settings. The quantum path
 preserves legacy experiment compatibility while adding fairness artifacts. The
@@ -70,7 +85,7 @@ allocation decisions, EQUITAS context, and model-stratified fairness summaries.
 Claims about active fairness-adjusted quantum learning require an explicit
 policy-update mechanism and full experimental validation.
 
-\subsection{Paper Organization}
+\subsection{Research Overview}
 The remainder of the paper is organized as follows: Section~II reviews related
 work on bandits, fairness, missing context, clinical bias, and quantum routing;
 Section~III presents the shared missing-context routing model and methodology;
