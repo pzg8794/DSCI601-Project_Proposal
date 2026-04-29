@@ -2,20 +2,20 @@
 
 \subsection{Scientific Merit, Importance, and Challenges}
 
-\subsubsection{Sequential Decision-Making Under Uncertainty}
-Many applied data science systems are sequential decision systems that route
-limited resources under uncertainty. These types of decisions are difficult
-because the system observes only partial feedback. The chosen action reveals an
-outcome, but the unchosen alternatives remain counterfactual.
+\subsubsection{Scientific Merit}
+Many applied data science systems are sequential decision systems (SDSs) that
+route limited resources under uncertainty. SDSs are difficult because the
+system observes only partial feedback. The chosen action reveals an outcome,
+but the unchosen alternatives remain counterfactual.
 
-\subsubsection{Fairness Risk From Uneven Context Quality}
-They are also fairness critical because the quality of the observed context is
-often uneven across groups. When one group has delayed testing, incomplete
-history, lower-quality measurements, or less representative calibration data, a
-policy optimized only for aggregate reward can hide subgroup errors and
-compound disparities over time.
+\subsubsection{Importance}
+SDSs are also fairness critical because the quality of the observed context is
+often uneven across groups. A policy optimized only for aggregate reward can
+hide subgroup errors and compound disparities over time when one group has
+delayed testing, incomplete history, lower-quality measurements, or less
+representative calibration data.
 
-\subsubsection{Fairness-Aware Contextual Bandit Framing}
+\subsubsection{Challenges}
 This work frames that problem as fairness-aware contextual bandit learning. At
 each round, a policy observes context, chooses an action, receives reward only
 for the chosen action, and updates its future decisions. The scientific
