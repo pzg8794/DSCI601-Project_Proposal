@@ -4,28 +4,29 @@
 
 \subsubsection{Scientific Merit}
 Many applied data science systems are sequential decision systems (SDSs) that
-route limited resources under uncertainty. SDSs are difficult because the
-system observes only partial feedback. The chosen action reveals an outcome,
-but the unchosen alternatives remain counterfactual.
+route limited resources under uncertainty. SDSs are scientifically challenging
+because they observe only partial feedback: the chosen action reveals an
+outcome, but the unchosen alternatives remain counterfactual.
 
 \subsubsection{Importance}
-SDSs are also fairness critical because the quality of the observed context is
-often uneven across groups. A policy optimized only for aggregate reward can
-hide subgroup errors and compound disparities over time when one group has
-delayed testing, incomplete history, lower-quality measurements, or less
-representative calibration data.
+A policy optimized only for aggregate reward can hide subgroup errors and
+compound disparities over time when one group has delayed testing, incomplete
+history, lower-quality measurements, or less representative calibration data.
+Since the quality of the observed context is often uneven across groups, SDSs
+are critical to fairness-aware approaches that mediate compounded disparities.
 
 \subsubsection{Challenges}
-This work frames that problem as fairness-aware contextual bandit learning. At
-each round, a policy observes context, chooses an action, receives reward only
-for the chosen action, and updates its future decisions. The scientific
-questions focus not only on whether contextual information improves reward, but
-on whether informative context and fairness-aware monitoring reduce disparities
-when context is missing or degraded. This matters in clinical workflows because
-false-negative or delayed-escalation gaps can produce direct harm. It also
-matters in quantum-network routing because future communication systems will
-allocate scarce probabilistic resources among competing flows; fairness in
-success probability and latency is a service-quality issue.
+This work frames the central challenge as fairness-aware contextual bandit
+learning. At each round, a policy observes context, chooses an action, receives
+reward only for the chosen action, and updates its future decisions. This
+framing guides the scientific questions toward whether informative context and
+fairness-aware monitoring reduce disparities when context is missing or
+degraded. This focus matters because of the challenges identified in both
+target domains. In clinical workflows, false-negative or delayed-escalation
+gaps can produce direct harm. In quantum-network routing, future communication
+systems will allocate scarce probabilistic resources among competing flows.
+Together, these domains expose a central challenge: fairness in success
+probability and latency is a service-quality issue that must be addressed.
 
 \subsection{Overview of the Work and Relationship to Prior Work}
 
@@ -41,19 +42,21 @@ and fairness auditing work~\cite{garcia2025equitable_bioinformatics}.
 \subsubsection{Clinical and Quantum Routing Analogy}
 The clinical environment models the routing of scarce tests, retesting
 capacity, escalation decisions, diagnostic attention, and model-assisted triage
-across sites and cohorts. Under volatile conditions, such as a pandemic,
-threat, demand, evidence quality, and resource availability can change
-rapidly; this makes the clinical routing setting structurally comparable to
-quantum routing under noisy links, uncertain entanglement generation, and
-non-stationary service conditions. The two-domain design tests whether fairness
-mechanisms and policy-update strategies transfer across fundamentally
-different applications with the same partial-feedback allocation structure.
+across sites and cohorts. Under volatile conditions such as a pandemic, demand,
+evidence quality, and resource availability can change rapidly. This makes the
+clinical routing setting structurally comparable to quantum routing under noisy
+links, uncertain entanglement generation, and non-stationary service
+conditions. The two-domain design tests whether fairness mechanisms and
+policy-update strategies transfer across fundamentally different applications
+with the same partial-feedback allocation structure.
 
 \subsubsection{Contribution Relative to Prior Work}
 Across both environments, the central concern is that unequal context quality
-can turn partial feedback into repeated allocation harm. The study therefore
-evaluates performance and fairness as coupled outcomes rather than as separate
-post-hoc measurements.
+can turn partial feedback into repeated allocation harm. Prior bandit methods
+primarily optimize aggregate reward, while many fairness analyses evaluate
+disparity after decisions have already been made. This study evaluates
+performance and fairness as coupled outcomes rather than as separate post-hoc
+measurements.
 
 \subsection{Preliminary Results and Current Evidence}
 
@@ -61,34 +64,19 @@ post-hoc measurements.
 Here, our MAB spectrum refers to the non-contextual, contextual, and
 informative contextual bandit families evaluated in this work.
 
-\subsubsection{Research Questions}
-This study is organized around five research questions:
-
-\begin{itemize}
-    \item \textbf{RQ1:} How does context affect performance across our MAB spectrum?
-
-    \item \textbf{RQ2:} What is the relationship between context, context quality, and fairness?
-
-    \item \textbf{RQ3:} How does fairness-aware mediation affect overall performance?
-
-    \item \textbf{RQ4:} Which MAB family is most likely to amplify disparities, and why?
-
-    \item \textbf{RQ5:} In a non-stationary environment, which group is more likely to be harmed, and why?
-\end{itemize}
-
-\subsubsection{Current Evidence and Claim Boundary}
-The current evidence supports a reproducible framework for studying these
-questions across clinical and quantum routing settings. The quantum path
-preserves legacy experiment compatibility while adding fairness artifacts. The
-clinical path supports embedded evaluation across multiple model families,
-allocation decisions, EQUITAS context, and model-stratified fairness summaries.
-Claims about active fairness-adjusted quantum learning require an explicit
+\subsubsection{Questions and Findings}
+This study asks how context affects performance across our MAB spectrum and
+how context quality relates to fairness. The current implementation establishes
+the evaluation path needed to answer those questions by producing comparable
+clinical and quantum outcome records, model-stratified fairness summaries, and
+fairness artifacts that preserve the context, action, allocation, reward, and
+group fields needed for analysis. It also asks how fairness-aware mediation
+affects overall performance. Current clinical smoke results show that the
+embedded clinical path can compare multiple model families through allocation
+decisions and EQUITAS audit/mitigation context, with model-level efficiency
+summaries already available for the clinical fixture. The remaining questions
+ask which MAB family is most likely to amplify disparities and which group is
+more likely to be harmed in a non-stationary environment. The present evidence
+supports the reporting and validation layer needed for those comparisons, but
+full claims about active fairness-adjusted quantum learning require an explicit
 policy-update mechanism and full experimental validation.
-
-\subsection{Research Overview}
-The remainder of the paper is organized as follows: Section~II reviews related
-work on bandits, fairness, missing context, clinical bias, and quantum routing;
-Section~III presents the shared missing-context routing model and methodology;
-Section~IV describes the implementation architecture; Section~V summarizes the
-data and experimental inputs; Section~VI presents preliminary results;
-Sections~VII and VIII discuss future work and conclusions.
