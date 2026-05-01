@@ -1,0 +1,34 @@
+\begin{frame}{Updated Domain Model}
+\centering
+\resizebox{0.95\textwidth}{!}{%
+\begin{tikzpicture}[
+  node distance=0.7cm,
+  entity/.style={draw, rounded corners, align=center, fill=softgray, minimum width=2.5cm, minimum height=0.8cm},
+  risk/.style={draw, rounded corners, align=center, fill=softred!18, minimum width=2.5cm, minimum height=0.8cm},
+  decision/.style={draw, rounded corners, align=center, fill=ritorange!18, minimum width=2.5cm, minimum height=0.8cm},
+  output/.style={draw, rounded corners, align=center, fill=softgreen!18, minimum width=2.5cm, minimum height=0.8cm},
+  arr/.style={-{Stealth}, thick}
+]
+\node[entity] (env) {Environment\\clinical or quantum};
+\node[risk, right=1.0cm of env] (ctx) {Observed Context\\missing / delayed / noisy};
+\node[decision, right=1.0cm of ctx] (pol) {Policy Family\\MAB / CMAB / iCMAB};
+\node[entity, right=1.0cm of pol] (act) {Routing Action\\test, triage, path};
+\node[output, below=1.0cm of act] (reward) {Reward + Cost\\partial feedback};
+\node[output, left=1.0cm of reward] (fair) {Fairness State\\group or flow gaps};
+\node[entity, left=1.0cm of fair] (report) {Reporting Artifact\\manifest + figures};
+\draw[arr] (env) -- node[above]{1..* contexts} (ctx);
+\draw[arr] (ctx) -- node[above]{1 observation} (pol);
+\draw[arr] (pol) -- node[above]{1 selected action} (act);
+\draw[arr] (act) -- node[right]{1 observed outcome} (reward);
+\draw[arr] (reward) -- node[above]{1..* metrics} (fair);
+\draw[arr] (fair) -- node[above]{0..* artifacts} (report);
+\draw[arr,dashed] (fair) to[bend right=35] node[below]{mitigation feedback} (pol);
+\end{tikzpicture}}
+
+\vspace{0.5em}
+\begin{itemize}
+  \item The rough draft frames both domains as sequential routing under partial feedback.
+  \item Updates this semester: clinical fairness path, EQUITAS mediation, COVID evidence, and artifact reporting.
+  \item Multiplicity is explicit: many contexts feed one decision; one action creates one observed outcome and many unobserved counterfactuals.
+\end{itemize}
+\end{frame}
