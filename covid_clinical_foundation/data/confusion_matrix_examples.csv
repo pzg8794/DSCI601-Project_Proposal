@@ -1,0 +1,9 @@
+case,policy,group,tp,fp,fn,tn,unit,notes
+routing,baseline_context_blind,High-SVI Hispanic,21,5,79,45,communities_per_150,"Illustrative allocation matrix: high-risk community receiving adequate testing is positive prediction."
+routing,fair_cmab_equitas,High-SVI Hispanic,76,14,24,36,communities_per_150,"Counterfactual fair routing reduces high-risk false negatives."
+routing,baseline_context_blind,High-SVI Black,28,7,72,43,communities_per_150,"Illustrative allocation matrix grounded in underallocation pattern."
+routing,fair_cmab_equitas,High-SVI Black,72,16,28,34,communities_per_150,"Counterfactual fair routing improves sensitivity to high-risk communities."
+pulseox,baseline_single_threshold,White,83,5,17,95,patients_per_200,"Illustrative diagnostic matrix: actual positive is SaO2-defined hypoxemia."
+pulseox,baseline_single_threshold,Black,71,7,29,93,patients_per_200,"Higher false-negative rate reflects higher occult hypoxemia under same SpO2 threshold."
+pulseox,equitas_calibrated_threshold,White,83,5,17,95,patients_per_200,"Fair policy leaves White threshold largely unchanged."
+pulseox,equitas_calibrated_threshold,Black,94,11,6,89,patients_per_200,"Fair policy uses confirmatory ABG or calibrated threshold in ambiguous SpO2 range."
