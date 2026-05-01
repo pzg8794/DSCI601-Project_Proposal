@@ -1,0 +1,42 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+\usetheme{Madrid}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,booktabs,array,graphicx,tikz,pgfplots}
+\usetikzlibrary{arrows.meta,positioning,fit,calc,shapes.geometric}
+\pgfplotsset{compat=1.18}
+\graphicspath{{../analysis_artifacts/}{figures/}}
+
+\definecolor{ritorange}{RGB}{247,105,2}
+\definecolor{deepblue}{RGB}{31,78,121}
+\definecolor{softgreen}{RGB}{72,160,98}
+\definecolor{softred}{RGB}{190,75,72}
+\definecolor{softgray}{RGB}{245,247,250}
+\definecolor{softblue}{RGB}{88,137,174}
+\definecolor{softpurple}{RGB}{135,99,171}
+\setbeamercolor{title}{fg=deepblue}
+\setbeamercolor{frametitle}{fg=deepblue}
+\setbeamercolor{structure}{fg=ritorange}
+\setbeamercolor{block title}{fg=white,bg=deepblue}
+\setbeamercolor{block body}{bg=softgray}
+
+\newcommand{\mab}{\textsc{MAB}}
+\newcommand{\cmab}{\textsc{CMAB}}
+\newcommand{\icmab}{\textsc{iCMAB}}
+\newcommand{\equitas}{\textsc{EQUITAS}}
+
+\title[Fairness-Aware Routing]{Fairness-Aware Routing Under Missing Context}
+\subtitle{Clinical and Quantum Sequential Decision Systems with MAB, CMAB, and iCMAB Methods}
+\author[P. Z. Garcia Bautista]{Piter Z. Garcia Bautista\\Advisors: Daniel Krutz and Travis Desell}
+\institute[RIT]{Rochester Institute of Technology\\DSCI 601 -- Applied Data Science I}
+\date{Final Presentation -- Draft 2}
+
+\begin{document}
+\input{sections/01_opening}
+\input{sections/02_clinical_artifacts}
+\input{sections/03_architecture_results}
+\input{sections/04_references}
+\end{document}
