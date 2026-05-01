@@ -1,0 +1,45 @@
+\begin{frame}{Break From Slides: GitHub Code Review}
+\begin{block}{What to show live}
+Open the GitHub repositories and show 2--3 classes that were not the focus of the midterm. Tie each class directly back to the architecture diagram.
+\end{block}
+\small
+\begin{tabular}{p{0.30\textwidth}p{0.32\textwidth}p{0.25\textwidth}}
+\toprule
+Class / file & What to point out & Architecture layer \\
+\midrule
+\texttt{ClinicalExperimentEvaluator} & aggregation, fairness summaries, manifests & Layer 2 / Layer 4 \\
+\texttt{ClinicalExperimentRunner} & seed/scenario execution and model loop & Layer 2 \\
+\texttt{FairAllocatorV1} or \texttt{ClinicalBanditUCB} & allocation rule, update rule, context use & Layer 3 \\
+\texttt{equitas\_mediator.py} & audit fields and mitigation context & Layer 4 \\
+\bottomrule
+\end{tabular}
+\vspace{0.4em}
+\begin{itemize}
+\item Emphasize comments, formatting, and where fields/methods correspond to the architecture slides.
+\item Explain low coupling: policies do not own reporting, and reporting does not own simulation.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Working Demo Plan}
+\begin{enumerate}
+\item Run the clinical fairness smoke or demo notebook/script.
+\item Show the generated fairness states and model-stratified summaries.
+\item Open the manifest-linked report artifacts.
+\item Show the COVID clinical foundation as evidence backing the clinical side.
+\item Explain the quantum side as the retained legacy routing path plus next-semester active fairness updates.
+\end{enumerate}
+\vspace{0.4em}
+\begin{block}{Demo goal for the rubric}
+Demonstrate a working preliminary version of the project that executes the architecture path, records fairness evidence, and produces usable artifacts.
+\end{block}
+\end{frame}
+
+\begin{frame}{What Gets Completed Next Semester}
+\begin{enumerate}
+\item Convert the COVID testing and pulse-ox cases into executable clinical environments.
+\item Implement active iCMAB mitigation policies for missing or unreliable context.
+\item Complete fairness-adjusted quantum policy updates, not only sidecar reporting.
+\item Expand the validation hub into paper-ready efficiency and fairness reporting.
+\item Produce final cross-domain experiments: reward/regret curves, disparity curves, and utility--fairness tradeoff plots.
+\end{enumerate}
+\end{frame}
