@@ -1,0 +1,71 @@
+\begin{frame}{Layer 1 Detail: Evidence, Data, and Context}
+\small
+\begin{tabular}{p{0.28\textwidth}p{0.62\textwidth}}
+\toprule
+Responsibility & Define what context the policy can observe and what missingness means. \\
+\midrule
+Key inputs & COVID clinical foundation, synthetic clinical fixture, quantum saved states, scenario configuration. \\
+Main fields & group, site, cohort, service line, route, action, reward, latency, success, missingness flag. \\
+Low coupling & Exposes context records, not policy internals. \\
+High cohesion & Only owns evidence, schemas, and context construction. \\
+\bottomrule
+\end{tabular}
+\vspace{0.6em}
+\begin{block}{Why this matters}
+The COVID analysis makes context concrete: testing access, SVI, disease burden, and pulse-ox calibration quality determine whether the policy sees risk correctly.
+\end{block}
+\end{frame}
+
+\begin{frame}{Layer 2 Detail: Environments and Evaluators}
+\small
+\begin{tabular}{p{0.30\textwidth}p{0.58\textwidth}}
+\toprule
+Class / component & Role \\
+\midrule
+\texttt{ClinicalEnvironment} & Emits patient/community contexts and rewards for test allocation or diagnostic escalation. \\
+\texttt{ClinicalExperimentRunner} & Executes seeds, scenarios, model families, and allocation decisions. \\
+\texttt{ClinicalExperimentEvaluator} & Aggregates utility, regret, fairness gaps, and artifact manifests. \\
+Quantum testbed & Preserves legacy routing saved-state behavior and path/service-quality metrics. \\
+\bottomrule
+\end{tabular}
+\vspace{0.5em}
+\begin{block}{Architecture relation}
+This layer separates simulation mechanics from policy choice, keeping coupling low and allowing clinical and quantum environments to share the same reporting layer.
+\end{block}
+\end{frame}
+
+\begin{frame}{Layer 3 Detail: Policies and Allocation}
+\small
+\begin{tabular}{p{0.26\textwidth}p{0.30\textwidth}p{0.30\textwidth}}
+\toprule
+Policy & Key methods / behavior & What it tests \\
+\midrule
+ClinicalBaseline & fixed or simple utility rule & non-contextual routing baseline \\
+FairAllocatorV1 & allocation with group-aware fairness fields & whether context can reduce allocation harm \\
+ClinicalBanditUCB & uncertainty bonus plus observed reward updates & contextual online learning under partial feedback \\
+iCMAB target & missingness-aware confidence or mitigation state & next-semester informative context learning \\
+\bottomrule
+\end{tabular}
+\vspace{0.5em}
+\begin{equation*}
+\text{decision}_t = \arg\max_a \left[\text{utility}_{t,a} - \lambda \cdot \text{expected disparity}_{t,a}\right]
+\end{equation*}
+\end{frame}
+
+\begin{frame}{Layer 4 Detail: EQUITAS, Reporting, and Validation}
+\small
+\begin{tabular}{p{0.30\textwidth}p{0.58\textwidth}}
+\toprule
+Artifact & Purpose \\
+\midrule
+Fairness state & Stores group/site/cohort/flow disparity after each run. \\
+Manifest-linked reports & Connects figures, metrics, model family, seed, and scenario. \\
+Validation hub & Separates validated evidence claims from future experimental claims. \\
+Presentation artifacts & Converts outputs into readable figures for committee review. \\
+\bottomrule
+\end{tabular}
+\vspace{0.5em}
+\begin{block}{Rubric connection}
+This layer is where architecture becomes demonstrable: the code produces figures, tables, and summaries instead of only theoretical claims.
+\end{block}
+\end{frame}
