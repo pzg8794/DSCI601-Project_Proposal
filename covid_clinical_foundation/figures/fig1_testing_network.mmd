@@ -1,0 +1,28 @@
+flowchart TB
+  S1[Large hospital hub\ncapacity 1200/day]
+  S2[Regional medical center\ncapacity 900/day]
+  S3[Community clinic\ncapacity 400/day]
+  S4[Urgent care chain\ncapacity 350/day]
+  S5[Mobile unit\ncapacity 150/day]
+
+  W[Low-SVI White community\n720 cases per 100k\n8.9 tests per 1k per week]
+  M[Low-SVI mixed community\n890 cases per 100k\n7.4 tests per 1k per week]
+  HM[High-SVI mixed community\n2290 cases per 100k\n3.1 tests per 1k per week]
+  B[High-SVI Black community\n2410 cases per 100k\n2.7 tests per 1k per week]
+  H[High-SVI Hispanic community\n3100 cases per 100k\n2.1 tests per 1k per week]
+
+  S1 == overserved high capacity ==> W
+  S2 == overserved high capacity ==> M
+  S3 --> HM
+  S4 --> HM
+  S1 -. underserved low capacity .-> B
+  S2 -. underserved low capacity .-> H
+  S5 -. small mobile capacity .-> B
+  S5 -. small mobile capacity .-> H
+
+  classDef overserved fill:#d6e9f8,stroke:#2c7fb8,color:#111
+  classDef underserved fill:#f8d7da,stroke:#c0392b,color:#111
+  classDef neutral fill:#eeeeee,stroke:#777,color:#111
+  class W,M overserved
+  class B,H underserved
+  class HM neutral
