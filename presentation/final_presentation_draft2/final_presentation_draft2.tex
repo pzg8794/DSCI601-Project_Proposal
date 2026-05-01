@@ -6,7 +6,7 @@
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath,amssymb,booktabs,array,graphicx,tikz,pgfplots}
-\usetikzlibrary{arrows.meta,positioning,fit,calc,shapes.geometric}
+\usetikzlibrary{arrows.meta,positioning,fit,calc,shapes.geometric,backgrounds}
 \pgfplotsset{compat=1.18}
 \graphicspath{{../analysis_artifacts/}{figures/}}
 
@@ -28,18 +28,18 @@
 \newcommand{\icmab}{\textsc{iCMAB}}
 \newcommand{\equitas}{\textsc{EQUITAS}}
 
-\title[Fairness-Aware Routing]{Fairness-Aware Routing Under Missing Context}
-\subtitle{Clinical and Quantum Sequential Decision Systems with MAB, CMAB, and iCMAB Methods}
-\author[P. Z. Garcia Bautista]{Piter Z. Garcia Bautista\\Advisors: Daniel Krutz and Travis Desell}
-\institute[RIT]{Rochester Institute of Technology\\DSCI 601 -- Applied Data Science I}
-\date{Final Presentation -- Draft 2}
+\title[Fairness-Aware Routing]{Fairness-Aware Routing in Quantum Networks \& Clinical Settings}
+\subtitle{via Multi-Armed, Contextual, and Informative Bandit Methods}
+\author[P. Z. Garcia]{Piter Z. Garcia\\Advisors: Daniel Krutz and Travis Desell}
+\institute[RIT]{Rochester Institute of Technology\\MS Data Science / Decision-Making \& Algorithmic Fairness}
+\date{DSCI 601 Final Presentation -- Draft 2}
 
 \begin{document}
-\input{sections/01_opening}
-\input{sections/02a_clinical_artifacts_routing}
-\input{sections/02b_pulseox_bias}
-\input{sections/02c_confusion_matrices}
-\input{sections/02d_utility_frontier}
-\input{sections/03_architecture_results}
-\input{sections/04_references}
+\input{sections/00_title_and_overview}
+\input{sections/01_domain_model}
+\input{sections/02_architecture_overview}
+\input{sections/03_architecture_layers}
+\input{sections/04_code_review_demo_plan}
+\input{sections/05_clinical_artifacts}
+\input{sections/06_references}
 \end{document}
