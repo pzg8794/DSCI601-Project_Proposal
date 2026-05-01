@@ -1,0 +1,121 @@
+\begin{frame}{Updated Domain Model}
+\begin{center}
+\begin{tikzpicture}[node distance=.78cm,box/.style={draw,rounded corners,align=center,minimum width=2.15cm,minimum height=.7cm,fill=softgray},arr/.style={-{Stealth},thick}]
+\node[box] (env) {Environment};
+\node[box,fill=softred!18,right=of env] (ctx) {Missing/noisy\\context};
+\node[box,right=of ctx] (pol) {\mab/\cmab/\icmab\\policy};
+\node[box,right=of pol] (act) {Routing\\action};
+\node[box,fill=softgreen!18,below=of act] (out) {Reward +\\fairness state};
+\node[box,left=of out] (rep) {Reporting +\\validation};
+\draw[arr] (env)--(ctx);\draw[arr] (ctx)--(pol);\draw[arr] (pol)--(act);\draw[arr] (act)--(out);\draw[arr] (out)--(rep);\draw[arr,dashed] (rep) to[bend right=35] (pol);
+\end{tikzpicture}
+\end{center}
+\begin{itemize}
+\item One policy sees only partial feedback, not every counterfactual.
+\item Fairness risk appears when context is systematically worse for a group, site, flow, or route class.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Architecture Overview}
+\begin{center}
+\begin{tikzpicture}[layer/.style={draw,rounded corners,align=center,minimum width=10.5cm,minimum height=.72cm,fill=softgray},arr/.style={-{Stealth},thick,deepblue}]
+\node[layer,fill=softblue!18] (data) {Layer 1: Evidence, Data, and Context -- COVID evidence, clinical fixture, quantum states};
+\node[layer,fill=softgreen!18,below=.3cm of data] (env) {Layer 2: Environments and Evaluators -- ClinicalEnvironment, quantum testbed, runners};
+\node[layer,fill=ritorange!18,below=.3cm of env] (pol) {Layer 3: Policies and Allocation -- Baseline, FairAllocatorV1, ClinicalBanditUCB};
+\node[layer,fill=softpurple!18,below=.3cm of pol] (rep) {Layer 4: EQUITAS, Reporting, and Validation -- fairness states, summaries, artifacts};
+\draw[arr](data)--(env);\draw[arr](env)--(pol);\draw[arr](pol)--(rep);
+\end{tikzpicture}
+\end{center}
+\begin{block}{Design principle}
+Low coupling: each layer exposes records/artifacts to the next layer. High cohesion: each layer has one responsibility.
+\end{block}
+\end{frame}
+
+\begin{frame}{Policy Comparison}
+\begin{center}
+\begin{tabular}{p{0.20\textwidth}p{0.31\textwidth}p{0.34\textwidth}}
+\toprule
+Policy family & Decision signal & Expected failure mode \\
+\midrule
+\mab & action history only & repeats historical allocation patterns \\
+\cmab & observed context & improves utility but can inherit biased or incomplete context \\
+\icmab & context plus missingness/fairness state & can learn when context itself is unreliable \\
+\equitas-mediated & policy output plus disparity audit & constrains unsafe disparity while preserving utility \\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{equation*}
+\text{decision}_t = \arg\max_a \left[\text{utility}_{t,a} - \lambda\,\text{expected disparity}_{t,a}\right]
+\end{equation*}
+\end{frame}
+
+\begin{frame}{Preliminary Framework Results}
+\small
+\begin{center}
+\begin{tabular}{p{0.42\textwidth}p{0.43\textwidth}}
+\toprule
+Evidence item & Current result \\
+\midrule
+Clinical embedded path & evaluator, runner, environment, allocator, models, and EQUITAS context run end-to-end \\
+Clinical fairness smoke & 16 fairness states across four model families \\
+Non-oracle efficiency & FairAllocatorV1: 91.23\%; ClinicalBanditUCB: 84.21\%; ClinicalBaseline: 75.09\% oracle efficiency \\
+Reporting layer & 21 manifest-linked artifacts and model-stratified summaries \\
+Quantum compatibility & legacy quantum path preserved with fairness sidecar artifacts \\
+\bottomrule
+\end{tabular}
+\end{center}
+\small Boundary: active fairness-adjusted quantum learning still requires an explicit policy-update mechanism and full validation.
+\end{frame}
+
+\begin{frame}{GitHub Code Review Break}
+\begin{block}{Show 2--3 classes not used in the midterm}
+Open GitHub and connect each class to the architecture diagram.
+\end{block}
+\small
+\begin{center}
+\begin{tabular}{p{0.32\textwidth}p{0.48\textwidth}}
+\toprule
+Class/file & Architecture connection \\
+\midrule
+\texttt{ClinicalExperimentEvaluator} & Layer 2 evaluator orchestration and artifact capture \\
+\texttt{ClinicalExperimentRunner} & Layer 2 execution over seeds, models, and allocations \\
+\texttt{FairAllocatorV1} or \texttt{ClinicalBanditUCB} & Layer 3 policy/allocation decision logic \\
+\texttt{equitas\_mediator.py} & Layer 4 fairness audit and mitigation context \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{frame}
+
+\begin{frame}{Demo Plan and Next Semester}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Demo path}
+\begin{enumerate}
+\item run clinical fairness smoke/notebook
+\item show fairness states and summaries
+\item open report artifacts and manifests
+\item point to COVID clinical foundation
+\end{enumerate}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Next semester}
+\begin{enumerate}
+\item convert COVID cases into executable environments
+\item complete active quantum fairness updates
+\item expand validation hub
+\item link results to paper-ready reporting
+\end{enumerate}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Limitations and Takeaway}
+\begin{itemize}
+\item COVID analysis uses aggregate literature-grounded evidence, not patient-level data.
+\item PCR/antigen false-positive disparity is not claimed; pulse oximetry is the defensible diagnostic case.
+\item Fair CMAB allocations are counterfactual evaluation targets, not historical claims.
+\end{itemize}
+\begin{block}{Takeaway}
+Fair sequential decision-making is not achieved by pretending context does not exist. It is achieved by measuring context, auditing disparities, and routing scarce resources where the cost of being wrong is highest.
+\end{block}
+\end{frame}
