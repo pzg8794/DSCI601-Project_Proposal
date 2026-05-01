@@ -1,0 +1,80 @@
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{15-Minute Roadmap and Rubric Match}
+\begin{enumerate}
+    \item Problem, research question, and contribution.
+    \item New clinical evidence: COVID test routing and pulse-ox bias.
+    \item Updated domain model and architecture.
+    \item Best analysis artifacts from \texttt{presentation/analysis\_artifacts}.
+    \item Results, code-review targets, demo path, limitations, and next-semester plan.
+\end{enumerate}
+\begin{block}{Presentation requirement alignment}
+This deck includes background, motivation, updated architecture, code-review targets, current results, graph-backed clinical validation, demo plan, and next steps.
+\end{block}
+\end{frame}
+
+\begin{frame}{Project Claim}
+\begin{block}{Scientific claim}
+Context quality is a fairness variable: when sequential decision systems learn from incomplete or unequally reliable context, they can repeatedly route scarce resources away from the groups or flows that need them most.
+\end{block}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Clinical routing}
+\begin{itemize}
+    \item tests, retests, and triage escalation
+    \item under-measured or mis-measured groups
+    \item harm as missed diagnosis or delayed care
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Quantum routing}
+\begin{itemize}
+    \item route selection and qubit allocation
+    \item stale or incomplete link context
+    \item harm as repeated routing failure
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Why Clinical and Quantum Belong in the Same Study}
+\begin{center}
+\begin{tabular}{p{0.25\textwidth}p{0.30\textwidth}p{0.31\textwidth}}
+\toprule
+\textbf{Shared feature} & \textbf{Clinical testbed} & \textbf{Quantum testbed} \\
+\midrule
+Scarce resource & diagnostic attention, retests, escalation & route capacity, qubits, entanglement effort \\
+Partial feedback & chosen test or escalation only & chosen path/allocation only \\
+Context failure & missing risk or calibration context & stale topology or link context \\
+Fairness metric & group/site/cohort disparity & flow/class/service disparity \\
+\bottomrule
+\end{tabular}
+\end{center}
+\vspace{0.5em}
+\alert{Research goal:} compare \mab, \cmab, and \icmab policies under one utility/fairness reporting surface.
+\end{frame}
+
+\begin{frame}{New Clinical Foundation: Two COVID Cases}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Case 1: Testing allocation}
+\begin{itemize}
+    \item high-SVI Hispanic and Black communities had high burden
+    \item testing access was often lower or delayed
+    \item fair CMAB routes tests by burden and vulnerability
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Case 2: Pulse oximetry}
+\begin{itemize}
+    \item calibration context was incomplete across skin tone
+    \item same SpO$_2$ threshold produced unequal reliability
+    \item EQUITAS mediation targets ambiguous decisions
+\end{itemize}
+\end{column}
+\end{columns}
+\vspace{0.4em}
+\scriptsize Sources include CDC COVID disparities, Sjoding et al. 2020, Fawzy et al. 2022/2023, FDA pulse oximetry safety communication, and the new COVID clinical foundation report.
+\end{frame}
