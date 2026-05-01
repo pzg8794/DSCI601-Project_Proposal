@@ -1,0 +1,6 @@
+group,majority_group,svi,burden_cases_per_100k,actual_tests_per_1000_week,fair_cmab_tests_per_1000_week,source_type,notes
+High-SVI Hispanic,Hispanic,0.87,3100,2.1,8.4,scenario_from_literature,"Grounded in early testing-site underrepresentation and high positivity/burden evidence; fair value is counterfactual allocation target."
+High-SVI Black,Black,0.81,2410,2.7,7.9,scenario_from_literature,"Grounded in elevated hospitalization/disparity evidence; fair value is counterfactual allocation target."
+High-SVI Mixed,Mixed high vulnerability,0.76,2290,3.1,6.8,scenario_from_literature,"Represents high-vulnerability mixed communities; fair value is counterfactual allocation target."
+Low-SVI White,White,0.31,720,8.9,4.2,scenario_from_literature,"Represents lower-burden infrastructure-rich communities."
+Low-SVI Mixed,Mixed lower vulnerability,0.34,890,7.4,3.8,scenario_from_literature,"Represents lower-vulnerability communities with higher access."
