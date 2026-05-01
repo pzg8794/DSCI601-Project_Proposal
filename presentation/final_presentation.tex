@@ -1,0 +1,376 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+\title[Fairness-Aware Routing]{Fairness-Aware Routing Under Missing Context}
+\subtitle{Multi-Armed, Contextual, and Informative Bandit Methods for Clinical and Quantum Settings}
+\author[P. Z. Garcia]{Piter Z. Garcia Bautista}
+\institute[RIT]{Rochester Institute of Technology\\MS Data Science / Decision-Making \& Algorithmic Fairness}
+\date{DSCI 601 Final Presentation}
+
+\definecolor{ritorange}{RGB}{247,105,2}
+\definecolor{deepblue}{RGB}{31,78,121}
+\definecolor{softgreen}{RGB}{72,160,98}
+\definecolor{softred}{RGB}{190,75,72}
+\definecolor{softgray}{RGB}{245,247,250}
+
+\setbeamercolor{title}{fg=deepblue}
+\setbeamercolor{frametitle}{fg=deepblue}
+\setbeamercolor{structure}{fg=ritorange}
+
+\newcommand{\mab}{\textsc{MAB}}
+\newcommand{\cmab}{\textsc{CMAB}}
+\newcommand{\icmab}{\textsc{iCMAB}}
+\newcommand{\sds}{\textsc{SDS}}
+
+\begin{document}
+
+% -----------------------------------------------------------------------------
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Presentation Roadmap}
+\begin{enumerate}
+    \item Problem: sequential decisions under missing context
+    \item Real-world grounding: COVID test allocation and pulse oximetry bias
+    \item Proposed approach: fair contextual bandits over a selected MAB spectrum
+    \item Framework: clinical and quantum routing through a shared evaluator
+    \item Preliminary evidence, validation, and next work
+\end{enumerate}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Scientific Merit: Sequential Decision Systems}
+\begin{block}{Core setting}
+Many applied data science systems are \textbf{sequential decision systems (SDSs)} that route scarce resources under uncertainty.
+\end{block}
+
+\vspace{0.5em}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Clinical examples}
+\begin{itemize}
+    \item Which patient receives a scarce diagnostic test?
+    \item Which case is escalated or retested?
+    \item Which model/pipeline should be trusted?
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Quantum examples}
+\begin{itemize}
+    \item Which route receives entanglement-generation effort?
+    \item Which path receives scarce qubit capacity?
+    \item Which allocator performs best under noisy links?
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.5em}
+\alert{Challenge:} the chosen action reveals an outcome, but unchosen alternatives remain counterfactual.
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Why Context Matters for Fairness}
+\begin{block}{Failure mode}
+A policy optimized only for aggregate reward can hide subgroup errors and compound disparities over time when one group has delayed testing, incomplete history, lower-quality measurements, or less representative calibration data.
+\end{block}
+
+\vspace{0.5em}
+\begin{center}
+\begin{tikzpicture}[node distance=1.2cm, every node/.style={align=center}]
+\node[draw, rounded corners, fill=softgray, minimum width=2.8cm, minimum height=0.8cm] (ctx) {Uneven\\context quality};
+\node[draw, rounded corners, fill=softgray, right=1.2cm of ctx, minimum width=2.8cm, minimum height=0.8cm] (learn) {Partial-feedback\\learning};
+\node[draw, rounded corners, fill=softgray, right=1.2cm of learn, minimum width=2.8cm, minimum height=0.8cm] (alloc) {Repeated\\allocation};
+\node[draw, rounded corners, fill=softred!18, right=1.2cm of alloc, minimum width=2.8cm, minimum height=0.8cm] (harm) {Compounded\\disparity};
+\draw[-{Stealth}, thick] (ctx) -- (learn);
+\draw[-{Stealth}, thick] (learn) -- (alloc);
+\draw[-{Stealth}, thick] (alloc) -- (harm);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.4em}
+\textbf{Research idea:} treat context, performance, and fairness as coupled outcomes in the same sequential decision process.
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Real-World Grounding: COVID Test Allocation}
+\begin{columns}[T]
+\begin{column}{0.54\textwidth}
+\textbf{Claim 1: Missing or ignored allocation context}
+\begin{itemize}
+    \item Early COVID-19 testing resources were scarce.
+    \item Allocation failed to adequately incorporate vulnerability context: race/ethnicity, SVI, burden, and access barriers.
+    \item Result: mismatch between testing access and community need.
+\end{itemize}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{block}{Key quantitative finding}
+For every \textbf{1 percentage-point} increase in Hispanic underrepresentation in testing-site ZIP codes, the Hispanic share of COVID-19 deaths in later weeks was approximately \textbf{1.04 percentage points higher} than expected.
+\end{block}
+\end{column}
+\end{columns}
+
+\vspace{0.6em}
+\footnotesize Sources summarized in \texttt{docs/covid\_context\_case\_studies.md}: Bilal et al. (2021), Escobar et al. (2021), CDC MMWR, CDC SVI, Landes et al. (2020).
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{COVID Test Allocation as a Bandit Problem}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Decision unit}
+\begin{itemize}
+    \item Community node: ZIP code, county, or service region
+    \item Context: cases, deaths, positivity, race/ethnicity, SVI, poverty, crowding, age, essential-worker share
+    \item Arm: testing allocation level
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Evaluation}
+\begin{itemize}
+    \item Reward: infections detected or deaths-averted proxy
+    \item Fairness: tests per 1,000, tests per detected case, disparity ratio by group/SVI
+    \item Risk: non-contextual allocation can reproduce convenience-based inequity
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.8em}
+\begin{center}
+\small
+\begin{tabular}{lll}
+\toprule
+Policy & Uses context? & Uses fairness signal? \\
+\midrule
+Non-contextual baseline & No & No \\
+Contextual utility-only & Yes & No \\
+Fairness-aware \icmab & Yes & Yes \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Real-World Grounding: Pulse Oximetry Bias}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\textbf{Claim 2: Missing group context at evaluation time}
+\begin{itemize}
+    \item Pulse oximetry was widely used for COVID triage and monitoring.
+    \item Devices overestimated oxygen saturation more often in darker-skinned patients.
+    \item This produced occult hypoxemia and delayed treatment eligibility.
+\end{itemize}
+\end{column}
+\begin{column}{0.41\textwidth}
+\begin{block}{Empirical pattern}
+Black patients were reported as roughly \textbf{3 times more likely} than White patients to have occult hypoxemia in the original NEJM evidence base.
+\end{block}
+\begin{block}{Scale}
+Later work included \textbf{24,504} patients with paired SpO$_2$/SaO$_2$ measurements.
+\end{block}
+\end{column}
+\end{columns}
+
+\vspace{0.4em}
+\footnotesize Sources summarized in \texttt{docs/covid\_context\_case\_studies.md}: Sjoding et al. (2020), Fawzy et al. (2022, 2023), Valbuena et al. (2022), VA ESP (2022), Gottlieb et al. (2022).
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Pulse Oximetry as a Bandit Problem}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Decision unit}
+\begin{itemize}
+    \item Patient encounter
+    \item Context: SpO$_2$, respiratory rate, heart rate, work of breathing, race/ethnicity, comorbidities
+    \item Arms: treat now, watch/wait, order confirmatory ABG
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Evaluation}
+\begin{itemize}
+    \item Reward: correct and timely treatment decisions
+    \item Fairness: group-wise occult hypoxemia rate
+    \item Constraint target: reduce disparity in missed hypoxemia across groups
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.6em}
+\begin{equation*}
+\text{GWOHR}_g = P(\text{occult hypoxemia not caught} \mid \text{group}=g)
+\end{equation*}
+\begin{equation*}
+\max_g \text{GWOHR}_g - \min_g \text{GWOHR}_g \leq \epsilon
+\end{equation*}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Selected MAB Spectrum}
+\begin{block}{Spectrum evaluated in this work}
+Our MAB spectrum refers to the non-contextual, contextual, and informative contextual bandit families evaluated in the framework.
+\end{block}
+
+\vspace{0.5em}
+\begin{center}
+\begin{tabular}{p{0.23\textwidth}p{0.29\textwidth}p{0.34\textwidth}}
+\toprule
+Family & Decision signal & Expected risk under missing context \\
+\midrule
+\mab & action history only & may reinforce historical allocation bias \\
+\cmab & observed context & improves utility but can inherit biased or incomplete context \\
+\icmab & observed context + missingness/fairness information & tests whether context recovery and fairness mediation reduce harm \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Shared Domain Model}
+\begin{center}
+\begin{tikzpicture}[
+  node distance=1.0cm,
+  box/.style={draw, rounded corners, align=center, minimum width=2.45cm, minimum height=0.75cm, fill=softgray},
+  bad/.style={draw, rounded corners, align=center, minimum width=2.45cm, minimum height=0.75cm, fill=softred!18},
+  good/.style={draw, rounded corners, align=center, minimum width=2.45cm, minimum height=0.75cm, fill=softgreen!18}
+]
+\node[box] (env) {Environment\\clinical / quantum};
+\node[bad, right=0.8cm of env] (ctx) {Missing, noisy,\\delayed context};
+\node[box, right=0.8cm of ctx] (policy) {Policy family\\\mab / \cmab / \icmab};
+\node[box, right=0.8cm of policy] (action) {Routing\\action};
+\node[good, below=0.9cm of action] (outcome) {Reward +\\fairness state};
+\node[box, left=0.8cm of outcome] (report) {Model-stratified\\reporting};
+\draw[-{Stealth}, thick] (env) -- (ctx);
+\draw[-{Stealth}, thick] (ctx) -- (policy);
+\draw[-{Stealth}, thick] (policy) -- (action);
+\draw[-{Stealth}, thick] (action) -- (outcome);
+\draw[-{Stealth}, thick] (outcome) -- (report);
+\draw[-{Stealth}, thick, dashed] (report.west) to[bend right=30] (policy.south);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.5em}
+\textbf{Key point:} the same failure mechanism appears in both domains: context quality determines what the learner can see, what it chooses, and which groups absorb the harm.
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Framework Contribution}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Quantum path}
+\begin{itemize}
+    \item Preserves legacy quantum testbed and saved-state conventions.
+    \item Adds governed fairness artifacts through a sidecar/compatibility path.
+    \item Supports fairness evaluation without breaking existing quantum runs.
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Clinical path}
+\begin{itemize}
+    \item Runs as embedded evaluator: environment, runner, allocator, model registry, EQUITAS mediation.
+    \item Supports multiple clinical model families.
+    \item Produces model-stratified fairness summaries and report artifacts.
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.7em}
+\begin{block}{Contribution}
+A reproducible framework for comparing context, fairness, and performance across two structurally similar but domain-distinct routing systems.
+\end{block}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Preliminary Framework Evidence}
+\begin{center}
+\begin{tabular}{p{0.42\textwidth}p{0.42\textwidth}}
+\toprule
+Evidence item & Status / finding \\
+\midrule
+Clinical embedded path & runs through evaluator, runner, environment, allocator, models, and EQUITAS context \\
+Clinical fairness smoke & produced 16 fairness states across Oracle, ClinicalBaseline, FairAllocatorV1, and ClinicalBanditUCB \\
+Non-oracle clinical efficiency & FairAllocatorV1: 91.23\%; ClinicalBanditUCB: 84.21\%; ClinicalBaseline: 75.09\% oracle efficiency \\
+Reporting layer & generated model-stratified fairness summaries and manifest-linked artifacts \\
+Quantum compatibility & legacy quantum path preserved while fairness artifacts are attached \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.4em}
+\small These are preliminary framework-validation results; active fairness-adjusted quantum learning still requires an explicit policy-update mechanism and full validation.
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{What the New COVID Analysis Adds}
+\begin{block}{Before}
+The project had a framework and cross-domain analogy, but the clinical motivation needed stronger empirical grounding.
+\end{block}
+
+\begin{block}{Now}
+The COVID case-study analysis supplies two concrete, evidence-backed clinical routing failures:
+\begin{enumerate}
+    \item test allocation failed when risk and vulnerability context were ignored;
+    \item pulse oximetry failed when group/skin-tone context was missing from calibration and evaluation.
+\end{enumerate}
+\end{block}
+
+\begin{block}{Impact on presentation and paper}
+These cases make the clinical side real: missing context is not abstract; it caused measurable access, mortality, diagnostic, and treatment-delay harms.
+\end{block}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Next Work}
+\begin{enumerate}
+    \item Convert COVID test-allocation and pulse-ox case studies into executable clinical environments.
+    \item Generate the planned figures: allocation network, group access bars, occult hypoxemia bars, bias bars, and fairness--utility tradeoff curve.
+    \item Complete model-family comparisons across the selected MAB spectrum.
+    \item Quantify which group is more likely to be harmed under non-stationary conditions.
+    \item Implement and validate active fairness-adjusted quantum policy updates.
+\end{enumerate}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Takeaway}
+\begin{block}{Main claim}
+Context quality is a fairness variable. When context is missing, ignored, or unevenly distributed, sequential decision systems can convert measurement gaps into repeated allocation harm.
+\end{block}
+
+\begin{block}{Project contribution}
+This work builds a clinical--quantum evaluation framework that compares performance and fairness across the selected MAB spectrum while preserving reproducibility and model-stratified evidence.
+\end{block}
+
+\begin{block}{Why it matters}
+The same methodology can study COVID test allocation, biased diagnostic triage, and quantum routing under scarce probabilistic resources.
+\end{block}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}[allowframebreaks]{Selected References}
+\scriptsize
+\begin{thebibliography}{99}
+\bibitem{bilal2021} Bilal et al. Racial and ethnic inequities in the early distribution of U.S. COVID-19 testing sites. \textit{Social Science \& Medicine}, 2021.
+\bibitem{escobar2021} Escobar et al. Addressing COVID-19 testing inequities among underserved communities. 2021.
+\bibitem{sjoding2020} Sjoding et al. Racial bias in pulse oximetry measurement. \textit{New England Journal of Medicine}, 2020.
+\bibitem{fawzy2022} Fawzy et al. Racial and ethnic discrepancy in pulse oximetry and delayed identification of treatment eligibility among patients with COVID-19. \textit{JAMA Internal Medicine}, 2022.
+\bibitem{fawzy2023} Fawzy et al. Clinical outcomes associated with overestimation of oxygen saturation by pulse oximetry. \textit{JAMA Network Open}, 2023.
+\bibitem{valbuena2022} Valbuena et al. Racial bias and reproducibility in pulse oximetry among medical and surgical inpatients in general care. \textit{BMJ}, 2022.
+\bibitem{garcia2026} Garcia Bautista. Threat-aware quantum routing evaluation / DSCI601 project materials, 2026.
+\end{thebibliography}
+\end{frame}
+
+\end{document}
