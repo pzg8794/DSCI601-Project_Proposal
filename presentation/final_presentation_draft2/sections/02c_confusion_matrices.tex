@@ -1,0 +1,20 @@
+\begin{frame}{Clinical Artifact 4: Confusion-Matrix Findings}
+\begin{center}
+\IfFileExists{../analysis_artifacts/fig4_confusion_matrices.pdf}{\includegraphics[width=0.96\textwidth,height=0.62\textheight,keepaspectratio]{../analysis_artifacts/fig4_confusion_matrices.pdf}}{%
+\IfFileExists{../analysis_artifacts/fig4_confusion_matrices.png}{\includegraphics[width=0.96\textwidth,height=0.62\textheight,keepaspectratio]{../analysis_artifacts/fig4_confusion_matrices.png}}{%
+\IfFileExists{../analysis_artifacts/confusion_matrices.pdf}{\includegraphics[width=0.96\textwidth,height=0.62\textheight,keepaspectratio]{../analysis_artifacts/confusion_matrices.pdf}}{%
+\small\begin{tabular}{llrrrr}
+\toprule
+Case & Policy & TP & FP & FN & TN \\
+\midrule
+Routing, high-SVI Hispanic & baseline & 21 & 5 & 79 & 45 \\
+Routing, high-SVI Hispanic & fair CMAB & 76 & 14 & 24 & 36 \\
+Pulse-ox, Black patients & baseline & 71 & 7 & 29 & 93 \\
+Pulse-ox, Black patients & EQUITAS & 94 & 11 & 6 & 89 \\
+\bottomrule
+\end{tabular}}}}
+\end{center}
+\begin{block}{Evaluator meaning}
+False negatives are either high-risk communities not served adequately or hypoxemic patients missed by a biased threshold.
+\end{block}
+\end{frame}
