@@ -1,0 +1,24 @@
+\begin{frame}{Updated Architecture Overview + Next-Semester Extension}
+\centering
+\resizebox{0.96\textwidth}{!}{%
+\begin{tikzpicture}[
+  layer/.style={draw, rounded corners, align=center, minimum width=10.7cm, minimum height=0.72cm, fill=softgray},
+  todo/.style={draw, rounded corners, align=center, minimum width=3.0cm, minimum height=0.72cm, fill=softred!15},
+  arr/.style={-{Stealth}, thick, deepblue}
+]
+\node[layer,fill=softblue!18] (l1) {Layer 1: Evidence, Data, and Context -- COVID evidence, clinical fixture, quantum saved states};
+\node[layer,fill=softgreen!18,below=.3cm of l1] (l2) {Layer 2: Environments and Evaluators -- ClinicalEnvironment, quantum testbed, runners};
+\node[layer,fill=ritorange!18,below=.3cm of l2] (l3) {Layer 3: Policies and Allocation -- Baselines, FairAllocatorV1, ClinicalBanditUCB};
+\node[layer,fill=softpurple!18,below=.3cm of l3] (l4) {Layer 4: EQUITAS, Reporting, and Validation -- fairness states, summaries, artifacts};
+\node[todo,right=0.55cm of l1] (t1) {Next: executable COVID scenarios};
+\node[todo,right=0.55cm of l2] (t2) {Next: active quantum fairness updates};
+\node[todo,right=0.55cm of l3] (t3) {Next: iCMAB mitigation policies};
+\node[todo,right=0.55cm of l4] (t4) {Next: paper-ready portal/reporting};
+\draw[arr] (l1)--(l2); \draw[arr] (l2)--(l3); \draw[arr] (l3)--(l4);
+\draw[arr,dashed] (l1)--(t1); \draw[arr,dashed] (l2)--(t2); \draw[arr,dashed] (l3)--(t3); \draw[arr,dashed] (l4)--(t4);
+\end{tikzpicture}}
+\vspace{0.4em}
+\begin{block}{Software stack shown in the architecture}
+Python simulation/evaluation code, LaTeX/Overleaf reports and presentation artifacts, GitHub version control, CI/smoke validation, and EQUITAS-mediated fairness reporting.
+\end{block}
+\end{frame}
