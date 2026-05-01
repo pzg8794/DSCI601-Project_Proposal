@@ -71,62 +71,205 @@
 
 \begin{frame}{Project Overview}
 \begin{block}{What this project is}
-This project studies \textbf{fairness-aware routing under missing context} in two environment families: \textbf{clinical decision support} and \textbf{quantum-network routing}. Both are \textbf{sequential decision systems (SDSs)} that allocate scarce resources under uncertainty and learn from partial feedback.
+This project studies \textbf{fairness-aware routing under missing context} in two environment families:
+\textbf{clinical decision support} and \textbf{quantum-network routing}.
 \end{block}
 
-\begin{columns}[T]
-\begin{column}{0.49\textwidth}
-\textbf{Goals}
+\vspace{0.5em}
+
+\begin{block}{Shared problem}
+Both domains are \textbf{sequential decision systems (SDSs)}:
+they allocate scarce resources under uncertainty, observe only partial feedback,
+and update future decisions from incomplete evidence.
+\end{block}
+
+\vspace{0.5em}
+
+\textbf{Project goals}
 \begin{itemize}
-    \item compare \mab, \cmab, and \icmab strategies
-    \item measure both \textbf{performance} and \textbf{fairness}
-    \item show how missing or degraded context can create repeated allocation harm
-    \item build a reproducible framework with reportable artifacts
+    \item Compare \mab, \cmab, and \icmab{} strategies.
+    \item Measure both \textbf{performance} and \textbf{fairness}.
+    \item Show how missing or degraded context can create repeated allocation harm.
+    \item Build a reproducible framework with reportable artifacts.
 \end{itemize}
-\end{column}
-\begin{column}{0.47\textwidth}
-\textbf{Why it matters}
-\begin{itemize}
-    \item \textbf{Clinical:} tests, triage, and escalation affect real patient outcomes
-    \item \textbf{Quantum:} route selection and qubit allocation affect service quality under noisy conditions
-    \item In both domains, a policy can look good on average while harming specific groups or flows
-\end{itemize}
-\end{column}
-\end{columns}
 \end{frame}
 
+
+\begin{frame}{Why This Project Matters}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\begin{block}{Clinical impact}
+Routing decisions affect real patient outcomes.
+\end{block}
+
+\begin{itemize}
+    \item Who receives a diagnostic test?
+    \item Who gets retested or escalated?
+    \item Whose risk is missed because context is incomplete?
+\end{itemize}
+
+\vspace{0.4em}
+
+\alert{A policy can look accurate on average while still delaying access to critical resources/care for a vulnerable group.}
+\end{column}
+
+\begin{column}{0.48\textwidth}
+\begin{block}{Quantum-network impact}
+Routing decisions affect service quality under noisy conditions.
+\end{block}
+
+\begin{itemize}
+    \item Which path gets selected?
+    \item Which flows receive scarce qubit or link resources?
+    \item Which users experience repeated failure or latency?
+\end{itemize}
+
+\vspace{0.4em}
+
+\alert{A policy can maximize total throughput while still giving some flows consistently worse service.}
+\end{column}
+\end{columns}
+
+\vspace{0.6em}
+
+\begin{block}{Core reason this matters}
+Fairness-aware routing asks whether the system is making good decisions
+\textbf{for everyone affected}, not only good decisions on average.
+\end{block}
+\end{frame}
+
+
 \begin{frame}{Updated Domain Model}
-\begin{center}
+\centering
+\resizebox{0.90\textwidth}{!}{%
 \begin{tikzpicture}[
-  node distance=0.95cm,
-  box/.style={draw, rounded corners, align=center, minimum width=2.4cm, minimum height=0.88cm, fill=softgray},
-  risk/.style={draw, rounded corners, align=center, minimum width=2.4cm, minimum height=0.88cm, fill=softred!18},
-  good/.style={draw, rounded corners, align=center, minimum width=2.4cm, minimum height=0.88cm, fill=softgreen!18},
+  node distance=0.7cm,
+  entity/.style={draw, rounded corners, align=center, fill=softgray, minimum width=2.5cm, minimum height=0.8cm},
+  risk/.style={draw, rounded corners, align=center, fill=softred!18, minimum width=2.5cm, minimum height=0.8cm},
+  decision/.style={draw, rounded corners, align=center, fill=ritorange!18, minimum width=2.5cm, minimum height=0.8cm},
+  output/.style={draw, rounded corners, align=center, fill=softgreen!18, minimum width=2.5cm, minimum height=0.8cm},
   arr/.style={-{Stealth}, thick}
 ]
-\node[box] (env) {Environment family\\clinical / quantum};
-\node[risk, right=0.7cm of env] (ctx) {Observed context\\missing, noisy, delayed};
-\node[box, right=0.7cm of ctx] (policy) {Policy family\\\mab / \cmab / \icmab};
-\node[box, right=0.7cm of policy] (action) {Routing action\\test, triage, path};
-\node[good, below=0.95cm of action] (outcome) {Observed outcome\\reward, latency, success};
-\node[box, left=0.7cm of outcome] (fair) {Fairness state\\group, cohort, route};
-\node[risk, left=0.7cm of fair] (report) {Reporting +\\validation hub};
-\draw[arr] (env) -- node[above, font=\scriptsize]{1 generates 1..*} (ctx);
-\draw[arr] (ctx) -- node[above, font=\scriptsize]{1 conditions 1} (policy);
-\draw[arr] (policy) -- node[above, font=\scriptsize]{1 selects 1} (action);
-\draw[arr] (action) -- node[right, font=\scriptsize]{1 yields 1} (outcome);
-\draw[arr] (outcome) -- node[below, font=\scriptsize]{1 updates 1} (fair);
-\draw[arr] (fair) -- node[below, font=\scriptsize]{1..* artifacts} (report);
-\draw[arr, dashed] (report.west) to[bend right=35] node[below, font=\scriptsize]{feedback} (policy.south);
-\end{tikzpicture}
-\end{center}
+\node[entity] (env) {Environment\\clinical or quantum};
+\node[risk, right=1.0cm of env] (ctx) {Observed Context\\missing / delayed / noisy};
+\node[decision, right=1.0cm of ctx] (pol) {Policy Family\\MAB / CMAB / iCMAB};
+\node[entity, right=1.0cm of pol] (act) {Routing Action\\test, triage, path};
+\node[output, below=1.0cm of act] (reward) {Reward + Cost\\partial feedback};
+\node[output, left=1.0cm of reward] (fair) {Fairness State\\group or flow gaps};
+\node[entity, left=1.0cm of fair] (report) {Reporting Artifact\\manifest + figures};
+
+\draw[arr] (env) -- (ctx);
+\draw[arr] (ctx) -- (pol);
+\draw[arr] (pol) -- (act);
+\draw[arr] (act) -- (reward);
+\draw[arr] (reward) -- (fair);
+\draw[arr] (fair) -- (report);
+\draw[arr,dashed] (fair) to[bend right=35] (pol);
+\end{tikzpicture}}
+
+\vspace{0.55em}
+\scriptsize
+\begin{tabular}{p{0.24\textwidth}p{0.58\textwidth}p{0.12\textwidth}}
+\toprule
+\textbf{Relationship} & \textbf{Meaning} & \textbf{Cardinality} \\
+\midrule
+Environment $\rightarrow$ Context & each run produces observed context snapshots & 1 to 1..* \\
+Context $\rightarrow$ Policy & one observed state is used for the current decision & 1 to 1 \\
+Policy $\rightarrow$ Action & the policy selects exactly one routing action & 1 to 1 \\
+Action $\rightarrow$ Outcome & only the chosen action creates observed feedback & 1 to 1 \\
+Outcome $\rightarrow$ Fairness & outcomes update fairness metrics over groups or routes & 1 to 1..* \\
+Fairness $\rightarrow$ Report & validation stores summaries, figures, and manifests & 1 to 0..* \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.35em}
+\begin{itemize}
+  \item The same domain model supports both environment families.
+  \item The unchosen actions remain \textbf{counterfactual}; only the chosen action produces observed feedback.
+  \item Fairness risk appears when context quality is systematically worse for one group, site, cohort, or route class.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Why the Domain Model Changed}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\centering
+\textbf{Old domain view}
 
 \vspace{0.3em}
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  node distance=0.42cm,
+  smallbox/.style={draw, rounded corners, align=center, minimum width=1.7cm, minimum height=0.55cm, fill=softgray},
+  bad/.style={draw, rounded corners, align=center, minimum width=1.7cm, minimum height=0.55cm, fill=softred!18},
+  good/.style={draw, rounded corners, align=center, minimum width=1.7cm, minimum height=0.55cm, fill=softgreen!18},
+  arr/.style={-{Stealth}, thick}
+]
+\node[smallbox] (env) {Environment};
+\node[bad, right=0.35cm of env] (ctx) {Context};
+\node[smallbox, right=0.35cm of ctx] (pol) {Policy};
+\node[smallbox, right=0.35cm of pol] (act) {Action};
+\node[good, below=0.55cm of act] (out) {Reward + Fairness};
+\node[smallbox, left=0.35cm of out] (rep) {Reporting};
+\node[bad, left=0.35cm of rep] (harm) {Disparity};
+
+\draw[arr] (env) -- (ctx);
+\draw[arr] (ctx) -- (pol);
+\draw[arr] (pol) -- (act);
+\draw[arr] (act) -- (out);
+\draw[arr] (out) -- (rep);
+\draw[arr] (rep) -- (harm);
+\draw[arr,dashed] (harm.west) to[bend right=35] (pol.south);
+\end{tikzpicture}}
+\vspace{0.35em}
+
+{\scriptsize Compact pipeline, but some concepts were merged together.}
+\end{column}
+
+\begin{column}{0.48\textwidth}
+\centering
+\textbf{Updated domain view}
+
+\vspace{0.3em}
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  node distance=0.42cm,
+  smallbox/.style={draw, rounded corners, align=center, minimum width=1.7cm, minimum height=0.55cm, fill=softgray},
+  bad/.style={draw, rounded corners, align=center, minimum width=1.7cm, minimum height=0.55cm, fill=softred!18},
+  good/.style={draw, rounded corners, align=center, minimum width=1.7cm, minimum height=0.55cm, fill=softgreen!18},
+  orangebox/.style={draw, rounded corners, align=center, minimum width=1.7cm, minimum height=0.55cm, fill=ritorange!18},
+  arr/.style={-{Stealth}, thick}
+]
+\node[smallbox] (env) {Environment};
+\node[bad, right=0.35cm of env] (ctx) {Observed Context};
+\node[orangebox, right=0.35cm of ctx] (pol) {Policy Family};
+\node[smallbox, right=0.35cm of pol] (act) {Routing Action};
+\node[good, below=0.55cm of act] (out) {Observed Outcome};
+\node[good, left=0.35cm of out] (fair) {Fairness State};
+\node[smallbox, left=0.35cm of fair] (rep) {Reporting Artifact};
+
+\draw[arr] (env) -- (ctx);
+\draw[arr] (ctx) -- (pol);
+\draw[arr] (pol) -- (act);
+\draw[arr] (act) -- (out);
+\draw[arr] (out) -- (fair);
+\draw[arr] (fair) -- (rep);
+\draw[arr,dashed] (fair.west) to[bend right=35] (pol.south);
+\end{tikzpicture}}
+\vspace{0.35em}
+
+{\scriptsize Clearer separation of decision, outcome, fairness audit, and reporting.}
+\end{column}
+\end{columns}
+
+\vspace{0.6em}
+\begin{block}{Why this matters}
 \begin{itemize}
-    \item The same domain model supports both environment families.
-    \item The unchosen actions remain \textbf{counterfactual}; only the chosen action produces observed feedback.
-    \item Fairness risk appears when context quality is systematically worse for one group, site, cohort, or route class.
+    \item The updated model separates \textbf{observed outcome} from \textbf{fairness state}, so fairness is treated as an audit layer rather than being hidden inside reward.
+    \item It makes the \textbf{bandit setting} clearer: only the chosen action is observed, while the other actions remain \textbf{counterfactual}.
+    \item It also makes the project more reproducible by showing that \textbf{reporting/validation artifacts} are explicit outputs of the framework.
 \end{itemize}
+\end{block}
 \end{frame}
 
 \begin{frame}{Best Evidence Figure 1: Test Routing Failure vs. Context-Aware Routing}

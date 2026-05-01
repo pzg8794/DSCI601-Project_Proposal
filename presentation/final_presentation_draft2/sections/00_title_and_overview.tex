@@ -1,28 +1,43 @@
-\begin{frame}
-  \titlepage
+
+% -----------------------------------------------------------------------------
+\begin{frame}{15-Minute Presentation Plan}
+\begin{enumerate}
+    \item Project overview: problem, goal, and contribution.
+    \item Updated domain model: clinical and quantum routing as one missing-context problem.
+    \item Updated architecture overview and four architecture layer slides.
+    \item GitHub code-review break: classes connected to the architecture.
+    \item Working demo plan and preliminary results.
+    \item Next-semester completion plan.
+\end{enumerate}
+\vspace{0.5em}
+% \begin{block}{Rubric alignment}
+% The deck prioritizes clear figures, background explanation, an updated domain model, layered architecture, code review, and a demo path.
+% \end{block}
 \end{frame}
 
-\begin{frame}{Project Overview: What I Am Building}
-\begin{block}{Goal}
-Build and evaluate fairness-aware routing policies for scarce-resource decisions under uncertainty and partial feedback.
+% -----------------------------------------------------------------------------
+\begin{frame}{Project Overview}
+\begin{block}{What this project is}
+This project studies \textbf{fairness-aware routing under missing context} in two environment families: \textbf{clinical decision support} and \textbf{quantum-network routing}. Both are \textbf{sequential decision systems (SDSs)} that allocate scarce resources under uncertainty and learn from partial feedback.
 \end{block}
 
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\textbf{Goals}
 \begin{itemize}
-  \item Clinical side: route tests, retests, diagnostic attention, and triage escalation.
-  \item Quantum side: route path capacity, qubit allocation, and entanglement-generation effort.
-  \item Method comparison: MAB, CMAB, and iCMAB policies.
-  \item Main fairness risk: missing or unreliable context creates repeated allocation harm.
+    \item compare \mab, \cmab, and $\icmab$ strategies
+    \item measure both \textbf{performance} and \textbf{fairness}
+    \item show how missing or degraded context can create repeated allocation harm
+    \item build a reproducible framework with reportable artifacts
 \end{itemize}
-\end{frame}
-
-\begin{frame}{15-Minute Roadmap}
-\begin{enumerate}
-  \item Title and project overview.
-  \item Updated domain model.
-  \item Updated architecture overview.
-  \item Architecture layer details.
-  \item GitHub code review break.
-  \item Next-semester completion plan.
-  \item Working demo plan.
-\end{enumerate}
+\end{column}
+\begin{column}{0.47\textwidth}
+\textbf{Why it matters}
+\begin{itemize}
+    \item \textbf{Clinical:} tests, triage, and escalation affect real patient outcomes
+    \item \textbf{Quantum:} route selection and qubit allocation affect service quality under noisy conditions
+    \item In both domains, a policy can look good on average while harming specific groups or flows
+\end{itemize}
+\end{column}
+\end{columns}
 \end{frame}

@@ -1,34 +1,32 @@
 \begin{frame}{Updated Domain Model}
-\centering
-\resizebox{0.95\textwidth}{!}{%
+\begin{center}
 \begin{tikzpicture}[
-  node distance=0.7cm,
-  entity/.style={draw, rounded corners, align=center, fill=softgray, minimum width=2.5cm, minimum height=0.8cm},
-  risk/.style={draw, rounded corners, align=center, fill=softred!18, minimum width=2.5cm, minimum height=0.8cm},
-  decision/.style={draw, rounded corners, align=center, fill=ritorange!18, minimum width=2.5cm, minimum height=0.8cm},
-  output/.style={draw, rounded corners, align=center, fill=softgreen!18, minimum width=2.5cm, minimum height=0.8cm},
+  node distance=0.9cm,
+  box/.style={draw, rounded corners, align=center, minimum width=2.35cm, minimum height=0.75cm, fill=softgray},
+  bad/.style={draw, rounded corners, align=center, minimum width=2.35cm, minimum height=0.75cm, fill=softred!18},
+  good/.style={draw, rounded corners, align=center, minimum width=2.35cm, minimum height=0.75cm, fill=softgreen!18},
   arr/.style={-{Stealth}, thick}
 ]
-\node[entity] (env) {Environment\\clinical or quantum};
-\node[risk, right=1.0cm of env] (ctx) {Observed Context\\missing / delayed / noisy};
-\node[decision, right=1.0cm of ctx] (pol) {Policy Family\\MAB / CMAB / iCMAB};
-\node[entity, right=1.0cm of pol] (act) {Routing Action\\test, triage, path};
-\node[output, below=1.0cm of act] (reward) {Reward + Cost\\partial feedback};
-\node[output, left=1.0cm of reward] (fair) {Fairness State\\group or flow gaps};
-\node[entity, left=1.0cm of fair] (report) {Reporting Artifact\\manifest + figures};
-\draw[arr] (env) -- node[above]{1..* contexts} (ctx);
-\draw[arr] (ctx) -- node[above]{1 observation} (pol);
-\draw[arr] (pol) -- node[above]{1 selected action} (act);
-\draw[arr] (act) -- node[right]{1 observed outcome} (reward);
-\draw[arr] (reward) -- node[above]{1..* metrics} (fair);
-\draw[arr] (fair) -- node[above]{0..* artifacts} (report);
-\draw[arr,dashed] (fair) to[bend right=35] node[below]{mitigation feedback} (pol);
-\end{tikzpicture}}
+\node[box] (env) {Environment\\clinical / quantum};
+\node[bad, right=0.62cm of env] (ctx) {Observed context\\missing, noisy, delayed};
+\node[box, right=0.62cm of ctx] (policy) {Policy family\\\mab / \cmab / \icmab};
+\node[box, right=0.62cm of policy] (action) {Routing action\\test, triage, path};
+\node[good, below=0.85cm of action] (outcome) {Reward +\\fairness state};
+\node[box, left=0.62cm of outcome] (report) {Reporting +\\validation hub};
+\node[bad, left=0.62cm of report] (harm) {Disparity\\monitor};
+\draw[arr] (env) -- (ctx);
+\draw[arr] (ctx) -- (policy);
+\draw[arr] (policy) -- (action);
+\draw[arr] (action) -- (outcome);
+\draw[arr] (outcome) -- (report);
+\draw[arr] (report) -- (harm);
+\draw[arr, dashed] (harm.west) to[bend right=35] (policy.south);
+\end{tikzpicture}
+\end{center}
 
-\vspace{0.5em}
+\vspace{0.4em}
 \begin{itemize}
-  \item The rough draft frames both domains as sequential routing under partial feedback.
-  \item Updates this semester: clinical fairness path, EQUITAS mediation, COVID evidence, and artifact reporting.
-  \item Multiplicity is explicit: many contexts feed one decision; one action creates one observed outcome and many unobserved counterfactuals.
+    \item Multiplicity: one environment produces many contexts; one policy selects one action per round; one action produces one observed reward but many unobserved counterfactuals.
+    \item Fairness risk appears when context quality is systematically worse for one group, site, cohort, flow, or route class.
 \end{itemize}
 \end{frame}
