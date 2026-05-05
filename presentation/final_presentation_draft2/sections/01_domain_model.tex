@@ -25,10 +25,30 @@
 \draw[arr,dashed] (fair) to[bend right=35] node[below]{mitigation feedback} (pol);
 \end{tikzpicture}}
 
-\vspace{0.5em}
+\vspace{0.45em}
 \begin{itemize}
-  \item The rough draft frames both domains as sequential routing under partial feedback.
-  \item Updates this semester: clinical fairness path, EQUITAS mediation, COVID evidence, and artifact reporting.
   \item Multiplicity is explicit: many contexts feed one decision; one action creates one observed outcome and many unobserved counterfactuals.
+  \item Fairness risk appears when context quality is systematically worse for one group, site, cohort, flow, or route class.
 \end{itemize}
+\end{frame}
+
+\begin{frame}{Domain Model Interpretation}
+\scriptsize
+\begin{tabular}{p{0.25\textwidth}p{0.55\textwidth}p{0.13\textwidth}}
+\toprule
+\textbf{Relationship} & \textbf{Meaning} & \textbf{Cardinality} \\
+\midrule
+Environment $\rightarrow$ Context & each run produces observed context snapshots & 1 to 1..* \\
+Context $\rightarrow$ Policy & one observed state is used for the current decision & 1 to 1 \\
+Policy $\rightarrow$ Action & the policy selects exactly one routing action & 1 to 1 \\
+Action $\rightarrow$ Outcome & only the chosen action creates observed feedback & 1 to 1 \\
+Outcome $\rightarrow$ Fairness & outcomes update fairness metrics over groups or routes & 1 to 1..* \\
+Fairness $\rightarrow$ Report & validation stores summaries, figures, and manifests & 1 to 0..* \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.65em}
+\begin{block}{Why this matters}
+The updated model separates \textbf{observed outcome} from \textbf{fairness state}, so fairness is treated as an audit and mediation layer rather than being hidden inside reward.
+\end{block}
 \end{frame}
