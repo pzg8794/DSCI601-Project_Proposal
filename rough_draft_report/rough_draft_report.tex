@@ -26,8 +26,7 @@
 \definecolor{softgray}{RGB}{245,247,250}
 
 \title{{\LARGE\textbf{Fairness-Aware Routing in Quantum Networks \& Clinical Settings}}\\
-{\Large\textit{via Multi-Armed, Contextual, and Informative Bandit Methods}}\\[0.3em]
-{\large\textit{(Rough Draft Report)}}}
+{\Large\textit{via Multi-Armed, Contextual, and Informative Bandit Methods}}}
 
 \author{
 \IEEEauthorblockN{Piter Z. Garcia}
@@ -93,40 +92,32 @@ allocate scarce probabilistic resources among competing flows; fairness in
 success probability and latency is a service-quality issue rather
 than a purely normative add-on.
 
-The project uses two complementary environment families. The first is an
-existing quantum-routing evaluation stack based on hybrid contextual bandits
-for entanglement routing and qubit allocation~\cite{garcia2026threat_aware_quantum_routing}.
-That stack already exposes uncertainty, adversarial or non-stationary
-conditions, legacy testbed conventions, and stateful evaluator artifacts. The
-second is an embedded clinical simulation motivated by equitable bioinformatics
-and fairness auditing work~\cite{garcia2025equitable_bioinformatics}. The
-clinical environment models the routing of scarce tests, retesting capacity,
-escalation decisions, diagnostic attention, and model-assisted triage across
-sites and cohorts. Under volatile conditions such as a pandemic, threat,
-demand, evidence quality, and resource availability can change rapidly; this
-makes the clinical routing setting structurally comparable to quantum routing
-under noisy links, uncertain entanglement generation, and non-stationary
-service conditions. The two-domain design tests whether fairness mechanisms
-and policy-update strategies transfer across fundamentally different
-applications with the same partial-feedback allocation structure.
+The study develops a shared environment--runner--evaluator architecture for
+two complementary routing families. The first is a quantum-routing testbed
+based on hybrid contextual bandits for entanglement routing and qubit
+allocation~\cite{garcia2026threat_aware_quantum_routing}. It exposes noisy
+links, uncertain entanglement generation, adversarial or non-stationary
+conditions, allocator decisions, and saved evaluator state. The second is an
+embedded clinical simulation motivated by equitable bioinformatics and
+fairness auditing work~\cite{garcia2025equitable_bioinformatics}. It models
+test ordering, retesting, escalation, diagnostic attention, model-assisted
+triage, site-level constraints, and cohort-level context quality. The shared
+abstraction is that each domain routes scarce resources from partial feedback
+while fairness risk emerges from unequal context quality.
 
-The current rough draft reports the mostly completed design and implementation
-foundation rather than final experimental results. The remainder of the paper
-is organized as follows. Section~II summarizes related work. Section~III
-describes the methodology and domain model. Section~IV describes the
-implementation and reproducibility architecture. Section~V summarizes the data
-sets and experimental inputs. Section~VI gives preliminary validation evidence.
-Sections~VII and VIII describe future work and conclusions.
-
-This rough draft does not claim that the final fairness results are complete.
-Instead, it consolidates the work into a single preliminary
-final-paper structure. That consolidation is important because the project is
-cross-domain. The organizing idea used throughout this draft is
-that both domains are sequential routing systems whose fairness risk emerges
-from unequal context quality. The clinical system routes diagnostic attention;
-the quantum system routes probabilistic network resources. Both require
-learning under partial feedback, non-stationarity, and subgroup- or flow-level
-performance monitoring.
+Four research questions drive the work. RQ1 asks how much richer context
+improves utility and fairness relative to non-contextual baselines. RQ2 asks
+how quickly disparities emerge when a group, site, cohort, or flow class
+receives noisier, delayed, or incomplete context. RQ3 asks whether
+missingness-aware or fairness-mediated policy updates reduce outcome gaps
+without unacceptable utility loss. RQ4 asks whether the same fairness
+mediation strategy transfers between clinical diagnostic simulation and
+quantum routing, or whether mitigation must remain domain-specific.
+Preliminary evidence supports the context-gain premise: predictive-context
+quantum policies improve over no-context baselines by 3.74 percentage points
+in the internal corpus and 2.83 percentage points in the standardized external
+corpus, while the clinical EQUITAS evidence package shows large improvements
+after domain context restoration and under-represented-context augmentation.
 
 \section{Related Work}
 \subsection{Bandits and Contextual Sequential Decision-Making}
@@ -204,7 +195,7 @@ both clinical and quantum-resource routing domains.
 \small
 \begin{tabular}{p{0.29\columnwidth}p{0.65\columnwidth}}
 \toprule
-\textbf{Literature area} & \textbf{Role in this rough draft} \\
+\textbf{Literature area} & \textbf{Role in this study} \\
 \midrule
 Bandit foundations & partial feedback, regret \& baselines \\
 Contextual bandits & model side data \& missing-context sensitivity \\
@@ -217,8 +208,8 @@ Quantum routing & resource-scarce routing testbed \& stateful simulator \\
 \end{table}
 
 Table~\ref{tab:related_map} summarizes the role of each category. The final
-paper will expand this discussion with direct comparisons once the final
-experiments are complete, but the rough draft already establishes the
+analysis will expand this discussion with direct comparisons once the
+experiments are complete, but the literature already establishes the
 scientific gap: existing work rarely evaluates outcome-based fairness under
 missing context and distribution shift across two structurally similar but
 domain-distinct routing systems.
@@ -382,6 +373,95 @@ success probability, latency, or escalation delay. This notation separates the
 learning objective from the fairness audit: a policy can have low regret in
 aggregate while still producing high $\Delta_m(t)$ for specific groups.
 
+\subsection{Bandit Policies and EQUITAS Mediation}
+The baseline non-contextual policy is an upper-confidence-bound bandit. For
+action $a$, let $N_{a,t}$ be the number of times action $a$ has been selected
+before round $t$ and let $\hat{\mu}_{a,t}$ be its empirical reward mean. The
+UCB score is
+\begin{equation}
+U^{\mathrm{MAB}}_{t}(a) =
+\hat{\mu}_{a,t-1} +
+\alpha \sqrt{\frac{2\log t}{\max(1,N_{a,t-1})}},
+\label{eq:mab_ucb}
+\end{equation}
+and the learner selects $a_t=\arg\max_a U^{\mathrm{MAB}}_{t}(a)$. This
+baseline deliberately ignores patient, site, topology, load, or fidelity
+features, so it measures the cost of acting without context.
+
+The contextual policy replaces scalar action means with action-specific linear
+models. For each action, let $A_{a,t}$ and $b_{a,t}$ denote the accumulated
+feature covariance and reward-weighted feature vector, with
+$\hat{\theta}_{a,t}=A_{a,t}^{-1}b_{a,t}$. Given observed context
+$\tilde{\mathbf{x}}_t$, the contextual UCB score is
+\begin{equation}
+U^{\mathrm{CMAB}}_{t}(a) =
+\tilde{\mathbf{x}}_t^\top\hat{\theta}_{a,t-1} +
+\alpha
+\sqrt{\tilde{\mathbf{x}}_t^\top A_{a,t-1}^{-1}\tilde{\mathbf{x}}_t}.
+\label{eq:linucb}
+\end{equation}
+After observing reward $r_t(a_t)$, the selected action updates as
+$A_{a_t,t}=A_{a_t,t-1}+\tilde{\mathbf{x}}_t\tilde{\mathbf{x}}_t^\top$ and
+$b_{a_t,t}=b_{a_t,t-1}+r_t(a_t)\tilde{\mathbf{x}}_t$.
+
+EQUITAS adds fairness mediation as a governed scoring layer around either
+bandit family. Let $U_t(a)$ be the utility score from Eq.~\ref{eq:mab_ucb} or
+Eq.~\ref{eq:linucb}, $\widehat{\Delta}_{m,t}(a)$ be the estimated disparity
+gap that would result from action $a$, $\epsilon$ be an allowable gap, and
+$C_t(a)$ be a context-deficit penalty for missing, stale, or low-confidence
+features. The mediated score is
+\begin{equation}
+S^{\mathrm{EQUITAS}}_t(a) =
+U_t(a) -
+\lambda \max \left(0,\widehat{\Delta}_{m,t}(a)-\epsilon\right) -
+\gamma C_t(a),
+\label{eq:equitas_score}
+\end{equation}
+with action $a_t=\arg\max_a S^{\mathrm{EQUITAS}}_t(a)$. The parameters
+$\lambda$ and $\gamma$ control the utility--fairness and
+utility--context-quality tradeoffs. In clinical routing, $\widehat{\Delta}$
+tracks error, escalation, or delay gaps across sites and cohorts. In quantum
+routing, it tracks service gaps such as success probability, latency, or
+resource access across flows or service classes.
+
+\begin{table*}[t]
+\caption{EQUITAS-mediated fairness-aware routing procedure.}
+\label{alg:equitas_bandit}
+\centering
+\small
+\begin{tabular}{p{0.96\textwidth}}
+\toprule
+\textbf{Input:} environment $\mathcal{E}$, action set $\mathcal{A}$, policy family $\pi$, fairness metric $m$, allowable gap $\epsilon$, tradeoff weights $\lambda,\gamma$, horizon $T$. \\
+\midrule
+1. Initialize per-action bandit statistics, fairness summaries, context-quality summaries, and state provenance. \\
+2. \textbf{For} $t=1,\ldots,T$: observe incomplete context $\tilde{\mathbf{x}}_t$ and context-quality indicators from $\mathcal{E}$. \\
+3. Compute a utility score $U_t(a)$ for each $a\in\mathcal{A}$ using the MAB score in Eq.~\ref{eq:mab_ucb} or the contextual score in Eq.~\ref{eq:linucb}. \\
+4. Estimate the group- or flow-conditioned disparity effect $\widehat{\Delta}_{m,t}(a)$ and context-deficit penalty $C_t(a)$. \\
+5. Apply EQUITAS mediation with Eq.~\ref{eq:equitas_score}; choose $a_t=\arg\max_a S^{\mathrm{EQUITAS}}_t(a)$. \\
+6. Execute $a_t$, observe partial reward $r_t(a_t)$ and outcome fields, then update policy statistics only for the selected action. \\
+7. Persist the round state: context, action, reward, outcome, group/flow labels, allocator metadata, EQUITAS score components, and provenance. \\
+8. \textbf{Return:} default utility summaries, fairness summaries, state artifacts, and reporting datasets for clinical or quantum analysis. \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table}[t]
+\caption{Application mapping for the shared method.}
+\label{tab:application_mapping}
+\centering
+\small
+\begin{tabular}{p{0.22\columnwidth}p{0.33\columnwidth}p{0.35\columnwidth}}
+\toprule
+\textbf{Element} & \textbf{Clinical setting} & \textbf{Quantum setting} \\
+\midrule
+Context & site, cohort, service line, test signals, missingness & topology, load, fidelity, route state, capacity \\
+Action & test, retest, escalation, model-assisted triage & path, route, qubit allocation, retry policy \\
+Reward & diagnostic utility, delay/cost penalty, error outcome & success, latency, fidelity, Oracle-normalized efficiency \\
+Fairness gap & FNR/FPR, escalation delay, access imbalance & success-rate, latency, or service-class imbalance \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{Design Decisions}
 Bandits are used instead of full reinforcement learning because both testbeds
 provide bandit feedback: only the chosen diagnostic or routing action reveals
@@ -405,19 +485,6 @@ context augmentation. These mechanisms will be evaluated as tradeoffs rather
 than as free improvements, because fairness constraints can reduce short-term
 reward while improving reliability and equity.
 
-\subsection{Experimental Questions}
-The final experiments will answer four questions. First, how much does context
-improve utility and fairness relative to non-contextual baselines when all
-groups have comparable context quality? Second, how quickly do fairness gaps
-emerge when one group or flow class receives noisier, delayed, or incomplete
-context? Third, do missingness-aware or fairness-regularized policy updates
-reduce outcome disparities without unacceptable utility loss? Fourth, do the
-same policy-update strategies transfer between clinical diagnostic simulation
-and quantum routing, or are the fairness mechanisms domain-specific? These
-questions define the planned analysis tables and figures: reward/regret curves,
-time-evolving disparity curves, mitigation tradeoff plots, and cross-domain
-transfer summaries.
-
 \subsection{Planned Mitigation Strategy}
 The first mitigation family will treat fairness as a penalty or constraint in
 the policy-update loop. In the simplest form, the learner receives a utility
@@ -432,7 +499,7 @@ value. A third family will test group-aware calibration or thresholding at the
 decision boundary. This is especially relevant for diagnostic-like escalation,
 where a small threshold shift can change false-negative rates.
 
-The mitigation comparison will be conservative. The final paper will not claim
+The mitigation comparison will be conservative. The analysis will not claim
 that lower disparity is automatically better if the policy produces unsafe or
 unusable utility loss. Instead, each mitigation will be evaluated through
 utility--fairness tradeoff curves. The preferred policy is expected to be one
@@ -444,148 +511,83 @@ fairness-aware updates rather than confounding algorithm choice with simulator
 configuration.
 
 \section{Implementation and Reproducibility}
-\subsection{Execution Paths}
-The implementation is designed around reproducibility. The quantum side uses
-three execution paths inherited from the upstream quantum project: notebooks
-for fast interactive replication, a local environment for development and
-testing, and GCP/batch scripts for longer runs. The notebook and local paths
-support the legacy quantum testbeds and saved-state conventions documented in
-the quantum-routing evaluation paper~\cite{garcia2026threat_aware_quantum_routing}.
-The clinical side now runs through an embedded evaluator path consisting of
-\texttt{ClinicalExperimentEvaluator}, \texttt{ClinicalExperimentRunner},
-\texttt{ClinicalEnvironment}, clinical resource allocation, clinical model
-objects, and EQUITAS mediation. The local path uses a virtual environment,
-dependencies from \texttt{requirements.txt}, and validation scripts. The GCP
-path uses startup and dynamic-runner scripts for larger allocator and
-time-scale experiments.
+\subsection{Architecture}
+The implementation realizes the method in Table~\ref{alg:equitas_bandit}
+through a modular experiment architecture. Each environment supplies domain
+state, available actions, outcome semantics, and context-quality indicators.
+A runner executes one or more policy models inside that environment. A
+resource allocator controls scarce capacity before actions are selected, such
+as qubit/path capacity in quantum routing or test/retest/escalation capacity
+in the clinical setting. An evaluator coordinates repeated runs, collects
+states, and computes utility, regret, and disparity summaries. EQUITAS sits
+between policy scoring and evaluation: it can mediate action scores during a
+run, or it can audit saved states after a legacy run without changing the
+original execution semantics.
 
 \begin{table}[t]
-\caption{Implementation layers and the role of reproducibility.}
+\caption{High-level implementation architecture.}
 \label{tab:implementation}
 \centering
 \small
-\begin{tabular}{p{0.32\columnwidth}p{0.65\columnwidth}}
+\begin{tabular}{p{0.30\columnwidth}p{0.61\columnwidth}}
 \toprule
-\textbf{Layer} & \textbf{Role} \\
+\textbf{Component} & \textbf{Responsibility} \\
 \midrule
-Configuration & fixed seeds, settings, run scales \& output roots \\
-Collection/state access & retrieves Drive framework \& model states \\
-Runner/allocator & executes routing actions \& qubit allocation \\
-Evaluator & winners, reward, efficiency, \& gap summaries \\
-Visualizer/analysis & plots, summaries \& review-facing tables \\
-CRISP+ML package & a deterministic pipeline, tests \& merge checks \\
+Environment abstraction & exposes domain state, actions, rewards, groups, and context quality \\
+Runner & executes model policies over repeated rounds and seeds \\
+Allocator/resource policy & controls scarce test, routing, qubit, or escalation capacity \\
+EQUITAS mediator & applies fairness and context-quality adjustments to policy evidence \\
+Evaluator & aggregates run states into utility, regret, and disparity evidence \\
+State/reporting layer & persists model, runner, evaluator, fairness, and figure artifacts \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:implementation} summarizes the software entities. The quantum
-workflow relies on evaluator and runner objects that save framework state,
-model state, and analysis outputs. These state layers support interruption
-recovery and replication. The CRISP+ML package in its own repository is
-a reviewer-safe implementation harness that mirrors the project methodology:
-data collection, cleaning, preparation, exploration, mining, evaluation, and
-postprocessing. It exposes command-line stages through \texttt{python -m
-experiments}, writes deterministic artifacts under a result directory, and
-records provenance through a pipeline manifest.
+Table~\ref{tab:implementation} summarizes the core components. The design is
+intentionally object-oriented because clinical and quantum experiments share a
+control pattern but not the same domain semantics. The quantum environment
+defines network topologies, link uncertainty, path decisions, allocator
+settings, and routing outcomes. The clinical environment defines sites,
+cohorts, service lines, diagnostic actions, resource constraints, and
+diagnostic outcomes. Both environments emit comparable state records so the
+same evaluator and fairness reporting strategy can operate across domains.
 
-The state design is intentionally layered. Individual models can save model
-state so interrupted algorithm runs do not always require recomputation.
-Experiment runners can save complete experiment state so a particular
-scenario, seed, allocator, and capacity setting can be resumed. Evaluators can
-save scenario-level collections of runner outputs so a full comparison can be
-extended, summarized, or audited later. This layered persistence is important
-for research validity because long-running quantum-routing jobs can be
-interrupted, and because later fairness analysis may need to reconstruct how a
-specific result was produced. In the final system, allocator-runner state will
-become a fourth layer that aggregates all evaluator runs for a specific
-allocator and supports broader cross-scenario analysis.
-
-\begin{table}[t]
-\caption{CRISP+ML mapping used by the reviewer-safe implementation.}
-\label{tab:crisp}
-\centering
-\small
-\begin{tabular}{p{0.24\columnwidth}p{0.67\columnwidth}}
-\toprule
-\textbf{Lifecycle stage} & \textbf{Concrete artifact} \\
-\midrule
-Data collection & synthetic fairness-style raw records \& metadata \\
-Data cleaning & validated, normalized data \& context handling \\
-Data preparation & train/test artifacts \& model-ready feature table \\
-Data exploration & summary statistics \& group/context diagnostics \\
-Data mining & light deterministic model/bandit-style run \\
-Evaluation & utility metrics and group-disparity summaries \\
-Presentation & final table, manifest, and visualization artifact \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Table~\ref{tab:crisp} shows how the small code package maps to a recognized
-methodology rather than an ad hoc script sequence. The same conceptual
-pipeline will be used for the final experiments: collect or generate simulator
-records, clean and validate them, prepare model-ready contexts, run policy
-families, evaluate utility and fairness, and present results in reproducible
-plots and tables.
-
-\subsection{Code Review and Validation Path}
-The code artifact is intentionally object-oriented. A base pipeline-stage
-interface defines the stage contract, concrete classes implement each CRISP+ML
-phase, typed configuration and artifact containers carry paths and metadata,
-and a pipeline orchestrator runs stages end-to-end or stage-by-stage. Unit
-tests validate each stage and the overall manifest. The merge-check command
-runs the full quick-review pipeline and the unit-test suite, giving reviewers
-a fast way to verify that the repository executes before inspecting the larger
-quantum workflow. This design supports the rough-draft requirement that
-another party should be able to recreate the system or software from the
-description.
-
-The package also supports stage-level commands rather than requiring reviewers
-to run notebooks. Each stage can be executed independently, and the full
-pipeline command composes those same objects. This separation makes failures
-diagnosable: a schema error should fail in cleaning, a feature construction
-problem should fail in preparation, and a missing metric should fail in
-evaluation. The GitHub merge-check workflow mirrors the local validation path,
-so code submitted for review is checked against the same unit tests and
-quick-run pipeline that a reviewer would execute manually.
+\subsection{State Persistence and Reporting}
+The system treats state as a first-class research artifact. Model state
+captures policy-level information needed to resume or inspect a learner.
+Runner state captures the sequence of environment interactions for a specific
+configuration, seed, and allocator setting. Evaluator state captures
+cross-run summaries needed for comparing policies and scenarios. Reporting
+state captures the derived datasets, fairness summaries, visualizations, and
+manifests needed to reproduce claims. These layers prevent a long-running
+experiment from becoming a single opaque metric and allow fairness analyses to
+be repeated as definitions or mitigation strategies evolve.
 
 \begin{figure*}[t]
 \centering
 \resizebox{0.98\textwidth}{!}{\input{architecture_diagram.tex}}
 \caption{Architecture diagram adapted from the architecture report. The
-workflow is an evidence-flow view rather than a full implementation graph. It
-connects problem formulation and data/context understanding to repository/user
-entry paths, control and validation layers, executable data-processing stages,
-the fairness--performance synthesis layer, and final replication artifacts. In
-application terms, each environment supplies a saved-state or simulator source,
-a runner/model/allocator decision path, and evaluator-facing outcomes. The
-framework converts those outcomes into canonical states, default and fairness
-reporting datasets, visualizer outputs, report manifests, and validation-hub
-evidence.}
+workflow is an evidence-flow view: domain context enters through an environment
+abstraction, runner/model/allocator decisions produce stateful outcomes, the
+EQUITAS layer converts those outcomes into utility and fairness evidence, and
+the reporting layer emits datasets, figures, manifests, and reproducibility
+artifacts. The same flow supports clinical simulation and quantum routing
+without forcing either domain to imitate the other.}
 \label{fig:architecture}
 \end{figure*}
 
-\subsection{Recreation Path for Reviewers}
-A reviewer should be able to recreate the small software artifact without
-private data or notebooks. The intended path is: create a Python virtual
-environment, install dependencies from \texttt{requirements.txt}, run the
-stage-level commands if inspecting individual lifecycle steps, and run the
-local merge-check command before accepting changes. The code-review repository
-therefore acts as a miniature version of the larger research system. It does
-not attempt to reproduce every long-running quantum experiment; instead, it
-proves that the lifecycle, object contracts, validation style, and
-fairness-oriented metric outputs are executable in a small deterministic
-setting.
-
-The larger quantum workflow remains available through notebooks, local scripts,
-and GCP execution. The notebooks are useful for rapid inspection and for
-matching earlier Paper2, Paper7, Paper8, and Paper12 testbed conventions. The
-local path is useful for debugging evaluator, runner, visualizer, and
-state-management behavior. The GCP path is reserved for long jobs that would be
-too slow for local review. Shared Drive storage is part of the immediate
-execution model because it allows state files, model outputs, and analysis
-artifacts to persist across machines and interrupted sessions. This is
-especially important for quantum runs whose value is not only the final metric
-but also the sequence of states and decisions that produced it.
+\subsection{Validation Strategy}
+Validation is organized around contracts rather than ad hoc scripts. Stage
+tests verify that data collection, cleaning, preparation, modeling,
+evaluation, and reporting artifacts satisfy their schemas. Experiment tests
+verify that clinical and quantum runs emit non-empty state records with the
+fields required for utility and fairness analysis. Sidecar tests verify that
+legacy quantum states can be converted into canonical fairness outcomes
+without changing old execution behavior. Reporting tests verify that master
+datasets, figures, and manifests remain linked to their source states. This
+strategy connects software correctness to scientific reproducibility: the
+same state contracts that protect code changes also preserve the evidence
+needed to interpret preliminary findings.
 
 \section{Data Sets and Experimental Inputs}
 The current quantum testbed uses simulated quantum-network routing scenarios
@@ -616,14 +618,12 @@ Paper 12 standardized slice & 2,400 & 30 & 100 nodes, 426 edges, 4 paths & fusio
 \end{table*}
 
 Table~\ref{tab:datasets} summarizes the main datasets already available in the
-quantum framework work tree. The project inherits a validated quantum-routing corpus that already
-contains scenario-level and experiment-level outputs for four external testbeds
-and for the internal hybrid framework. These corpora are stored under
-\textit{/Users/pitergarcia/DataScience/Semester4/GA-Work/Validated\_Logs} and
-are paired with a shared Drive data lake whose top-level folders are
-\texttt{model\_state} and \texttt{framework\_state}. This matters because the
-final fairness-aware paper can build directly on preserved runner/evaluator
-artifacts.
+quantum framework. The project inherits a validated quantum-routing corpus
+that already contains scenario-level and experiment-level outputs for four
+external testbeds and for the internal hybrid framework. These corpora are
+paired with shared data-lake state artifacts for model and framework
+persistence. This matters because the fairness-aware analysis can build
+directly on preserved runner/evaluator artifacts.
 
 \begin{table}[t]
 \caption{Planned data fields and fairness role.}
@@ -644,14 +644,13 @@ Oracle/baseline & regret, gap \& mitigation comparison \\
 \end{tabular}
 \end{table}
 
-The code-review package uses a small synthetic dataset that preserves
-the shape of the final fairness problem without requiring private data. Each
-record includes a group label, signal feature, contextual feature, binary
-outcome, missingness flag, and invalid-record flag. The dataset is deliberately
-small so reviewers can run the full pipeline quickly, but it exercises the
-same operations needed by the final project: cleaning missing context,
-preparing train/test artifacts, producing predictions, computing group
-metrics, and writing final summaries.
+A small synthetic validation corpus preserves the shape of the final fairness
+problem without requiring private data. Each record includes a group label,
+signal feature, contextual feature, binary outcome, missingness flag, and
+invalid-record flag. The dataset is deliberately small so controlled
+validation remains fast, but it exercises the same operations needed by the
+final project: cleaning missing context, preparing train/test artifacts,
+producing predictions, computing group metrics, and writing final summaries.
 
 The planned clinical diagnostic testbed will also be simulation-first. Its
 records will represent patient or case contexts, protected or fairness-relevant
@@ -668,7 +667,7 @@ length, and GC-content groups. Its current corpus contains 20 RNA sequences
 after fairness-aware augmentation, including tRNA, rRNA, miRNA, synthetic
 controls, and 10 targeted Synthetic LowGC sequences added to repair
 under-representation. These assets provide an existing clinical-context
-example for the rough draft while the final sequential diagnostic testbed
+example for method validation while the final sequential diagnostic testbed
 remains simulation-first.
 
 Table~\ref{tab:data_fields} summarizes the common schema. The schema is broad
@@ -683,9 +682,9 @@ The existing quantum corpora already expose many of the fields the fairness
 layer needs. The master datasets record allocator, scenario, scenario category,
 run count, frame configuration, capacity semantics, scale, model identity,
 reward, regret, Oracle-relative efficiency, retries, failures, misses below
-threshold, and scenario winners. In practical terms, this means the current
-paper can confidently claim access to real experimental data and preliminary
-results. The main extension still needed is the
+threshold, and scenario winners. In practical terms, this means the study has
+access to real experimental data and preliminary results. The main extension
+still needed is the
 fairness layer itself: group or flow labels, subgroup disparity summaries, and
 time-evolving fairness metrics must be added on top of the already preserved
 performance corpus.
@@ -752,30 +751,24 @@ assumptions can be varied and documented rather than ignored.
 The EQUITAS preliminary evidence reinforces the same ethical point:
 under-represented sequence contexts, such as low-GC examples, required explicit
 augmentation and re-auditing before fairness claims were defensible. The ethical
-standard for the final paper is therefore stronger than ``the algorithm works.''
+standard for the final analysis is therefore stronger than ``the algorithm works.''
 The final system should make visible when a policy is accurate but inequitable,
 robust but unfair to a service class, or fairer only because it sacrifices too
 much utility to be operationally useful. This tradeoff framing is important for
 applied data science: fairness is part of the
 evidence required to justify deployment or to reject a policy as unsafe.
 
-\section{Results and Current Validation Evidence}
+\section{Preliminary Results}
 \subsection{Quantum Preliminary Results}
-The final scientific results are not yet complete, but the implementation foundation
-has been validated. The rough-draft code package compiles and runs through the
-complete CRISP+ML lifecycle, and the merge-check path currently passes ten
-unit tests covering collection, cleaning, preparation, exploration, mining,
-evaluation, postprocessing, CLI behavior, and manifest generation. This is not
- a final scientific result; it is reproducibility evidence showing
-that the project has an executable review harness and that the architecture is
-ready for the next experimental phase.
-
-The quantum side has an existing experimental foundation from prior
-threat-aware routing work~\cite{garcia2026threat_aware_quantum_routing}. The
-remaining task is to extend those performance and robustness outputs with
-explicit service-equity metrics and fairness-aware mitigation. Thus, current
-progress is strongest on infrastructure, methodology, and reproducibility,
-while final cross-domain fairness results remain future work.
+The preliminary results are organized around the research questions stated in
+the introduction. The strongest current quantum evidence addresses RQ1: richer
+context improves routing utility relative to no-context baselines. The quantum
+side builds on prior threat-aware routing experiments
+~\cite{garcia2026threat_aware_quantum_routing}, where saved evaluator states,
+Oracle comparisons, and standardized external corpora already make
+context-level comparisons possible. These results are not yet full
+fairness-mitigation results; rather, they identify the utility frontier that
+EQUITAS must preserve while reducing service disparities.
 
 \begin{table*}[t]
 \caption{Preliminary quantum results available before fairness-layer extension.}
@@ -784,7 +777,7 @@ while final cross-domain fairness results remain future work.
 \small
 \begin{tabular}{p{0.10\textwidth}p{0.28\textwidth}p{0.25\textwidth}p{0.27\textwidth}}
 \toprule
-\textbf{Evidence source} & \textbf{Current quantitative signal} & \textbf{Why it matters} & \textbf{How it feeds this paper} \\
+\textbf{Evidence source} & \textbf{Current quantitative signal} & \textbf{Why it matters} & \textbf{Role in this study} \\
 \midrule
 Threat-aware quantum manuscript & pursuit--neural hybrids outperform non-contextual baselines by roughly 18--24 percentage points in scenario-aggregated efficiency & shows that context-rich routing materially improves utility under realistic threats & establishes the performance baseline to which the fairness layer will be added \\
 Threat-aware quantum manuscript & worst-case performance floors remain above 85\% under stochastic threats for the strongest hybrid family & suggests the best policies remain stable in benign-but-noisy settings & provides a natural starting point for testing whether fairness can be improved without breaking robust utility \\
@@ -914,7 +907,7 @@ ymin=0, ymax=4.5
 \label{fig:context_spectrum}
 \end{figure*}
 
-Figure~\ref{fig:context_spectrum} is more informative than the earlier version because it separates absolute routing quality from the incremental value of added context. The uplift panels show that predictive context is consistently the strongest improvement family, while the size of the gain varies materially by threat regime rather than remaining constant across scenarios.
+Figure~\ref{fig:context_spectrum} separates absolute routing quality from the incremental value of added context. The uplift panels show that predictive context is consistently the strongest improvement family, while the size of the gain varies materially by threat regime rather than remaining constant across scenarios.
 
 \subsection{Clinical Preliminary Results}
 The clinical side contributes preliminary evidence from the EQUITAS
@@ -933,11 +926,11 @@ fairness-aware Synthetic LowGC augmentation, and subgroup-aware EQUITAS auditing
 \setlength{\tabcolsep}{5pt}
 \begin{tabular}{p{0.07\textwidth}p{0.35\textwidth}p{0.26\textwidth}p{0.25\textwidth}}
 \toprule
-\textbf{Evidence source} & \textbf{Current quantitative signal} & \textbf{Why it matters} & \textbf{How it feeds this paper} \\
+\textbf{Evidence source} & \textbf{Current quantitative signal} & \textbf{Why it matters} & \textbf{Role in this study} \\
 \midrule
 EQUITAS corpus & dataset expanded from 10 to 20 RNA sequences, including 10 Synthetic LowGC sequences & makes clinical-like context gaps measurable in a controlled biomedical proxy task & informs the missingness and group-representation design of the planned simulator \\
 Enhanced Nussinov tuning & Optuna search over 30 trials produced an optimized objective of 56.44 and mean predicted-pair output of 66.07 $\pm$ 46.36 & shows that richer structural context can materially change diagnostic-relevant prediction behavior & motivates comparing lower-context and richer-context decision policies \\
-Context ablation & thermodynamic/context-aware scoring reported 61.36 $\pm$ 44.21 predicted pairs versus 14.96 $\pm$ 10.45 without that context & directly supports the rough draft's context-gain thesis in the clinical testbed & anchors the clinical side of the cross-testbed context-gain comparison \\
+Context ablation & thermodynamic/context-aware scoring reported 61.36 $\pm$ 44.21 predicted pairs versus 14.96 $\pm$ 10.45 without that context & directly supports the context-gain hypothesis in the clinical testbed & anchors the clinical side of the cross-testbed context-gain comparison \\
 Fairness audit & post-augmentation mitigation achieved 6/6 algorithm compliance with the 80\% rule, DI ratios of 1.000, and +0.805 average DI improvement & demonstrates that representation/context repair can improve fairness indicators, not only utility & supplies preliminary fairness evidence before final sequential bandit experiments \\
 \bottomrule
 \end{tabular}
@@ -1013,11 +1006,11 @@ ymin=0, ymax=130
   {Fairness audit at final stage:\\6/6 algorithms pass 80\% rule\\Mean DI improvement: +0.805};
 \end{groupplot}
 \end{tikzpicture}
-\caption{Cross-testbed context-enrichment trajectories. The left panel shows that quantum-routing performance improves monotonically as the policy moves from no context to observed context to predictive context, with consistent gains in both the internal hybrid corpus and the standardized external corpus. The right panel separates two clinical effects that the previous normalized bar chart hid: restoring domain-relevant context produces the large primary gain (14.96 to 61.36 predicted pairs), while tuning and fairness-oriented augmentation provide a smaller secondary improvement (66.07 at the final stage) together with improved parity indicators. This presentation is more informative than a single normalized index because it distinguishes pure context recovery from later mitigation or refinement.}
+\caption{Cross-testbed context-enrichment trajectories. The left panel shows that quantum-routing performance improves monotonically as the policy moves from no context to observed context to predictive context, with consistent gains in both the internal hybrid corpus and the standardized external corpus. The right panel separates two clinical effects that a single normalized index would obscure: restoring domain-relevant context produces the large primary gain (14.96 to 61.36 predicted pairs), while tuning and fairness-oriented augmentation provide a smaller secondary improvement (66.07 at the final stage) together with improved parity indicators. This decomposition distinguishes pure context recovery from later mitigation or refinement.}
 \label{fig:cross_testbed_context_gain}
 \end{figure*}
 
-Figure~\ref{fig:cross_testbed_context_gain} provides a more scientific cross-testbed view than a single normalized bar chart. It shows that quantum gains are steady and incremental across context levels, whereas the clinical proxy is dominated by a large first-stage recovery when domain-relevant context is restored and then a smaller second-stage gain associated with tuning and fairness-aware augmentation.
+Figure~\ref{fig:cross_testbed_context_gain} shows that quantum gains are steady and incremental across context levels, whereas the clinical proxy is dominated by a large first-stage recovery when domain-relevant context is restored and then a smaller second-stage gain associated with tuning and fairness-aware augmentation.
 
 \iffalse
 \begin{figure}[t]
@@ -1062,7 +1055,7 @@ perform best.}
 \fi
 
 \begin{table}[t]
-\caption{Current validation evidence and interpretation.}
+\caption{Reproducibility evidence supporting preliminary interpretation.}
 \label{tab:validation}
 \centering
 \small
@@ -1070,78 +1063,66 @@ perform best.}
 \toprule
 \textbf{Evidence} & \textbf{Interpretation} \\
 \midrule
-CRISP+ML quick pipeline runs & reviewer can execute the code artifact end-to-end \\
-Stage unit tests pass & lifecycle stages have isolated behavior checks \\
-Merge-check command passes & local validation path is ready for PR gating \\
-Quantum execution paths documented & final experiments can start from notebook, local, or GCP workflows \\
-State architecture documented & interrupted long-running tests can be resumed or audited \\
+Quantum state corpora & existing saved runs support context-level utility comparisons \\
+Clinical EQUITAS artifacts & context restoration and augmentation effects are traceable \\
+Fairness sidecar outputs & quantum and clinical states share a governed outcome contract \\
+Reporting manifests & datasets, figures, fairness summaries, and provenance remain linked \\
+Regression tests & state and reporting contracts are protected against implementation drift \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:validation} frames the current evidence conservatively. It
-supports reproducibility and readiness, not final claims about which policy is
-fairest. The final paper will replace or extend this table with empirical
-curves, statistical summaries, and domain-specific fairness results.
+Table~\ref{tab:validation} frames the current evidence conservatively. It does
+not claim that the fairest policy has already been identified. Instead, it
+shows that the preliminary results are traceable to saved states, fairness
+artifacts, and reporting manifests. That traceability is essential for RQ2 and
+RQ3 because time-evolving disparities and mitigation effects cannot be
+interpreted from aggregate reward alone.
 
-Table~\ref{tab:prelim_results} makes the current evidence more concrete. The
-rough draft can already report real quantum results because the project builds
-on an existing validated experiment corpus and an associated manuscript. In the
-standardized 4K/2K external corpus, the four inherited testbeds contribute
-8,060 rows of model--scenario--allocator--scale evaluations. In the internal
-hybrid corpus, the strongest current average efficiency belongs to
+Table~\ref{tab:prelim_results} makes the quantum evidence concrete. The
+validated experiment corpus and associated manuscript already provide real
+model--scenario--allocator--scale evaluations. In the standardized 4K/2K
+external corpus, the four inherited testbeds contribute 8,060 rows. In the
+internal hybrid corpus, the strongest current average efficiency belongs to
 \texttt{iCPursuitNeuralUCB} (86.13\%), followed by
 \texttt{CPursuitNeuralUCB} (84.70\%), \texttt{GNeuralUCB} (82.83\%), and
-\texttt{EXPNeuralUCB} (81.95\%). These are meaningful preliminary results: they identify the current utility frontier
-and expose which policy families are worth extending first.
+\texttt{EXPNeuralUCB} (81.95\%). These preliminary results identify the
+current utility frontier and expose which policy families are worth extending
+with EQUITAS mediation first.
 
-Just as importantly, the current results can already be organized according to
-the project's core scientific claim: \emph{context quality matters}. Rather
-than treating the preliminary evidence as a list of algorithm names,
-Table~\ref{tab:context_spectrum} and Figure~\ref{fig:context_spectrum} recast
-the existing quantum framework work as evidence into a three-level spectrum. The no-context condition
-captures reward-only or non-context baselines, the context condition captures
-methods that use observed contextual structure, and the predictive-context
-condition captures the informative or forecasting-aware extension. In both the
-internal and external corpora, performance rises as the method family moves
-from no context to context to predictive context. That pattern is exactly what
-motivates our work extension: if richer context already improves utility,
-the next question is whether fairness-aware and missingness-aware context
-handling can also improve equity.
+The context-spectrum view in Table~\ref{tab:context_spectrum} and
+Figure~\ref{fig:context_spectrum} directly addresses RQ1. The no-context
+condition captures reward-only or non-context baselines, the context condition
+captures methods that use observed contextual structure, and the
+predictive-context condition captures informative or forecasting-aware
+extensions. In both internal and external corpora, performance rises as the
+method family moves from no context to context to predictive context. The
+external standardized corpus also shows that gains vary by testbed structure:
+\texttt{iCPursuitNeuralUCB} reaches approximately 74.34\% on Paper~2, 78.39\%
+on Paper~7, 73.95\% on Paper~8, and 42.54\% on Paper~12. This variation
+supports the need for cross-testbed fairness analysis rather than a single
+topology-specific claim.
 
-The external standardized corpus also shows that results vary by testbed
-structure. Mean efficiencies for \texttt{iCPursuitNeuralUCB} are currently
-about 74.34\% on Paper~2, 78.39\% on Paper~7, 73.95\% on Paper~8, and 42.54\%
-on Paper~12. This matters for our work because it already suggests
-that fairness conclusions should not be tied to a single network topology or
-threat setting. A fairness-aware extension that appears successful in one
-testbed but fails in another would still be a useful scientific finding.
+The clinical evidence addresses the same context hypothesis from a biomedical
+angle. The EQUITAS package shows that restoring domain-relevant context changes
+prediction behavior substantially, while under-represented-context
+augmentation improves parity indicators. These results are preliminary because
+they come from a clinical proxy rather than the final sequential diagnostic
+simulator. They are nevertheless methodologically useful: they show that the
+EQUITAS framing can represent context quality, group representation, utility,
+and fairness evidence in a form that can later be routed through the same
+bandit-style evaluator used for quantum experiments.
 
-From the standpoint of the rough-draft requirement, these results answer the
-most important preliminary question: does the system already do something real
-and measurable? Yes. The inherited quantum framework already executes correctly,
-produces large validated datasets, distinguishes strong and weak model
-families, and supports claims about robustness, efficiency, and configuration
-effects. The new contribution of the final paper is to attach an explicit
-fairness layer to those same data and test whether the best utility policies
-also behave equitably under missing context.
-
-The most important current result is that the research workflow has converged
-into a coherent experiment plan. Earlier pieces of the semester work existed as
-separate deliverables. This rough draft integrates those pieces into a single project narrative. The
-implementation now has a reviewer-safe CRISP+ML path, a quantum-first execution
-path, a state-management strategy, and a defined fairness layer. This reduces
-the risk that final experiments will produce isolated performance numbers
-without enough provenance to explain them.
-
-The expected preliminary figures for the final report are also now specified.
-For each scenario, the analysis will report reward or efficiency curves,
-oracle gap, subgroup or flow-level disparity curves, and mitigation tradeoff
-plots. For cross-domain transfer, the analysis will compare whether a
-mitigation strategy that reduces missing-context disparity in one domain also
-reduces it in the other. If transfer fails, that failure is still informative:
-it would suggest that the shared framework is useful for diagnosing differences
-between domains even when a single mitigation rule does not generalize.
+Together, the preliminary findings support the central novelty of the method.
+Richer context improves utility, but the magnitude of improvement depends on
+environment structure; fairness-aware mediation is therefore needed to decide
+whether context gains are distributed equitably. The next empirical step is to
+apply Eq.~\ref{eq:equitas_score} during sequential runs and compare utility,
+regret, and disparity curves against the no-context and context-only
+baselines. A mitigation that transfers across both domains would support RQ4;
+a mitigation that succeeds in one domain and fails in the other would still be
+scientifically useful because it would identify which parts of fairness
+mediation are domain-dependent.
 
 \section{Future Work}
 Next, the focus will be on completing the experimental contribution. First,
@@ -1158,8 +1139,8 @@ Third, at least one mitigation mechanism will be added and compared against
 utility-only baselines. The initial priority is a simple fairness-regularized
 or missingness-aware update rule that can be implemented in both domains.
 Fourth, the same policy stack will be evaluated across both domains to test
-whether fairness mechanisms transfer. Fifth, the final report will add full
-results, plots, statistical discussion, and a stronger conclusion grounded ini
+whether fairness mechanisms transfer. Fifth, the final analysis will add full
+results, plots, statistical discussion, and a stronger conclusion grounded in
 experimental evidence. The final analysis will also include a limitations
 section discussing simulation validity, group-definition choices, and the
 difference between fairness in a controlled testbed and fairness in deployment.
@@ -1168,18 +1149,17 @@ difference between fairness in a controlled testbed and fairness in deployment.
 This semester established the foundation for a reproducible fairness-aware
 contextual bandit project. The work completed so far includes a related-work
 survey, a shared missing-context domain model, an approach and architecture
-writeup, a cleaned code-review repository, documented notebook/local/GCP
-execution paths, and a runnable CRISP+ML validation package. The project is positioned to move from design and infrastructure into final
+writeup, a cleaned validation package, embedded clinical and quantum execution
+interfaces, and a governed state-reporting layer. The project is positioned to move from design and infrastructure into final
 experiments. Its expected impact is a practical framework for measuring and
 mitigating fairness disparities in sequential decision systems where context
 is incomplete, non-stationary, and unequally distributed across groups.
 
-The next version of the paper will replace the current validation evidence with
-complete experimental results. However, the structure needed for those results
-is now in place: the literature gap is defined, the domain model is explicit,
-the architecture is reproducible, the data contracts are identified, and the
-ethical requirements are stated as part of the technical design. That makes the
-remaining work a focused execution task.
+The remaining work is to replace preliminary evidence with complete sequential
+experiments. The structure needed for those results is now in place: the
+literature gap is defined, the domain model is explicit, the architecture is
+reproducible, the data contracts are identified, and the ethical requirements
+are stated as part of the technical design.
 
 \bibliographystyle{IEEEtran}
 \bibliography{rough_draft_references}

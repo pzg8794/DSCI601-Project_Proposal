@@ -40,6 +40,10 @@ _minted*
 docs/
 notes/
 
+# Local-only draft directories
+draft*/
+rough_draft_report/draft*/
+
 # Internal revision logs (keep local-only)
 proposal/proposal_revision_log.md
 survey/survey_revision_log.md
