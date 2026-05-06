@@ -73,6 +73,12 @@ mitigating time-evolving fairness disparities while preserving utility under
 non-stationarity and limited context.
 \end{abstract}
 
+\begin{IEEEkeywords}
+Fairness-aware bandits, contextual bandits, resource allocation, clinical
+routing, quantum routing, partial feedback, missing context, algorithmic
+fairness.
+\end{IEEEkeywords}
+
 \section{Introduction}
 
 Many applied data science systems are sequential decision systems that route
@@ -93,22 +99,17 @@ when flows depend on uneven link, fidelity, capacity, or route-state evidence.
 \centering
 \includegraphics[width=0.98\columnwidth]{figures/clinical_routing_context_comparison.png}
 \vspace{0.25em}
-\textbf{(a) Clinical diagnostic routing}
-
-\vspace{0.6em}
-
-\includegraphics[width=0.98\columnwidth]{figures/quantum_routing_context_comparison.png}
-\vspace{0.25em}
-\textbf{(b) Quantum network routing}
-\caption{Motivating routing examples for the shared problem. In both panels,
-the left side shows weak-context or baseline allocation and the right side
-shows context-aware fairness allocation. The examples visualize the paper's
-core claim: scarce resources are routed under partial feedback, and context
-quality shapes who absorbs the worst errors.}
-\label{fig:intro_routing_examples}
+\caption{Clinical routing example for the shared problem. The left side shows
+weak-context or baseline allocation and the right side shows context-aware
+fairness allocation. The example visualizes the paper's core claim in the
+clinical domain: scarce resources are routed under partial feedback, and
+context quality shapes who absorbs the worst errors.}
+\label{fig:intro_clinical_routing}
 \end{figure}
 
-Figure~\ref{fig:intro_routing_examples} summarizes this shared routing pattern.
+Figure~\ref{fig:intro_clinical_routing} summarizes this shared routing pattern
+in the clinical domain; Appendix~\ref{app:quantum_routing_example} provides
+the analogous quantum-routing example.
 
 This work frames the scarce-resource routing problem as fairness-aware bandit
 learning across a decision spectrum. At each round, a policy observes available
@@ -149,6 +150,22 @@ points externally. In the embedded clinical setting, the EQUITAS-aware
 allocator improves oracle-normalized efficiency from 75.09\% to 91.23\%,
 raises mean success from 50.0\% to 72.5\%, and reduces the latency parity gap
 from 18.0 to 10.17 relative to the baseline.
+
+\appendices
+\section{Quantum Routing Motivating Example}
+\label{app:quantum_routing_example}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.98\columnwidth]{figures/quantum_routing_context_comparison.png}
+\vspace{0.25em}
+\caption{Quantum routing example corresponding to the clinical routing pattern
+shown in Figure~\ref{fig:intro_clinical_routing}. The left side shows baseline
+routing and the right side shows context-aware fairness allocation, illustrating
+how the same partial-feedback and context-quality issue appears in quantum
+network routing.}
+\label{fig:appendix_quantum_routing}
+\end{figure}
 
 \bibliographystyle{IEEEtran}
 \bibliography{rough_draft_references}
