@@ -112,9 +112,14 @@ Figure~\ref{fig:appendix_quantum_routing}.}
 \centering
 \includegraphics[width=1.0\columnwidth]{figures/clinical_routing_context_comparison.png}
 % \vspace{0.25em}
-\caption{Real-world clinical routing illustration. The left side shows
-weak-context allocation, while the right side shows context-aware fairness
-allocation under the same shared routing problem.}
+\caption{\modified{Clinical routing illustration under incomplete versus
+quality context. The left panel shows the harm mechanism: weak-context routing
+over-allocates testing to lower-burden majority-White communities while
+under-allocating scarce tests to higher-burden Latino, Black, and mixed
+minority communities, including a zero-allocation path. The right panel shows
+context-aware fair routing that uses burden, vulnerability, and site-capacity
+context to redirect tests toward higher-risk communities, increasing the
+opportunity to prevent missed diagnoses and save lives.}}
 \label{fig:intro_clinical_routing}
 \end{figure}
 
@@ -1320,9 +1325,14 @@ harm without discarding the utility benefits of contextual learning.}
 \centering
 \includegraphics[width=1.5\columnwidth]{figures/quantum_routing_context_comparison.png}
 % \vspace{0.25em}
-\caption{Quantum routing example corresponding to the clinical routing pattern
-shown in Figure~\ref{fig:intro_clinical_routing}. The left side shows baseline
-routing and the right side shows context-aware fairness allocation illustrating how the same partial-feedback and context-quality issue appears in quantum network routing.}
+\caption{\modified{Quantum routing example corresponding to the clinical
+routing pattern shown in Figure~\ref{fig:intro_clinical_routing}. The left
+panel shows baseline routing that over-allocates attempts to low-demand,
+well-calibrated pairs while under-serving high-demand, poorly calibrated pairs.
+The right panel shows context-aware iCMAB routing that uses demand,
+calibration-quality, and capacity context to reallocate entanglement attempts
+toward underserved high-demand flows, improving service opportunity under the
+same partial-feedback fairness mechanism.}}
 \label{fig:appendix_quantum_routing}
 \end{figure*}
 
