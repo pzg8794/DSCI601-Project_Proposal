@@ -49,6 +49,8 @@ dxkvse@g.rit.edu, tjdvse@g.rit.edu}
 
 \begin{document}
 \maketitle
+\thispagestyle{plain}
+\pagestyle{plain}
 
 \begin{abstract}
 Sequential decision systems increasingly determine how scarce diagnostic,
@@ -387,6 +389,93 @@ success probability, latency, or escalation delay. This notation separates the
 learning objective from the fairness audit: a policy can have low regret in
 aggregate while still producing high $\Delta_m(t)$ for specific groups.
 
+
+\subsection{Algorithmic Context Spectrum}
+\label{sec:algorithmic_context_spectrum}
+
+The implementation uses the same runner, action set, reward logging, and
+fairness audit across the context spectrum. What changes is the evidence
+passed into the action scorer. MAB uses action history only, CMAB adds observed
+context, and iCMAB augments observed context with predictive or recovered
+evidence. In this sense, iCMAB acts as a context-side mediator before scoring,
+whereas EQUITAS mediates fairness after utility scoring.
+Algorithm~\ref{alg:context_spectrum_runner} shows this shared runner, and
+Appendix~\ref{app:algorithm_spectrum_trace} provides the side-by-side
+code-family trace.
+
+\begin{algorithm}[!t]
+\caption{Context-Spectrum Bandit Runner}
+\label{alg:context_spectrum_runner}
+\small
+\begin{tcolorbox}[
+  colback=gray!4,
+  colframe=gray!35,
+  boxrule=0.3pt,
+  arc=2pt,
+  left=3pt,
+  right=3pt,
+  top=3pt,
+  bottom=3pt
+]
+\begin{algorithmic}
+\Require Environment $\mathcal{E}$; action set $\mathcal{A}$; policy
+$\pi \in \{\pi_0,\pi_1,\pi_2\}$; horizon $T$.
+\Ensure State log $\mathcal{L}$ and policy-specific utility summaries.
+
+\State \textbf{Initialize} policy state $\mathcal{B}_{\pi}$ and empty log
+$\mathcal{L}$.
+\State \textbf{Bandit constraint:} only the selected action $a_t$ reveals
+$r_t(a_t)$; unselected actions remain counterfactual.
+
+\For{$t=1,\ldots,T$}
+    \State \textbf{Observe} available actions $\mathcal{A}_t$, observed context
+    $\tilde{\mathbf{x}}_t$, optional predictive context $\hat{\mathbf{x}}_t$,
+    and context-quality indicators $q_t$ for logging and optional context
+    recovery.
+
+    \State \textbf{Build policy input}
+    \[
+    z_t =
+    \begin{cases}
+    \emptyset, & \pi=\pi_0 \quad \text{(MAB)},\\
+    \tilde{\mathbf{x}}_t, & \pi=\pi_1 \quad \text{(CMAB)},\\
+    [\tilde{\mathbf{x}}_t,\hat{\mathbf{x}}_t], & \pi=\pi_2 \quad \text{(iCMAB)}.
+    \end{cases}
+    \]
+
+    \For{each $a\in\mathcal{A}_t$}
+        \State \textbf{Score} action $a$ using
+        $S_t(a\mid z_t;\mathcal{B}_{\pi})$.
+    \EndFor
+
+    \State \textbf{Select}
+    \[
+    a_t \leftarrow
+    \arg\max_{a\in\mathcal{A}_t} S_t(a\mid z_t;\mathcal{B}_{\pi}).
+    \]
+
+    \State \textbf{Execute} $a_t$ and observe reward $r_t(a_t)$, outcome
+    $o_t$, and group/flow label.
+
+    \State \textbf{Update} $\mathcal{B}_{\pi}$ using only selected-action
+    feedback $(z_t,a_t,r_t(a_t),o_t)$.
+
+    \State \textbf{Log}
+    $\ell_t=\langle z_t,q_t,a_t,r_t(a_t),o_t,\text{group/flow}\rangle$;
+    append $\ell_t$ to $\mathcal{L}$.
+\EndFor
+
+\State \Return $\mathcal{L}$ and policy-specific utility summaries.
+\end{algorithmic}
+\end{tcolorbox}
+\end{algorithm}
+
+Algorithm~\ref{alg:context_spectrum_runner} links the method to the
+context-spectrum findings in Table~\ref{tab:context_spectrum} and
+Fig.~\ref{fig:context_spectrum}. The runner, action set, logging, and fairness
+audit remain fixed; the ablation changes only whether the scorer receives no
+context, observed context, or predictive context.
+
 \subsection{Bandit Policies and EQUITAS Mediation}
 The baseline non-contextual policy is an upper-confidence-bound bandit. For
 action $a$, let $N_{a,t}$ be the number of times action $a$ has been selected
@@ -417,9 +506,6 @@ U^{\mathrm{CMAB}}_{t}(a) =
 After observing reward $r_t(a_t)$, the selected action updates as
 $A_{a_t,t}=A_{a_t,t-1}+\tilde{\mathbf{x}}_t\tilde{\mathbf{x}}_t^\top$ and
 $b_{a_t,t}=b_{a_t,t-1}+r_t(a_t)\tilde{\mathbf{x}}_t$.
-
-Appendix~\ref{app:algorithm_spectrum_trace} gives the code-level transition
-from non-contextual bandits to contextual and predictive-context policies.
 
 EQUITAS adds fairness mediation as a governed scoring layer around either
 bandit family. Let $U_t(a)$ be the utility score from
@@ -516,7 +602,7 @@ reporting datasets.
 \end{algorithm}
 
 \begin{table}[t]
-\caption{Policy aliases used in Algorithm~\ref{alg:equitas_bandit}.}
+\caption{Policy aliases used in Algorithms~\ref{alg:context_spectrum_runner} and~\ref{alg:equitas_bandit}.}
 \label{tab:policy_aliases}
 \centering
 \small
@@ -601,8 +687,10 @@ configuration.
 
 \section{Implementation and Reproducibility}
 \subsection{Architecture}
-The implementation makes the method in Table~\ref{alg:equitas_bandit}
-executable without binding it to either domain. As shown in
+The implementation makes the shared runner in
+Algorithm~\ref{alg:context_spectrum_runner} and the EQUITAS mediation
+procedure in Algorithm~\ref{alg:equitas_bandit} executable without binding
+either one to a single domain. As shown in
 Fig.~\ref{fig:operational_framework}, each experiment is organized around six
 roles: an allocator, configuration, evaluator, runner, model, and visualizer.
 The environment supplies domain state, available actions, outcome semantics,
@@ -1316,78 +1404,9 @@ Internal hybrid corpus & \texttt{iCPursuitNeuralUCB} currently has the highest m
 \section{Algorithmic Context-Spectrum Trace}
 \label{app:algorithm_spectrum_trace}
 
-The implementation uses the same runner, action set, reward logging, and
-fairness audit across three policy families. What changes is the evidence
-passed into the action scorer. MAB uses action history only, CMAB adds observed
-context, and iCMAB augments observed context with predictive or recovered
-evidence. Unlike EQUITAS, which mediates fairness after utility scoring, iCMAB
-acts as a context-side mediator before scoring.
-
-\begin{algorithm}[!t]
-\caption{Context-Spectrum Bandit Runner}
-\label{alg:context_spectrum_runner}
-\small
-\begin{tcolorbox}[
-  colback=gray!4,
-  colframe=gray!35,
-  boxrule=0.3pt,
-  arc=2pt,
-  left=3pt,
-  right=3pt,
-  top=3pt,
-  bottom=3pt
-]
-\begin{algorithmic}
-\Require Environment $\mathcal{E}$; action set $\mathcal{A}$; policy
-$\pi \in \{\pi_0,\pi_1,\pi_2\}$; horizon $T$.
-\Ensure State log $\mathcal{L}$ and policy-specific utility summaries.
-
-\State \textbf{Initialize} policy state $\mathcal{B}_{\pi}$ and empty log
-$\mathcal{L}$.
-\State \textbf{Bandit constraint:} only the selected action $a_t$ reveals
-$r_t(a_t)$; unselected actions remain counterfactual.
-
-\For{$t=1,\ldots,T$}
-    \State \textbf{Observe} available actions $\mathcal{A}_t$, observed context
-    $\tilde{\mathbf{x}}_t$, optional predictive context $\hat{\mathbf{x}}_t$,
-    and context-quality indicators $q_t$.
-
-    \State \textbf{Build policy input}
-    \[
-    z_t =
-    \begin{cases}
-    \emptyset, & \pi=\pi_0 \quad \text{(MAB)},\\
-    \tilde{\mathbf{x}}_t, & \pi=\pi_1 \quad \text{(CMAB)},\\
-    [\tilde{\mathbf{x}}_t,\hat{\mathbf{x}}_t], & \pi=\pi_2 \quad \text{(iCMAB)}.
-    \end{cases}
-    \]
-
-    \For{each $a\in\mathcal{A}_t$}
-        \State \textbf{Score} action $a$ using
-        $S_t(a\mid z_t;\mathcal{B}_{\pi})$.
-    \EndFor
-
-    \State \textbf{Select}
-    \[
-    a_t \leftarrow
-    \arg\max_{a\in\mathcal{A}_t} S_t(a\mid z_t;\mathcal{B}_{\pi}).
-    \]
-
-    \State \textbf{Execute} $a_t$ and observe reward $r_t(a_t)$, outcome
-    $o_t$, and group/flow label.
-
-    \State \textbf{Update} $\mathcal{B}_{\pi}$ using only selected-action
-    feedback $(z_t,a_t,r_t(a_t),o_t)$.
-
-    \State \textbf{Log}
-    $\ell_t=\langle z_t,q_t,a_t,r_t(a_t),o_t,\text{group/flow}\rangle$;
-    append $\ell_t$ to $\mathcal{L}$.
-\EndFor
-
-\State \Return $\mathcal{L}$ and policy-specific utility summaries.
-\end{algorithmic}
-\end{tcolorbox}
-\end{algorithm}
+This appendix keeps the wider side-by-side trace for space reasons. It expands
+Algorithm~\ref{alg:context_spectrum_runner} by showing where the three policy
+families diverge in code-level evidence and interpretation.
 
 \begin{table*}[!t]
 \caption{Algorithmic transition across the context spectrum.}
