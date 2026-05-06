@@ -89,34 +89,24 @@ a policy optimized only for aggregate reward can hide subgroup errors and
 compound disparities over time. The same structure appears in quantum routing
 when flows depend on uneven link, fidelity, capacity, or route-state evidence.
 
-\begin{figure*}[t]
+\begin{figure}[!t]
 \centering
-\begin{minipage}{0.92\textwidth}
-\centering
-\includegraphics[width=\linewidth]{figures/clinical_routing_context_comparison.png}
-\vspace{0.2em}
+\includegraphics[width=0.98\columnwidth]{figures/clinical_routing_context_comparison.png}
+\vspace{0.25em}
 \textbf{(a) Clinical diagnostic routing}
-\end{minipage}
 
-\vspace{0.75em}
+\vspace{0.6em}
 
-\begin{minipage}{0.92\textwidth}
-\centering
-\includegraphics[width=\linewidth]{figures/quantum_routing_context_comparison.png}
-\vspace{0.2em}
+\includegraphics[width=0.98\columnwidth]{figures/quantum_routing_context_comparison.png}
+\vspace{0.25em}
 \textbf{(b) Quantum network routing}
-\end{minipage}
 \caption{Motivating routing examples for the shared problem. In both panels,
 the left side shows weak-context or baseline allocation and the right side
-shows context-aware fairness allocation. The clinical example shows how
-context-aware routing can shift testing capacity toward higher-burden or
-under-served communities. The quantum example shows the analogous shift from
-baseline routing toward fairness-aware iCMAB allocation for higher-demand or
-less reliable flow pairs. Together, the examples visualize the paper's core
-claim: scarce resources are routed under partial feedback, and context quality
-shapes who absorbs the worst errors.}
+shows context-aware fairness allocation. The examples visualize the paper's
+core claim: scarce resources are routed under partial feedback, and context
+quality shapes who absorbs the worst errors.}
 \label{fig:intro_routing_examples}
-\end{figure*}
+\end{figure}
 
 Figure~\ref{fig:intro_routing_examples} summarizes this shared routing pattern.
 
