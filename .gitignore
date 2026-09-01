@@ -1,4 +1,15 @@
 # LaTeX build artifacts
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+*.mp4
+*.mov
+*.mkv
+*.avi
+*.webm
 *.aux
 *.bbl
 *.bcf
